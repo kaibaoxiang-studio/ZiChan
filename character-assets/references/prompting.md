@@ -15,4 +15,4 @@
 - **全身**：用已定稿头像延展完整人物，**头到鞋均入画**；服装和身体比例按设计卡，检查脸部在全身尺度下仍能对应头像。
 - **执行资产表**：用已定稿头像、表情与全身图作参考，读取 `references/execution-sheet.md`；人形严格指定四格、上下占比与左下无头裁切。非人读取设计卡中获批准的替代布局。
 
-每个提示词包附 `reference_images`、`acceptance_checks` 和设计卡/图片 SHA。不能用新的提示词覆盖旧版；只有新设计卡或已批准图片才可改变锚点。
+每个提示词包附 `reference_images`、非空 `acceptance_checks`、`design_card_sha256` 和 `anchor_images`（阶段名到当前已批准图片 SHA）。单独全身图明确 `head_visible:true`、`feet_visible:true`。不能用新的提示词覆盖旧版；只有新设计卡或已批准图片才可改变锚点。

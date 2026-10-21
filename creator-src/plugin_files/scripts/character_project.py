@@ -250,6 +250,35 @@ def _require_approved(state, key):
     return value
 
 
+def _checked_record(root, state, key):
+    value = _require_approved(state, key)
+    ensure(digest(read_json(root / value["path"])) == value["sha256"],
+           f"Approved record contents changed: {key}")
+    ensure(value["approval"].get("sha256") == value["sha256"],
+           f"Approval refers to another record version: {key}")
+    return value
+
+
+def _checked_image(root, state, stage, character_id, variant_id):
+    image = _approved_image(state, stage, character_id, variant_id)
+    ensure(digest(root / image["path"]) == image["sha256"],
+           f"Approved image contents changed: {image['id']}")
+    review = state["reviews"].get(image["id"])
+    ensure(review and digest(read_json(root / review["path"])) == review["sha256"],
+           f"Review missing or changed: {image['id']}")
+    ensure(image["approval"].get("review_sha256") == review["sha256"],
+           f"Image approval refers to another review: {image['id']}")
+    ensure(image["approval"].get("image_sha256") == image["sha256"],
+           f"Image approval refers to another image version: {image['id']}")
+    ensure(read_json(root / review["path"]).get("verdict") == "pass",
+           f"Approved image review does not pass: {image['id']}")
+    prompt = _checked_record(root, state, _record_key(
+        "prompt-package", character_id, variant_id, stage))
+    ensure(image["prompt_sha256"] == prompt["sha256"],
+           f"Image was generated from another prompt version: {image['id']}")
+    return image
+
+
 def _approved_image(state, stage, character_id, variant_id):
     matching = [image for image in state["images"] if image["stage"] == stage
                 and image["character_id"] == character_id
@@ -343,9 +372,17 @@ def _validate_record(kind, data, state, character_id=None, variant_id=None, stag
         require_list(data, "reference_images")
         require_list(data, "prompts")
         require_list(data, "acceptance_checks")
+        require_text(data, "design_card_sha256")
+        ensure(isinstance(data.get("anchor_images"), dict),
+               "anchor_images must be a stage-to-SHA object")
         ensure(data["prompts"], "Prompt package is empty")
+        ensure(data["acceptance_checks"], "Prompt package needs acceptance checks")
+        prompt_ids = []
         for prompt in data["prompts"]:
+            require_text(prompt, "id")
             require_text(prompt, "text")
+            prompt_ids.append(prompt["id"])
+        ensure(len(set(prompt_ids)) == len(prompt_ids), "Prompt IDs must be unique")
         if stage == "avatar":
             ensure(2 <= len(data["prompts"]) <= 3, "Avatar requires 2–3 same-design candidates")
         if stage == "expression":
@@ -353,8 +390,11 @@ def _validate_record(kind, data, state, character_id=None, variant_id=None, stag
             ensure(len(data["labels"]) in {9, 16}, "Expression sheet needs 9 or 16 Chinese labels")
             ensure(all(isinstance(x, str) and x.strip() for x in data["labels"]),
                    "Expression labels cannot be empty")
+            ensure(all(re.search(r"[\u3400-\u9fff]", x) for x in data["labels"]),
+                   "Each expression label must contain Chinese text")
         if stage == "full_body":
             ensure(data.get("head_visible") is True, "Standalone full-body image includes head")
+            ensure(data.get("feet_visible") is True, "Standalone full-body image includes feet")
         if stage == "execution" and data.get("morphology") == "human":
             layout = data.get("layout") or {}
             ensure(layout.get("top_left") == "front_face" and
@@ -434,9 +474,8 @@ def cmd_init(args):
         content = read_json(bible_path)
         _validate_record("visual-bible", content, state)
         ensure(not content["unresolved"], "Approved snapshot bible has unresolved items")
-        if bible["approval"].get("sha256"):
-            ensure(bible["approval"]["sha256"] == digest(content),
-                   "Snapshot approval refers to another visual_bible version")
+        ensure(bible["approval"].get("sha256") == digest(content),
+               "Snapshot approval refers to another visual_bible version")
         target = root / "records" / "visual-bible" / f"{digest(content)[:12]}.json"
         write_json(target, content)
         state["records"]["visual-bible"] = {
@@ -473,17 +512,24 @@ def cmd_submit(args):
         dependencies = {"cast-plan": ["visual-bible"],
                         "design-card": ["visual-bible", "cast-plan"]}
         for dep in dependencies.get(args.kind, []):
-            _require_approved(state, dep)
+            _checked_record(root, state, dep)
         if args.kind == "prompt-package":
-            _require_approved(state, _record_key("design-card", character_id, variant_id))
+            card_key = _record_key("design-card", character_id, variant_id)
+            card_record = _checked_record(root, state, card_key)
+            anchors = {}
             if args.stage in {"expression", "full_body", "execution"}:
-                _approved_image(state, "avatar", character_id, variant_id)
+                anchors["avatar"] = _checked_image(root, state, "avatar", character_id, variant_id)["sha256"]
             if args.stage == "execution":
-                _approved_image(state, "expression", character_id, variant_id)
-                _approved_image(state, "full_body", character_id, variant_id)
+                for anchor_stage in ("expression", "full_body"):
+                    anchors[anchor_stage] = _checked_image(
+                        root, state, anchor_stage, character_id, variant_id)["sha256"]
         content = read_json(args.file)
         _validate_record(args.kind, content, state, character_id, variant_id, args.stage)
         if args.kind == "prompt-package":
+            ensure(content["design_card_sha256"] == card_record["sha256"],
+                   "Prompt package refers to a different design card version")
+            ensure(content["anchor_images"] == anchors,
+                   "Prompt package anchor image versions do not match the current approvals")
             card = read_json(root / state["records"][
                 _record_key("design-card", character_id, variant_id)]["path"])
             if args.stage == "execution":
@@ -520,6 +566,8 @@ def cmd_approve_record(args):
         key = _record_key(args.kind, args.character_id, args.variant_id or "base")
         value = state["records"].get(key)
         ensure(value and not value.get("stale"), f"Record is missing or stale: {key}")
+        ensure(digest(read_json(root / value["path"])) == value["sha256"],
+               "Record contents changed after submission")
         ensure(not read_json(root / value["path"])["unresolved"],
                "Resolve pending design decisions before approval")
         if args.kind == "cast-plan":
@@ -593,6 +641,8 @@ def _image(state, ident):
 def cmd_submit_review(args):
     with locked_project(args.project_root) as (root, state):
         image = _image(state, args.image_id)
+        ensure(digest(root / image["path"]) == image["sha256"],
+               "Imported image contents changed")
         report = read_json(args.file)
         ensure(report.get("schema_version") == "CharacterImageReviewV1", "Wrong review schema")
         ensure(report.get("image_sha256") == image["sha256"] and
@@ -621,7 +671,10 @@ def cmd_approve_image(args):
         image = _image(state, args.image_id)
         entry = state["reviews"].get(image["id"])
         ensure(entry, "Image must be reviewed first")
+        ensure(digest(root / image["path"]) == image["sha256"],
+               "Imported image contents changed")
         report = read_json(root / entry["path"])
+        ensure(digest(report) == entry["sha256"], "Review contents changed")
         ensure(report["verdict"] == "pass" and not report["blocking_issues"],
                "Image review has not passed")
         require_text({"operator": args.operator}, "operator")
@@ -637,9 +690,12 @@ def cmd_approve_image(args):
             for old in previous:
                 old["approval"] = None
         image["approval"] = {"operator": args.operator, "at": now(),
+                             "image_sha256": image["sha256"],
                              "review_sha256": entry["sha256"]}
         state["decisions"].append({"kind": "approve-image", "image_id": image["id"],
-                                   "operator": args.operator, "at": now()})
+                                   "operator": args.operator, "at": now(),
+                                   "image_sha256": image["sha256"],
+                                   "review_sha256": entry["sha256"]})
         return {"image_id": image["id"], "approved": True}
 
 
@@ -704,14 +760,17 @@ def cmd_package(args):
     ensure(not state["pending_impact"], "Unresolved upstream impact")
     ident = args.character_id
     variant = args.variant_id or "base"
-    _require_approved(state, "visual-bible")
-    _require_approved(state, "cast-plan")
-    _require_approved(state, _record_key("design-card", ident, variant))
+    for kind, source in state["inputs"].items():
+        ensure(digest(root / source["path"]) == source["sha256"],
+               f"Imported {kind} file changed after intake")
+    _checked_record(root, state, "visual-bible")
+    _checked_record(root, state, "cast-plan")
+    _checked_record(root, state, _record_key("design-card", ident, variant))
     records = [state["records"][_record_key("design-card", ident, variant)]]
     images = []
     for stage in STAGES:
-        records.append(_require_approved(state, _record_key("prompt-package", ident, variant, stage)))
-        images.append(_approved_image(state, stage, ident, variant))
+        records.append(_checked_record(root, state, _record_key("prompt-package", ident, variant, stage)))
+        images.append(_checked_image(root, state, stage, ident, variant))
     out = Path(args.output).expanduser().resolve()
     ensure(not out.exists(), f"Output already exists: {out}")
     out.mkdir(parents=True)
@@ -734,21 +793,36 @@ def cmd_package(args):
                      {None, ident}]
     for item in relevant_refs:
         source = root / item["path"]
+        ensure(digest(source) == item["sha256"],
+               f"Reference image contents changed: {item['id']}")
         target = out / item["path"]
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, target)
+        copied.append({"path": str(target.relative_to(out)), "sha256": digest(target)})
+    plugin_root = Path(__file__).resolve().parents[1]
+    for relative in ("knowledge/source-register.json", "sources.lock.json"):
+        source = plugin_root / relative
+        ensure(source.is_file(), f"Plugin provenance file missing: {relative}")
+        target = out / "plugin-provenance" / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, target)
         copied.append({"path": str(target.relative_to(out)), "sha256": digest(target)})
     image_ids = {x["id"] for x in images}
     record_keys = {"visual-bible", "cast-plan", _record_key("design-card", ident, variant)}
-    manifest = {"schema_version": "CharacterAssetPackV1", "project_id": state["project_id"],
+    record_keys.update(_record_key("prompt-package", ident, variant, stage) for stage in STAGES)
+    manifest = {"schema_version": "CharacterAssetPackV1", "plugin_version": "0.1.0",
+                "project_id": state["project_id"],
                 "character_id": ident, "variant_id": variant, "created_at": now(),
                 "input_sources": state["inputs"],
                 "approved_images": {x["stage"]: {"path": x["path"], "sha256": x["sha256"],
+                                                  "approval": x["approval"],
                                                   "purpose": {"avatar": "身份锚点",
                                                               "expression": "剧情表情参考",
                                                               "full_body": "完整全身造型",
                                                               "execution": "制作执行参考板"}[x["stage"]]}
                                     for x in images},
+                "record_approvals": {key: state["records"][key]["approval"]
+                                     for key in sorted(record_keys)},
                 "files": copied, "decisions": [x for x in state["decisions"]
                                                 if x.get("key") in record_keys or
                                                 x.get("image_id") in image_ids],

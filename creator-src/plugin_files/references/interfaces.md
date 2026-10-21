@@ -20,7 +20,7 @@
 
 ## CharacterPromptPackageV1
 
-必填 `stage`（`avatar|expression|full_body|execution`）、`target_model`（GPT Image 2.5）、`character_id`、`variant_id`、`reference_images[]`、`prompts[{id,text}]`、`acceptance_checks[]`。头像有同设计 2–3 条；表情加 `labels[]`，长度 9 或 16；单独全身图加 `head_visible:true`；人形执行表加：
+必填 `stage`（`avatar|expression|full_body|execution`）、`target_model`（GPT Image 2.5）、`character_id`、`variant_id`、`design_card_sha256`、`anchor_images{}`、`reference_images[]`、`prompts[{id,text}]`、非空 `acceptance_checks[]`。`anchor_images` 在头像阶段是空对象；表情/全身阶段含 `avatar` 的已批准图 SHA；执行阶段再含 `expression` 与 `full_body` 的已批准图 SHA。头像有同设计 2–3 条；表情加 `labels[]`，长度 9 或 16，且每项有中文；单独全身图加 `head_visible:true` 与 `feet_visible:true`；人形执行表加：
 
 ```json
 "layout": {
@@ -31,10 +31,10 @@
 }
 ```
 
-非人执行表在设计卡中批准替代布局，提示词包以同一结构说明格位与功能。包内同时写来源设计卡与参考图片哈希，防止误用旧版身份锚点。
+非人执行表在设计卡中批准替代布局，提示词包的 `layout` 必须与设计卡一致。包内设计卡与锚点图片哈希必须匹配当前批准版本，防止误用旧版身份锚点。
 
 ## CharacterImageReviewV1 与 CharacterAssetPackV1
 
 审查报告必填 `image_sha256`、`stage`、`verdict`（`pass|revise|uncertain`），及数组 `factual_conflicts`、`identity_issues`、`layout_issues`、`label_issues`、`blocking_issues`、`adoption_proposals`。`pass` 时缺陷数组都应为空；视觉判断必须基于实际收到的图片。
 
-发布包含 `manifest.json`、已批准设计/提示词/图片/审查报告，清单列每个文件 SHA、上游来源版本、图片用途和审批记录。只有头像、表情、全身、执行四阶段均有审查通过且由操作者批准，才能发布该角色变体。
+发布包含 `manifest.json`、已批准设计/提示词/图片/审查报告及插件来源收据。清单列每个文件 SHA、插件版本、上游来源版本、图片用途和审批记录。打包时重新计算输入、记录、图片、审查和参考图的哈希；任何内容与批准版本不符即停止。只有头像、表情、全身、执行四阶段均有审查通过且由操作者批准，才能发布该角色变体。

@@ -112,7 +112,8 @@ def blueprint():
             ("project_root", "image_path", "issue", "request")),
     ]
     files = {path.relative_to(CONTENT).as_posix(): path.read_text(encoding="utf-8")
-             for path in CONTENT.rglob("*") if path.is_file()}
+             for path in CONTENT.rglob("*") if path.is_file() and
+             "__pycache__" not in path.parts and path.suffix != ".pyc"}
     sources = [
         {"origin": "local:AI角色概念设计课.docx", "revision": "sha256:04ab20e00dd9983964f18f69e57059bdefef43109e8e3c4f94f955e57b72f363", "adaptation": "独立编写设计方法与身份检查规则"},
         {"origin": "local:资产概念knowledge.docx", "revision": "sha256:343a42ab44bc8d84c34d62bb7d3b8c8d30b3c53f3ff199bbae3b47674599cdd7", "adaptation": "提炼表情、变体与 2×2 执行参考板"},
