@@ -1,0 +1,51 @@
+{
+  "schema_version": "SourceReceiptsV1",
+  "sources": [
+    {
+      "origin": "local:AI角色概念设计课.docx",
+      "revision": "sha256:04ab20e00dd9983964f18f69e57059bdefef43109e8e3c4f94f955e57b72f363",
+      "adaptation": "独立编写设计方法与身份检查规则"
+    },
+    {
+      "origin": "local:资产概念knowledge.docx",
+      "revision": "sha256:343a42ab44bc8d84c34d62bb7d3b8c8d30b3c53f3ff199bbae3b47674599cdd7",
+      "adaptation": "提炼表情、变体与 2×2 执行参考板"
+    },
+    {
+      "origin": "local:角色概念设计知识库.zip",
+      "revision": "sha256:0f95d6493678ab129047767a80fbfd1c63b207a5e475f26e80424d4d305a277d",
+      "adaptation": "提炼角色设计与一致性检查"
+    },
+    {
+      "origin": "local:服装史与造型风格知识库.zip",
+      "revision": "sha256:ed0034c9e4aa857f898872800d85945f46eec0aa73bb9a432da645fef70f9e85",
+      "adaptation": "作为造型检索线索并要求另行核实"
+    },
+    {
+      "origin": "local:非人角色与极端体型知识库.zip",
+      "revision": "sha256:98464f8f0e6d6744a5b8063be6ff3a40db7ff33c4f790b7223e958f98fc0e929",
+      "adaptation": "独立编写形态适配规则，移除固定人形假设"
+    },
+    {
+      "origin": "https://superiguowai.mfdemo.cn/chaoji/2026/10/20/6ad737b25b707.rar",
+      "revision": "sha256:ef0496aeea3c3c105b23c2de27cb191ed2d8102d47d4e7f6b196ec1c765af18b",
+      "adaptation": "仅研究世界到角色、分轮选择与群像差异的方法；未复制无许可证内容"
+    },
+    {
+      "origin": "https://github.com/higgsfield-ai/skills",
+      "revision": "f83af0bc1d937c8119099a11f8ebbf5e6fb99819",
+      "license": "MIT",
+      "adaptation": "独立编写参考图与局部编辑方法；未复制 CLI"
+    },
+    {
+      "origin": "https://github.com/kaibaoxiang-studio/script-plugins",
+      "revision": "9110d951e882e3ac89a013f2fea42e142fa08b3f",
+      "adaptation": "沿用现有上游 JSON ID/来源契约，不复制业务代码"
+    },
+    {
+      "origin": "https://developers.openai.com/api/docs/guides/image-prompting",
+      "revision": "checked:2026-10-21",
+      "adaptation": "独立编写 GPT Image 2.5 提示词与编辑规则"
+    }
+  ]
+}

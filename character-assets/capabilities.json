@@ -1,0 +1,455 @@
+{
+  "schema_version": "CapabilityCatalogV1",
+  "capabilities": [
+    {
+      "id": "character-assets",
+      "skill_name": "character-assets",
+      "description": "角色资产主控：从剧本依据到可复用角色资产包",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "project_root": {
+            "type": "string",
+            "minLength": 1
+          },
+          "character_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "variant_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "request": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "request"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "artifact_path": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "status",
+          "summary",
+          "questions"
+        ],
+        "additionalProperties": false
+      },
+      "execution": {
+        "kind": "agent",
+        "access": "workspace-write",
+        "network": false
+      },
+      "knowledge_refs": [
+        "knowledge/index.md",
+        "references/workflow.md",
+        "references/interfaces.md",
+        "references/evidence.md",
+        "references/source-notes.md"
+      ],
+      "explicit_only": true
+    },
+    {
+      "id": "character-evidence",
+      "skill_name": "character-evidence",
+      "description": "核对剧本事实、资产表与场记来源并列冲突",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "project_root": {
+            "type": "string",
+            "minLength": 1
+          },
+          "character_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "variant_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "request": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "project_root",
+          "request"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "artifact_path": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "status",
+          "summary",
+          "questions"
+        ],
+        "additionalProperties": false
+      },
+      "execution": {
+        "kind": "agent",
+        "access": "workspace-write",
+        "network": false
+      },
+      "knowledge_refs": [
+        "knowledge/index.md",
+        "references/evidence.md",
+        "references/interfaces.md"
+      ],
+      "explicit_only": true
+    },
+    {
+      "id": "character-design",
+      "skill_name": "character-design",
+      "description": "建立全剧视觉基准、阵容差异与逐人设计卡",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "project_root": {
+            "type": "string",
+            "minLength": 1
+          },
+          "character_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "variant_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "request": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "project_root",
+          "request"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "artifact_path": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "status",
+          "summary",
+          "questions"
+        ],
+        "additionalProperties": false
+      },
+      "execution": {
+        "kind": "agent",
+        "access": "workspace-write",
+        "network": false
+      },
+      "knowledge_refs": [
+        "knowledge/index.md",
+        "references/character-design.md",
+        "references/costume-and-morphology.md",
+        "references/interfaces.md"
+      ],
+      "explicit_only": true
+    },
+    {
+      "id": "character-image-prompt",
+      "skill_name": "character-image-prompt",
+      "description": "把已批准设计转成 GPT Image 2.5 分阶段提示词",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "project_root": {
+            "type": "string",
+            "minLength": 1
+          },
+          "character_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "variant_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "request": {
+            "type": "string",
+            "minLength": 1
+          },
+          "stage": {
+            "type": "string",
+            "enum": [
+              "avatar",
+              "expression",
+              "full_body",
+              "execution"
+            ]
+          }
+        },
+        "required": [
+          "project_root",
+          "character_id",
+          "stage",
+          "request"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "artifact_path": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "status",
+          "summary",
+          "questions"
+        ],
+        "additionalProperties": false
+      },
+      "execution": {
+        "kind": "agent",
+        "access": "workspace-write",
+        "network": false
+      },
+      "knowledge_refs": [
+        "knowledge/index.md",
+        "references/prompting.md",
+        "references/expression.md",
+        "references/execution-sheet.md",
+        "references/interfaces.md"
+      ],
+      "explicit_only": true
+    },
+    {
+      "id": "character-image-review",
+      "skill_name": "character-image-review",
+      "description": "审查回流图片的剧本事实、身份与版式并产报告",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "project_root": {
+            "type": "string",
+            "minLength": 1
+          },
+          "character_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "variant_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "request": {
+            "type": "string",
+            "minLength": 1
+          },
+          "image_path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "stage": {
+            "type": "string",
+            "enum": [
+              "avatar",
+              "expression",
+              "full_body",
+              "execution"
+            ]
+          }
+        },
+        "required": [
+          "project_root",
+          "image_path",
+          "stage",
+          "request"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "artifact_path": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "status",
+          "summary",
+          "questions"
+        ],
+        "additionalProperties": false
+      },
+      "execution": {
+        "kind": "agent",
+        "access": "workspace-write",
+        "network": false
+      },
+      "knowledge_refs": [
+        "knowledge/index.md",
+        "references/review.md",
+        "references/execution-sheet.md",
+        "references/interfaces.md"
+      ],
+      "explicit_only": true
+    },
+    {
+      "id": "character-image-edit",
+      "skill_name": "character-image-edit",
+      "description": "针对回图缺陷编写局部修图指令",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "project_root": {
+            "type": "string",
+            "minLength": 1
+          },
+          "character_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "variant_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "request": {
+            "type": "string",
+            "minLength": 1
+          },
+          "image_path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "issue": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "project_root",
+          "image_path",
+          "issue",
+          "request"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "artifact_path": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "status",
+          "summary",
+          "questions"
+        ],
+        "additionalProperties": false
+      },
+      "execution": {
+        "kind": "agent",
+        "access": "workspace-write",
+        "network": false
+      },
+      "knowledge_refs": [
+        "knowledge/index.md",
+        "references/editing.md",
+        "references/review.md"
+      ],
+      "explicit_only": true
+    }
+  ],
+  "workflows": []
+}

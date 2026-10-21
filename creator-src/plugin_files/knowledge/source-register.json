@@ -1,0 +1,15 @@
+{
+  "schema_version": "CharacterKnowledgeSourceRegisterV1",
+  "sources": [
+    {"id": "character-course", "title": "AI角色概念设计课.docx", "sha256": "04ab20e00dd9983964f18f69e57059bdefef43109e8e3c4f94f955e57b72f363", "adopted_in": ["references/character-design.md", "references/costume-and-morphology.md"]},
+    {"id": "asset-concept", "title": "资产概念knowledge.docx", "sha256": "343a42ab44bc8d84c34d62bb7d3b8c8d30b3c53f3ff199bbae3b47674599cdd7", "adopted_in": ["references/execution-sheet.md", "references/expression.md"]},
+    {"id": "character-design-knowledge", "title": "角色概念设计知识库.zip", "sha256": "0f95d6493678ab129047767a80fbfd1c63b207a5e475f26e80424d4d305a277d", "adopted_in": ["references/character-design.md", "references/review.md"]},
+    {"id": "costume-knowledge", "title": "服装史与造型风格知识库.zip", "sha256": "ed0034c9e4aa857f898872800d85945f46eec0aa73bb9a432da645fef70f9e85", "adopted_in": ["references/costume-and-morphology.md"]},
+    {"id": "nonhuman-knowledge", "title": "非人角色与极端体型知识库.zip", "sha256": "98464f8f0e6d6744a5b8063be6ff3a40db7ff33c4f790b7223e958f98fc0e929", "adopted_in": ["references/costume-and-morphology.md", "references/execution-sheet.md"]},
+    {"id": "ensemble-application", "title": "AI角色_上传一个故事做出整套角色设计.docx", "sha256": "d42c3893aa8399f81f28c8fd16a95e74cf485960649f4aff15f08c629053dc94", "adopted_in": ["references/character-design.md"]},
+    {"id": "ensemble-rar", "title": "create-character-ensemble RAR", "origin": "https://superiguowai.mfdemo.cn/chaoji/2026/10/20/6ad737b25b707.rar", "sha256": "ef0496aeea3c3c105b23c2de27cb191ed2d8102d47d4e7f6b196ec1c765af18b", "license": "not provided", "adopted_in": ["references/character-design.md", "references/review.md"]},
+    {"id": "script-plugins", "origin": "https://github.com/kaibaoxiang-studio/script-plugins", "revision": "9110d951e882e3ac89a013f2fea42e142fa08b3f", "adopted_in": ["references/evidence.md", "references/interfaces.md"]},
+    {"id": "higgsfield-skills", "origin": "https://github.com/higgsfield-ai/skills", "revision": "f83af0bc1d937c8119099a11f8ebbf5e6fb99819", "license": "MIT", "adopted_in": ["references/prompting.md", "references/editing.md"]},
+    {"id": "openai-image-prompting", "origin": "https://developers.openai.com/api/docs/guides/image-prompting", "checked_on": "2026-10-21", "adopted_in": ["references/prompting.md", "references/editing.md"]}
+  ]
+}

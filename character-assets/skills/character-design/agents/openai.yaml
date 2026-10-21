@@ -1,0 +1,6 @@
+interface:
+  display_name: 角色设计
+  short_description: 建立全剧视觉基准、阵容差异与逐人设计卡
+  default_prompt: Use $character-design to complete the requested task.
+policy:
+  allow_implicit_invocation: false
