@@ -14,5 +14,4 @@ description: "针对回图缺陷编写局部修图指令"
 - [knowledge/index.md](../../knowledge/index.md)
 - [references/editing.md](../../references/editing.md)
 - [references/review.md](../../references/review.md)
-
-Read [hedgehog-general-image-prompting](../../references/knowledge/character-image-edit/hedgehog-general-image-prompting.md) when this capability needs the supplied knowledge.
+- [references/knowledge/character-image-edit/hedgehog-general-image-prompting.md](../../references/knowledge/character-image-edit/hedgehog-general-image-prompting.md)

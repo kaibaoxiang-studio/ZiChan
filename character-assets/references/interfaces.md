@@ -10,13 +10,19 @@
 
 `project_id`、`world_rules`（世界规则及其可见后果）、`style`（媒介、写实度、时代、色彩、材质、光线等已确认维度）、`evidence[{claim,source_refs}]`、`unresolved[]`。风格项注明原文约束或获准创作选择；全剧共用，不覆盖个别角色的特殊事实。
 
-## CastPlanV1
+## CastPlanV1 / CastPlanV2
 
 `characters[]` 必须覆盖资产表每个角色 ID，各项至少有 `id`、`design_distinction`，推荐附 `tier`、`narrative_role`、`relationships`、`visual_anchor`、`candidate_variants`、`source_refs`；另有 `unresolved[]`。轻规划不需要填每人的完整脸型。
 
-## CharacterDesignCardV1
+0.2.0 新轻规划使用 `CastPlanV2`。每行加 `recognition_axes`，含 `silhouette`、`face_structure`、`body_posture`、`hair_structure`、`costume_color` 五个非空字符串；轻规划时未知可写“待定”。非人或群像行还应写 `morphology: nonhuman|group`，不适用的轴可写“不适用：原因”，审查脚本会单列而不算缺失。每个轴写可见结构而非“美丽/英俊/特别”。旧项目的已批准 `CastPlanV1` 保持可读，不因升级自动作废。
+
+## CharacterDesignCardV1 / CharacterDesignCardV2
 
 必填 `character_id`、`variant_id`、`morphology`（`human|humanoid|nonhuman`）、`facts[{text,source_refs}]`、`inferences[{text,basis_refs}]`、`approved_choices[{field,value,rationale}]`、`identity_invariants[]`、`appearance{}`、`costume{}`、`unresolved[]`。可加 `reference_extracts`、`variant_of`、`execution_layout`、`forbidden_changes`。事实一定有来源；推导不能伪装成事实。变体沿用同一个角色 ID，并注明与基础造型的变化范围。
+
+0.2.0 新设计卡使用 `CharacterDesignCardV2`，额外包含同样五轴的 `recognition_axes` 和 `differentiation_review{closest_character_ids[],shared_features[],distinct_features[],realism_check}`。`distinct_features` 应写实在可见的对照结果，而非“更漂亮”。无可比角色时 `closest_character_ids` 可空并说明依据。旧 `CharacterDesignCardV1` 仍可读取和打包；只在用户请求修改时按原审批流程升级。
+
+专项提案是 `CharacterSpecialistProposalV1`，格式见 [专项交接](specialist-contract.md)，属于草案，不自动写进设计卡。全员差异化文本审查用 `CastDifferentiationAuditV1`，不代替看图；运行 `python scripts/cast_diff_audit.py --project-root PROJECT --output PROJECT/drafts/cast-differentiation-audit.json`，或用 `--cast-plan FILE` 审查未提交草案。
 
 ## CharacterPromptPackageV1
 

@@ -26,6 +26,8 @@ STAGES = ("avatar", "expression", "full_body", "execution")
 HEAVY_TIERS = {"主角", "重要角色"}
 SUPPORTED_INPUTS = {".json", ".md", ".markdown", ".xlsx"}
 IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp"}
+RECOGNITION_AXES = ("silhouette", "face_structure", "body_posture",
+                    "hair_structure", "costume_color")
 NS = {"m": "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
       "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
       "p": "http://schemas.openxmlformats.org/package/2006/relationships"}
@@ -324,7 +326,10 @@ def _validate_record(kind, data, state, character_id=None, variant_id=None, stag
     expected = {"visual-bible": "ProjectVisualBibleV1", "cast-plan": "CastPlanV1",
                 "design-card": "CharacterDesignCardV1",
                 "prompt-package": "CharacterPromptPackageV1"}[kind]
-    ensure(data.get("schema_version") == expected, f"Expected {expected}")
+    accepted = {"cast-plan": {"CastPlanV1", "CastPlanV2"},
+                "design-card": {"CharacterDesignCardV1", "CharacterDesignCardV2"}}
+    ensure(data.get("schema_version") in accepted.get(kind, {expected}),
+           f"Expected one of {sorted(accepted.get(kind, {expected}))}")
     require_list(data, "unresolved") if kind != "prompt-package" else None
     if kind == "visual-bible":
         require_text(data, "project_id")
@@ -343,6 +348,11 @@ def _validate_record(kind, data, state, character_id=None, variant_id=None, stag
         ensure(actual == expected_ids, "Cast plan must cover the asset-table roster exactly")
         for item in data["characters"]:
             require_text(item, "design_distinction")
+            if data["schema_version"] == "CastPlanV2":
+                axes = item.get("recognition_axes")
+                ensure(isinstance(axes, dict), "CastPlanV2 rows need recognition_axes")
+                for axis in RECOGNITION_AXES:
+                    require_text(axes, axis)
     elif kind == "design-card":
         ensure(data.get("character_id") == character_id, "Wrong character_id")
         ensure(data.get("variant_id") == variant_id, "Wrong variant_id")
@@ -363,6 +373,20 @@ def _validate_record(kind, data, state, character_id=None, variant_id=None, stag
             require_text(choice, "field")
             require_text(choice, "value")
             require_text(choice, "rationale")
+        if data["schema_version"] == "CharacterDesignCardV2":
+            axes = data.get("recognition_axes")
+            ensure(isinstance(axes, dict), "CharacterDesignCardV2 needs recognition_axes")
+            for axis in RECOGNITION_AXES:
+                require_text(axes, axis)
+            review = data.get("differentiation_review")
+            ensure(isinstance(review, dict), "CharacterDesignCardV2 needs differentiation_review")
+            require_list(review, "closest_character_ids")
+            require_list(review, "shared_features")
+            require_list(review, "distinct_features")
+            require_text(review, "realism_check")
+            if review["closest_character_ids"]:
+                ensure(review["distinct_features"],
+                       "Describe visible differences from the closest cast members")
     else:
         ensure(data.get("character_id") == character_id and data.get("variant_id") == variant_id,
                "Prompt target does not match character/variant")

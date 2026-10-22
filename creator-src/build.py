@@ -6,8 +6,10 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+import shutil
 import subprocess
 import sys
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = Path(__file__).resolve().parent
@@ -25,7 +27,31 @@ def text_field():
 
 RESULT = schema({"status": {"type": "string"}, "artifact_path": {"type": "string"},
                  "summary": {"type": "string"}, "questions": {"type": "array", "items": {"type": "string"}}},
-                ("status", "summary", "questions"))
+                ("status", "artifact_path", "summary", "questions"))
+
+
+SPECIALISTS = [
+    ("character-hair-design", "发型设计：发流、体积、轮廓与跨视角连续性", "hair",
+     "建立发际、发流、发量、前侧后体积和束发结构；与最相近角色比较发型块面，核对生活方式及背面结构。"),
+    ("character-body-design", "形体体态设计：年龄比例、骨架、重心与动作习惯", "body",
+     "区分骨架、体重分布、肌肉使用、比例、重心和惯常体态；避免默认修长健美，按年龄和动作需求检查。"),
+    ("character-face-design", "五官面部设计：原创骨相、比例与非模板面孔", "face",
+     "组合脸长宽、颧颌、眉眼距、鼻口比例，提出可画且原创的面孔；与比较组并排防撞脸，不用五官推断人格。"),
+    ("character-face-signature-design", "面部记忆点与锁骨以上饰品设计", "face-memory",
+     "先用已有结构识别，再考虑面部记号、发饰、耳饰和颈饰；写固定点与连续性，新增伤痕纹身必须待批准。"),
+    ("character-skin-design", "皮肤肌理设计：年龄、环境与真实表面", "skin",
+     "写自然毛孔、局部光泽、纹理、色沉及有依据的生活痕迹；区分稳定肌理与临时污损，避免磨皮。"),
+    ("character-costume-style-design", "服饰款式设计：衣装品类、长度和层次", "costume-style",
+     "从世界、场合、职业与行动决定衣装品类和整体轮廓；不侵占剪裁、配色、材质与饰品职责。"),
+    ("character-costume-cut-design", "服饰剪裁设计：结构线、连接与活动余量", "costume-cut",
+     "在选定款式上解决肩线、领口、袖、腰、摆、褶与闭合；让前侧背结构一致且动作可行。"),
+    ("character-costume-color-design", "服饰配色设计：明度、饱和度与群像色块", "costume-color",
+     "在项目色域内分配主辅点色与部位面积，比较同框角色色块；不把色彩心理当人格事实。"),
+    ("character-costume-material-design", "服饰材质设计：重量、光泽、垂坠与磨损", "costume-material",
+     "为各衣层写材料及物理表现，检查气候、行动、资源和制作技术相容，拒绝统一塑料感。"),
+    ("character-costume-accessory-design", "服饰饰品设计：衣身、腰、手与随身穿戴物", "costume-accessory",
+     "处理锁骨以下饰品的功能、固定、重量与道具 ID；跨锁骨物件与面部饰品专项只指定一个主责。"),
+]
 
 
 def capability(ident, description, instructions, refs, properties, required=()):
@@ -46,13 +72,16 @@ def blueprint():
             "# 角色资产主控\n\n" + refs + "\n\n" +
             "使用 [工作流](../../references/workflow.md) 与 [接口](../../references/interfaces.md)。"
             "先定位用户项目和当前阶段；没有项目时用内置 scripts/character_project.py 导入标准剧本与资产表，场记可选。"
-            "从角色清单做第 -1 阶段视觉基准和全员轻规划；主角与重要角色分轮 Grill Me，普通角色分层处理。"
+            "从角色清单做第 -1 阶段视觉基准和全员轻规划；用群像差异化总控建立比较组与五轴矩阵，"
+            "对发型、体型、五官、皮肤和服饰按缺口调用专项，而非让所有角色强制走十轮。"
+            "主角与重要角色分轮 Grill Me，普通角色分层处理；已批准角色不因新方法自动重做。"
             "每轮只推进一个已授权且依赖已批准的阶段；及时提交结构化 JSON 并通过 CLI 记录批准、图片、审查和来源。"
             "本插件只写 GPT Image 2.5 提示词，不调用生图工具。用户回图后必须实际查看图片，"
             "通过审查与操作者确认后才进入下一阶段。新细节先提议，获批后修改设计卡。"
             "仅在四阶段均通过时打包。运行中报告实际文件路径、未解决疑点与下一步；不虚报成图质量。",
             ["knowledge/index.md", "references/workflow.md", "references/interfaces.md",
-             "references/evidence.md", "references/source-notes.md"], common, ("request",)),
+             "references/evidence.md", "references/source-notes.md",
+             "references/differentiation-framework.md", "references/specialist-contract.md"], common, ("request",)),
         capability(
             "character-evidence", "核对剧本事实、资产表与场记来源并列冲突",
             "# 角色证据核对\n\n" + refs + "\n\n"
@@ -68,12 +97,16 @@ def blueprint():
             "# 角色设计\n\n" + refs + "\n\n"
             "读取 [角色方法](../../references/character-design.md) 和"
             " [服装与形态](../../references/costume-and-morphology.md)。"
-            "先依据世界规则提出视觉基准供操作者确认，再建立全员轻规划。重点角色逐轮给有依据的"
+            "先依据世界规则提出视觉基准供操作者确认，再调用群像差异化总控建立全员轻规划。"
+            "重点角色逐轮给有依据的"
             " 2–3 个具体方向；记录已确定、待选和已委托事项，不能把单一画风选择扩大成外貌定稿。"
+            "默认检查发型、体型、五官是否落入全员美型模板；按实际缺口加载对应专项知识，"
+            "近邻角色并排比较，保留普通相貌和真实皮肤的可能。"
             "设计卡区分原文事实、推导、参考图提取优点与已批准选择；仅明显换装、年龄或严重外观变化建变体。"
             "非人角色按形态改执行参考板。提交 JSON 草案；未解决项清空后请操作者批准。",
             ["knowledge/index.md", "references/character-design.md",
-             "references/costume-and-morphology.md", "references/interfaces.md"],
+             "references/costume-and-morphology.md", "references/interfaces.md",
+             "references/differentiation-framework.md", "references/specialist-contract.md"],
             common, ("project_root", "request")),
         capability(
             "character-image-prompt", "把已批准设计转成 GPT Image 2.5 分阶段提示词",
@@ -116,9 +149,52 @@ def blueprint():
             {**common, "image_path": text_field(), "issue": text_field()},
             ("project_root", "image_path", "issue", "request")),
     ]
+    capabilities.append(capability(
+        "character-cast-differentiation", "群像差异化总控：比较组、五轴矩阵与回图防撞型复核",
+        "# 群像差异化总控\n\n读取 [差异化框架](../../references/differentiation-framework.md)、"
+        "[专项交接](../../references/specialist-contract.md) 和群像知识快照。"
+        "从真实同框及功能近邻建立比较组，生成角色 × 识别轴矩阵；指出重复的结构组合和全员美型偏差。"
+        "按文本阶段或已收到的图片明确证据等级；需要回图判断时实际打开图片。"
+        "不能因差异化硬造疤痕、怪发或极端体型，不自动改已批准卡。"
+        "给主控具体修订点与应启用的专项，问题经操作者选择后才写入正式设计卡。",
+        ["knowledge/index.md", "references/differentiation-framework.md",
+         "references/specialist-contract.md",
+         "references/knowledge/character-cast-differentiation/ensemble.md",
+         "references/knowledge/character-cast-differentiation/legacy-visual.md"],
+        {**common, "cast_plan_path": text_field(), "comparison_group": {"type": "array", "items": text_field()}},
+        ("project_root", "request")))
+    for ident, description, source_id, method in SPECIALISTS:
+        capabilities.append(capability(
+            ident, description,
+            "# " + description + "\n\n读取 [专项交接](../../references/specialist-contract.md)、"
+            "[群像差异化框架](../../references/differentiation-framework.md) 与本专项知识快照。"
+            + method + "读取已批准视觉基准、当前设计卡与比较组；输出有依据的 2–3 个可见方案，"
+            "明确原文事实、创作提案、制作核对点及与近邻的差异。"
+            "新特征只能作为待选方案，不能代替操作者批准。"
+            "提交 CharacterSpecialistProposalV1 JSON 与短 Markdown，运行 scripts/validate_specialist_proposal.py；不调用生图。",
+            ["knowledge/index.md", "references/specialist-contract.md",
+             "references/differentiation-framework.md",
+             f"references/knowledge/{ident}/{source_id}.md"],
+            common, ("project_root", "character_id", "request")))
     files = {path.relative_to(CONTENT).as_posix(): path.read_text(encoding="utf-8")
              for path in CONTENT.rglob("*") if path.is_file() and
              "__pycache__" not in path.parts and path.suffix != ".pyc"}
+    adoption = json.loads((SOURCE / "knowledge-adoption.json").read_text(encoding="utf-8"))
+    files["knowledge/archive-manifest.json"] = json.dumps(adoption, ensure_ascii=False, indent=2) + "\n"
+    lock = json.loads(files["knowledge-lock.json"])
+    for item in adoption["sources"]:
+        rule = (SOURCE / item["rules"]).read_text(encoding="utf-8")
+        relative = f'references/knowledge/{item["capability"]}/{item["id"]}.md'
+        rendered = (f'<!-- source-id: {item["id"]}; revision: {item["ingested_sha256"]} -->\n'
+                    + rule)
+        files[relative] = rendered
+        lock["snapshots"] = [x for x in lock["snapshots"] if x["path"] != relative]
+        lock["snapshots"].append({
+            "source_id": item["id"], "source_sha256": item["ingested_sha256"],
+            "origin": "local:" + item["archive"], "path": relative,
+            "rules_sha256": hashlib.sha256(rendered.encode()).hexdigest(),
+            "capability_ids": [item["capability"]]})
+    files["knowledge-lock.json"] = json.dumps(lock, ensure_ascii=False, indent=2) + "\n"
     sources = [
         {"origin": "local:AI角色概念设计课.docx", "revision": "sha256:04ab20e00dd9983964f18f69e57059bdefef43109e8e3c4f94f955e57b72f363", "adaptation": "独立编写设计方法与身份检查规则"},
         {"origin": "local:资产概念knowledge.docx", "revision": "sha256:343a42ab44bc8d84c34d62bb7d3b8c8d30b3c53f3ff199bbae3b47674599cdd7", "adaptation": "提炼表情、变体与 2×2 执行参考板"},
@@ -136,19 +212,45 @@ def blueprint():
         {"origin": "local:刺猬星球素材/01-通用图片生成/SKILL.md", "revision": "sha256:3e8fdab2d0c0b69d121503a2d2833a067a672afca21b51c5e1ac99a1f30860fb", "license": "Apache-2.0", "adaptation": "改写角色提示词结构与参考图职责；不携带生图 API/CLI"},
         {"origin": "local:刺猬星球素材/01-通用图片生成/references/prompting.md", "revision": "sha256:d957a45cb24fe2cf1a85858674fc533f15a5f4621355f559a13a93168999c2dd", "license": "Apache-2.0", "adaptation": "改写单项修图与全图复核方法；保留外部出图"},
     ]
+    sources += [{"origin": "local:" + item["archive"],
+                 "revision": "sha256:" + item["archive_sha256"],
+                 "adaptation": "用户课程方法精炼为 " + item["capability"] +
+                 " 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"}
+                for item in adoption["sources"]]
     return {"schema_version": "HarnessBlueprintV1",
-            "plugin": {"name": "character-assets", "version": "0.1.3",
+            "plugin": {"name": "character-assets", "version": "0.2.0",
                        "description": "从剧本依据建设可追溯的角色视觉资产包与 GPT Image 2.5 提示词",
                        "author": {"name": "开宝箱工作室"}},
             "goal": "独立运行的角色资产子插件：设计、提示词、回图审查与可复用资产包",
             "acceptance_criteria": ["三份输入和顶层快照契约可接入", "阶段批准和图片回流可恢复",
-                                    "错误/冲突阻断发布", "知识按情景加载且来源可追溯"],
+                                    "错误/冲突阻断发布", "知识按情景加载且来源可追溯",
+                                    "群像比较组识别发型、体型和面孔模板化", "专项只按缺口启用且不改已批准卡"],
             "open_questions": [], "capabilities": capabilities, "files": files,
             "workflows": [], "sources": sources}
 
 
 def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def finalize_output(output):
+    apply_interface(output)
+    names = {"character-assets": "角色资产主控", "character-evidence": "角色证据核对",
+             "character-design": "角色设计", "character-image-prompt": "角色出图提示词",
+             "character-image-review": "角色回图审查", "character-image-edit": "角色精确修图",
+             "character-cast-differentiation": "角色群像差异化"}
+    names.update({ident: description.split("：", 1)[0]
+                  for ident, description, _, _ in SPECIALISTS})
+    for slug, display in names.items():
+        path = output / "skills" / slug / "agents" / "openai.yaml"
+        content = path.read_text(encoding="utf-8").replace(f"display_name: {slug}",
+                                                        f"display_name: {display}")
+        path.write_text(content, encoding="utf-8")
+    lock = output / "generation-lock.json"
+    hashes = {path.relative_to(output).as_posix(): sha(path) for path in output.rglob("*")
+              if path.is_file() and path != lock}
+    lock.write_text(json.dumps({"files": hashes}, ensure_ascii=False, indent=2) + "\n",
+                    encoding="utf-8")
 
 
 def apply_interface(output):
@@ -178,11 +280,56 @@ def main():
     parser.add_argument("--creator", type=Path, default=ROOT.parent / "harness-creator")
     parser.add_argument("--sync", action="store_true",
                         help="Update authored resources in an existing generated plugin")
+    parser.add_argument("--rebuild", action="store_true",
+                        help="Rebuild all capabilities from authored sources after checking the generated lock")
     args = parser.parse_args()
     creator = args.creator.resolve()
     spec = SOURCE / "blueprint.json"
     spec.write_text(json.dumps(blueprint(), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     output = ROOT / "character-assets"
+    if args.rebuild:
+        if output.exists():
+            baseline = json.loads((output / "generation-lock.json").read_text(encoding="utf-8"))["files"]
+            current = {path.relative_to(output).as_posix(): sha(path) for path in output.rglob("*")
+                       if path.is_file() and path.name != "generation-lock.json"
+                       and path.suffix != ".pyc" and "__pycache__" not in path.parts}
+            if current != baseline:
+                changed = sorted(key for key in set(current) | set(baseline)
+                                 if current.get(key) != baseline.get(key))
+                raise SystemExit(f"Generated plugin has user or concurrent edits: {changed}")
+        (ROOT / ".harness").mkdir(exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix="character-rebuild-", dir=ROOT / ".harness") as temp:
+            temp = Path(temp)
+            stage = temp / "character-assets"
+            # Creator's build copies its own licenses/ after authored files. Keep
+            # authored notices/licenses out of that initial copy, then overlay
+            # every authored file and restore the full source blueprint.
+            staged_spec = json.loads(spec.read_text(encoding="utf-8"))
+            staged_spec["files"] = {key: value for key, value in staged_spec["files"].items()
+                                    if not key.startswith("licenses/") and key != "THIRD_PARTY_NOTICES.md"}
+            stage_spec_path = temp / "build-spec.json"
+            stage_spec_path.write_text(json.dumps(staged_spec, ensure_ascii=False, indent=2) + "\n",
+                                       encoding="utf-8")
+            subprocess.run([sys.executable, str(creator / "harness.py"), "build", "--spec", str(stage_spec_path),
+                            "--output", str(stage), "--confirmed"], check=True)
+            for relative, content in blueprint()["files"].items():
+                target = stage / relative
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text(content, encoding="utf-8")
+            (stage / "harness-blueprint.json").write_text(spec.read_text(encoding="utf-8"),
+                                                         encoding="utf-8")
+            finalize_output(stage)
+            backup = temp / "previous"
+            if output.exists():
+                output.rename(backup)
+            try:
+                stage.rename(output)
+            except Exception:
+                if backup.exists():
+                    backup.rename(output)
+                raise
+        print(output)
+        return
     if output.exists():
         if not args.sync:
             raise SystemExit(f"Output exists: {output}; use --sync for authored resources")
@@ -210,20 +357,7 @@ def main():
         return
     subprocess.run([sys.executable, str(creator / "harness.py"), "build", "--spec", str(spec),
                     "--output", str(output), "--confirmed"], check=True)
-    apply_interface(output)
-    names = {"character-assets": "角色资产主控", "character-evidence": "角色证据核对",
-             "character-design": "角色设计", "character-image-prompt": "角色出图提示词",
-             "character-image-review": "角色回图审查", "character-image-edit": "角色精确修图"}
-    for slug, display in names.items():
-        path = output / "skills" / slug / "agents" / "openai.yaml"
-        content = path.read_text(encoding="utf-8").replace(f"display_name: {slug}",
-                                                        f"display_name: {display}")
-        path.write_text(content, encoding="utf-8")
-    lock = output / "generation-lock.json"
-    hashes = {path.relative_to(output).as_posix(): sha(path) for path in output.rglob("*")
-              if path.is_file() and path != lock}
-    lock.write_text(json.dumps({"files": hashes}, ensure_ascii=False, indent=2) + "\n",
-                    encoding="utf-8")
+    finalize_output(output)
     print(output)
 
 

@@ -30,6 +30,126 @@
       "capability_ids": [
         "character-image-edit"
       ]
+    },
+    {
+      "source_id": "hair",
+      "source_sha256": "0640af5dd894c8839615eef90c66b1419d3f532d890464d2b40a7da5594a84fd",
+      "origin": "local:发型设计知识库.zip",
+      "path": "references/knowledge/character-hair-design/hair.md",
+      "rules_sha256": "b49e4ee34993f3f7df3a97b33b8354d535c74d3e00a0bd4eff46bb4b4752b57e",
+      "capability_ids": [
+        "character-hair-design"
+      ]
+    },
+    {
+      "source_id": "body",
+      "source_sha256": "1fd297cc5722ab09ab2f58fe4692ce34064ca2918b732179569b771727689621",
+      "origin": "local:形体体态设计知识库.zip",
+      "path": "references/knowledge/character-body-design/body.md",
+      "rules_sha256": "b152eb6953d3a049a71bb509d5ccd4ca351c876f2b3891511c6d000ba368b2b8",
+      "capability_ids": [
+        "character-body-design"
+      ]
+    },
+    {
+      "source_id": "face",
+      "source_sha256": "129d6c39ad61723a17e709b5e3efd09b7615caca7c7245fd0b4a7240d923bc10",
+      "origin": "local:五官与面部差异化设计知识库.zip",
+      "path": "references/knowledge/character-face-design/face.md",
+      "rules_sha256": "6a1e5b9064a35c6c22096ba732e6b3a2ab866ad8283bdfbe8e436aaf6db39c20",
+      "capability_ids": [
+        "character-face-design"
+      ]
+    },
+    {
+      "source_id": "face-memory",
+      "source_sha256": "7f64634f52ab943982d714fc56331e873ca72aee250b2e3fd32422f801296660",
+      "origin": "local:面部记忆点与锁骨以上饰品设计.zip",
+      "path": "references/knowledge/character-face-signature-design/face-memory.md",
+      "rules_sha256": "4df2bcebbd98ccb09fbbcbfcbe383461fc9f760e7bd7e9cda70f8b5ce31b967d",
+      "capability_ids": [
+        "character-face-signature-design"
+      ]
+    },
+    {
+      "source_id": "skin",
+      "source_sha256": "6c655631cca72b70bb6b0aff7cb9b6354e82d813ca3069ee23fd1b86f5e33916",
+      "origin": "local:皮肤肌理与质感知识库.zip",
+      "path": "references/knowledge/character-skin-design/skin.md",
+      "rules_sha256": "8f6a7719465b3f8444c9ad1e27d6dbab7da8117338adc237797aa5b659641faa",
+      "capability_ids": [
+        "character-skin-design"
+      ]
+    },
+    {
+      "source_id": "costume-cut",
+      "source_sha256": "4e55c47de5f3e871865e90c45c870515f03e816eb6c6abc3e4c9c973291a3f7f",
+      "origin": "local:服饰剪裁设计知识库.zip",
+      "path": "references/knowledge/character-costume-cut-design/costume-cut.md",
+      "rules_sha256": "b3944ad2de448a07b24bff5f281ba8a961a0c2043a8a14eade549e1e667f1827",
+      "capability_ids": [
+        "character-costume-cut-design"
+      ]
+    },
+    {
+      "source_id": "costume-style",
+      "source_sha256": "8bf2a9fb6e40f61443d569649c37d453365e5f9db1c558d192ed131e9b78ae62",
+      "origin": "local:服饰款式设计知识库.zip",
+      "path": "references/knowledge/character-costume-style-design/costume-style.md",
+      "rules_sha256": "e2453a4efcdc0312751f4ee07428dc7ec128f3fe91df0dfe68083578f1b17014",
+      "capability_ids": [
+        "character-costume-style-design"
+      ]
+    },
+    {
+      "source_id": "ensemble",
+      "source_sha256": "b2b3b605f6e2e1ac2c9cf9d4bd2a302fc23d4929f7718ea6e742cbb7fb3523d3",
+      "origin": "local:角色群像差异化设计知识库.zip",
+      "path": "references/knowledge/character-cast-differentiation/ensemble.md",
+      "rules_sha256": "2cda43131d2da53de8900f6f91b6004c9065ab58012d1cead9bf1a93b098a478",
+      "capability_ids": [
+        "character-cast-differentiation"
+      ]
+    },
+    {
+      "source_id": "costume-color",
+      "source_sha256": "c80b5baa182ca6777ee617fddaaf375cf687b87a25971a34ccb3996affbad910",
+      "origin": "local:服饰配色设计知识库.zip",
+      "path": "references/knowledge/character-costume-color-design/costume-color.md",
+      "rules_sha256": "84550d68340daba5729e293722c59bf66366e32a934c04ed92710d26d2cc729a",
+      "capability_ids": [
+        "character-costume-color-design"
+      ]
+    },
+    {
+      "source_id": "costume-material",
+      "source_sha256": "9393bfc99b8d6d832e46a71f71bbd81080ee6a8edf9a1403f6859dba85976734",
+      "origin": "local:服饰材质设计知识库.zip",
+      "path": "references/knowledge/character-costume-material-design/costume-material.md",
+      "rules_sha256": "bd74a5b46d4e9533bd4de163da886c04776375f5e28da6989e8a4d131af9a9d6",
+      "capability_ids": [
+        "character-costume-material-design"
+      ]
+    },
+    {
+      "source_id": "costume-accessory",
+      "source_sha256": "6565d53ac91096979e8846ab8d19ef78f59641a1978aa617b837d3f002664f96",
+      "origin": "local:服饰饰品设计知识库.zip",
+      "path": "references/knowledge/character-costume-accessory-design/costume-accessory.md",
+      "rules_sha256": "02bfae07d291764448673b13ecc6630ceb9f4a6af713de58bc8fc800820a4592",
+      "capability_ids": [
+        "character-costume-accessory-design"
+      ]
+    },
+    {
+      "source_id": "legacy-visual",
+      "source_sha256": "eb375ed1e9860726ae0147db062c4ff235a1f9cae5154486a4f26c2e48336c6e",
+      "origin": "local:novel-characters-visual.zip",
+      "path": "references/knowledge/character-cast-differentiation/legacy-visual.md",
+      "rules_sha256": "ed4434f8cc10e7c031233d1d177ff5700f2ca55344db7689af762f922baee758",
+      "capability_ids": [
+        "character-cast-differentiation"
+      ]
     }
   ]
 }

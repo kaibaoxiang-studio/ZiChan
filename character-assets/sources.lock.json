@@ -78,6 +78,66 @@
       "revision": "sha256:d957a45cb24fe2cf1a85858674fc533f15a5f4621355f559a13a93168999c2dd",
       "license": "Apache-2.0",
       "adaptation": "改写单项修图与全图复核方法；保留外部出图"
+    },
+    {
+      "origin": "local:发型设计知识库.zip",
+      "revision": "sha256:54c08406b4382ea0f4b7a749055ce9f86743a8257d0f2588254252fff1928abb",
+      "adaptation": "用户课程方法精炼为 character-hair-design 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"
+    },
+    {
+      "origin": "local:形体体态设计知识库.zip",
+      "revision": "sha256:00136fde7b8cf5f68f7a1d431cf15aef73e1d8c2b395882a8091cd40e0c61d30",
+      "adaptation": "用户课程方法精炼为 character-body-design 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"
+    },
+    {
+      "origin": "local:五官与面部差异化设计知识库.zip",
+      "revision": "sha256:2c322d0bdf76ea3b2dbd17115cf63e0f4f1f2b8ba24565a9e7f790a18bf076cb",
+      "adaptation": "用户课程方法精炼为 character-face-design 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"
+    },
+    {
+      "origin": "local:面部记忆点与锁骨以上饰品设计.zip",
+      "revision": "sha256:2cfdb5f9f603f779be99ab0c3536c85a27e276165019d51cfbdfbfae813dbb61",
+      "adaptation": "用户课程方法精炼为 character-face-signature-design 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"
+    },
+    {
+      "origin": "local:皮肤肌理与质感知识库.zip",
+      "revision": "sha256:b473b4760c0d4bcaf9fd71c1bf4402a6b2dbf57c1e8816fdbc5ff221689e9e42",
+      "adaptation": "用户课程方法精炼为 character-skin-design 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"
+    },
+    {
+      "origin": "local:服饰剪裁设计知识库.zip",
+      "revision": "sha256:f2186d5b7292d5e2f4b5bb8a1a947be08500e08c1b091733fda393229472c03f",
+      "adaptation": "用户课程方法精炼为 character-costume-cut-design 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"
+    },
+    {
+      "origin": "local:服饰款式设计知识库.zip",
+      "revision": "sha256:6ee6dd619992bc12808444b1f0fe3d04c3457bbc69c9320815eb78749979a6e2",
+      "adaptation": "用户课程方法精炼为 character-costume-style-design 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"
+    },
+    {
+      "origin": "local:角色群像差异化设计知识库.zip",
+      "revision": "sha256:964fed322d36899f83014a5f70f642ccedbb3efa9bcf23e2bbf82cf1808113dd",
+      "adaptation": "用户课程方法精炼为 character-cast-differentiation 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"
+    },
+    {
+      "origin": "local:服饰配色设计知识库.zip",
+      "revision": "sha256:095795ac91aeffbcef8db5e94e207d61e96f123c3b8d0223ed95f989f5c809cc",
+      "adaptation": "用户课程方法精炼为 character-costume-color-design 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"
+    },
+    {
+      "origin": "local:服饰材质设计知识库.zip",
+      "revision": "sha256:338cb29f9a90ecc4f495a829cd61250850312c136d13d406da0da6cb8e0bbf7e",
+      "adaptation": "用户课程方法精炼为 character-costume-material-design 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"
+    },
+    {
+      "origin": "local:服饰饰品设计知识库.zip",
+      "revision": "sha256:a6cddefd194bedbecd87dd356758facabbd1e6bba6103db3c9869e2092b6e25f",
+      "adaptation": "用户课程方法精炼为 character-costume-accessory-design 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"
+    },
+    {
+      "origin": "local:novel-characters-visual.zip",
+      "revision": "sha256:134a1bb8476d8c99338c6c36bac27746f9a2bd9907dfb2dd919a0ad33f224d6c",
+      "adaptation": "用户课程方法精炼为 character-cast-differentiation 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"
     }
   ]
 }
