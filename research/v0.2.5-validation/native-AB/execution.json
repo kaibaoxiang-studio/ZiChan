@@ -1,0 +1,98 @@
+{
+  "schema_version": "NativeDesignResponseCheckV1",
+  "execution_host": "Codex Desktop native primary agent",
+  "operator_task": "/root",
+  "scope": "identity draft and A-prime/B-prime condition response",
+  "formal_project": false,
+  "approved": false,
+  "independent_consultations": 0,
+  "human_decision_rounds": 0,
+  "standalone_elapsed_seconds": null,
+  "timing_note": "This supplement was not timed independently. Use final-short metadata for App Server run timing.",
+  "actually_read_files": [
+    {
+      "path": "creator-src/tests/fixtures/v025/潮汐站_全文_A.md",
+      "sha256": "de2b6ed7a9c1d26d65ee570c2b7a83f1ff83177ef6374cbcf923c9826110ed4b"
+    },
+    {
+      "path": "creator-src/tests/fixtures/v025/潮汐站_全文_Aprime.md",
+      "sha256": "e036498d5a1dc5e99aafc7ef55ae6f9e4601088b1b6dbeeb9a1c139584318863"
+    },
+    {
+      "path": "creator-src/tests/fixtures/v025/呈现目标与结构冲突.md",
+      "sha256": "60686c8352a0f55ce75f88f995fd91caf2c18e84579ead2fe50798d8e3590cd9"
+    },
+    {
+      "path": "research/v0.2.5-validation/final-short/design.md",
+      "sha256": "2c7a9f7fddb5ddd1b3b8d16c1d21e60df1ecfdcdaecbf814c2af8c477958ac15"
+    },
+    {
+      "path": "research/v0.2.5-validation/final-short/design-basis.json",
+      "sha256": "8e25868c75db89d62e414ab697352eb7620b292262c1f4cba51d3366442f2757"
+    },
+    {
+      "path": "character-assets/skills/character-design/SKILL.md",
+      "sha256": "1dca1a62873dda2de6d8fc9dfad1924a149e4636ee485a9aa4a791bac23bdd8d"
+    },
+    {
+      "path": "character-assets/references/director-understanding.md",
+      "sha256": "cbe8a3fdb072ac4cb8b103ca274cf8af56552fec9ccedf25684cf846de712e14"
+    },
+    {
+      "path": "character-assets/knowledge/index.md",
+      "sha256": "074a588866fd98c66301a3ce88cee104ec27dde689c69b3f6ef511b03aece0bf"
+    },
+    {
+      "path": "character-assets/references/differentiation-framework.md",
+      "sha256": "a865f362ea7bdae8f660ebca883fe6e8803d9158b50fc075f796bb200f28769e"
+    },
+    {
+      "path": "character-assets/references/design-detail-standard.md",
+      "sha256": "5a925e49a5564e32088149c7887d59f0f6d3b399eef21d57954cb0f78447770f"
+    },
+    {
+      "path": "character-assets/skills/character-hair-design/SKILL.md",
+      "sha256": "5e5543967912bda5729d36ecec02441fbe834eb36ffbc59a4363007122b92f10"
+    },
+    {
+      "path": "character-assets/references/knowledge/character-hair-design/hair.md",
+      "sha256": "b49e4ee34993f3f7df3a97b33b8354d535c74d3e00a0bd4eff46bb4b4752b57e"
+    },
+    {
+      "path": "character-assets/skills/character-face-design/SKILL.md",
+      "sha256": "2bb963ec6948df3eed488f9bbdb635d7bef89c88b8bfd5d889b1988ae1419d38"
+    },
+    {
+      "path": "character-assets/references/knowledge/character-face-design/face.md",
+      "sha256": "62e7f973e7965ce60867af9fa87358df7bdf6e3cb5da293199e47aec2b8dc0c0"
+    },
+    {
+      "path": "character-assets/skills/character-skin-design/SKILL.md",
+      "sha256": "ee520fb8f7aadce65041484cab9971f954efb7e8b2ce0e5ef4c045c0fd579d65"
+    },
+    {
+      "path": "character-assets/references/knowledge/character-skin-design/skin.md",
+      "sha256": "8f6a7719465b3f8444c9ad1e27d6dbab7da8117338adc237797aa5b659641faa"
+    },
+    {
+      "path": "character-assets/skills/character-world-appearance-design/SKILL.md",
+      "sha256": "0a014fb3cf6a060471d77da8f0ac787de1884f5f4f79bd93710d9766a8e9a2ff"
+    },
+    {
+      "path": "character-assets/references/knowledge/character-world-appearance-design/world-appearance.md",
+      "sha256": "6f50a8de6095aa62016fb2a3d8c627faef3ba5b92a6dbdd5ec281831c87292cc"
+    }
+  ],
+  "inline_methods": {
+    "character-face-design": "Preserve chosen bone structure when environment or audience knowledge changes; do not infer temperament from facial structure.",
+    "character-hair-design": "Preserve front-side-back short silhouette because narrow-space safety/maintenance are unchanged.",
+    "character-skin-design": "Separate stable creative skin base from transient sweat and wetness; no invented lesions or complexion/class mapping.",
+    "character-world-appearance-design": "Revise actual exposure and later material tasks for indoor dry conditions, not inherited facial anatomy."
+  },
+  "result": "condition-response.md",
+  "limitations": [
+    "Text only; no image or visual comparison verified.",
+    "Not a second independent App Server invocation.",
+    "No timing or quality superiority claim against old version."
+  ]
+}

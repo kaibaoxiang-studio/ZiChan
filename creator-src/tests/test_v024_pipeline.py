@@ -34,7 +34,7 @@ class V024PipelineTests(unittest.TestCase):
         cp.cmd_init(ns(project_root=str(self.root), project_id="test-v024",
                        screenplay=str(examples / "sample-screenplay.json"),
                        asset_table=str(examples / "sample-assets.json"),
-                       scene_log=None, snapshot=None))
+                       scene_log=None, snapshot=None, design_progression="complete"))
         self.state = cp.read_json(self.root / "project.json")
         self.character = self.state["roster"][0]
 

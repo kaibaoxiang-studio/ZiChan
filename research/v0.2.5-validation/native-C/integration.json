@@ -1,0 +1,62 @@
+{
+  "schema_version": "CharacterDesignIntegrationReviewV1",
+  "character_id": "DRAFT-LIN-CHE",
+  "variant_id": "WORK",
+  "status": "proposal_not_approved",
+  "execution_host": "native_codex_root",
+  "consultations": [
+    {
+      "specialist": "character-costume-cut-design",
+      "execution_host": "native_codex_subagent",
+      "task_name": "/root/audit_inference_gap",
+      "proposal_ref": "research/v0.2.5-validation/native-C/cut/proposal.json",
+      "proposal_sha256": "88ae30799f4b804c6545b6fa4e1269a3e10bcf93f50b8130560841a4af713115",
+      "selected_option_id": "CUT-A"
+    },
+    {
+      "specialist": "character-costume-accessory-design",
+      "execution_host": "native_codex_subagent",
+      "task_name": "/root/derive_design_dimensions",
+      "proposal_ref": "research/v0.2.5-validation/native-C/accessory/proposal.json",
+      "proposal_sha256": "e2d16ae3b0167a9473170f5a2f93c8d73b94c14860acfc3fed9a4175fee73bff",
+      "selected_option_id": "A1-flush-vertical-duty-strip"
+    }
+  ],
+  "character_reading": "公开克制与实际照护并存；工装保留可靠、收整的职业感，不增加英雄化配件或表明秘密经历的符号。",
+  "conflict": "剪裁预留横向65×12mm净区，饰品给竖向12×30mm识别条，两者不能原样叠加。",
+  "resolution": "采用低立领、平遮门襟、后移肩缝、腋下插片和可内掖高髋圆摆。采用12×30mm软织物竖排班长条、四边平缝；剪裁的预留区改为约16×34mm，仍在左前片门襟外侧、横胸带上方的实际空窗中。空窗不足时只协同调整衣片上的净区位置，不改动安全带；实装覆盖与活动测试仍待进行。",
+  "adopted": [
+    {
+      "from": "cut",
+      "elements": [
+        0,
+        1,
+        2
+      ],
+      "result": "清楚而平服的领口闭合与肩袖活动结构；同衣通过收摆支持下井。"
+    },
+    {
+      "from": "accessory",
+      "elements": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "result": "窄软职务条与不可占据的安全带活动区域。"
+    }
+  ],
+  "rejected_or_revised": [
+    {
+      "from": "cut",
+      "element_index": 3,
+      "decision": "保留平整净区原则，横向65×12mm尺寸与竖条冲突，改约16×34mm；准确位置由实际带路覆盖确定。"
+    }
+  ],
+  "not_tested": [
+    "实际安全带覆盖",
+    "抬臂弯身和狭窄通行样衣动作",
+    "湿态识别可读性",
+    "图像生成及图像一致性"
+  ]
+}

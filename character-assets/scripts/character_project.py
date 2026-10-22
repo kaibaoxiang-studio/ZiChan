@@ -18,16 +18,20 @@ import re
 import shutil
 import sys
 import tempfile
+from types import SimpleNamespace
 import xml.etree.ElementTree as ET
 import zipfile
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import phased_design as phased
+
 SCHEMA = "CharacterProjectV1"
-PLUGIN_VERSION = "0.2.4.1"
+PLUGIN_VERSION = "0.2.5"
 IDENTITY_STAGES = ("avatar", "expression", "full_body")
 STAGES = (*IDENTITY_STAGES, "costume_design", "execution")
 LEGACY_STAGES = (*IDENTITY_STAGES, "execution")
 HEAVY_TIERS = {"主角", "重要角色"}
-SUPPORTED_INPUTS = {".json", ".md", ".markdown", ".xlsx"}
+SUPPORTED_INPUTS = {".json", ".md", ".markdown", ".txt", ".xlsx"}
 IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp"}
 RECOGNITION_AXES = ("silhouette", "face_structure", "body_posture",
                     "hair_structure", "costume_color")
@@ -93,6 +97,10 @@ NS = {"m": "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
 
 def now():
     return dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
+
+
+def _runtime():
+    return SimpleNamespace(**globals())
 
 
 def digest(data):
@@ -190,6 +198,8 @@ def validate_visual_details(data):
             ensure(normalized not in seen_descriptions and normalized not in generic_only,
                    f"visual_details.{domain}.{field} repeats or uses generic wording")
             seen_descriptions.add(normalized)
+    if data["schema_version"] == "CharacterDesignCardV2.5":
+        return phased.validate_compiled_coverage(_runtime(), data)
     coverage = data.get("specialist_coverage")
     ensure(isinstance(coverage, dict), "CharacterDesignCardV2.1 needs specialist_coverage")
     valid_detail_paths = {f"{domain}.{field}" for domain, fields in DETAIL_FIELDS.items() for field in fields}
@@ -213,7 +223,7 @@ def validate_visual_details(data):
                    f"specialist_coverage.{specialist} cannot apply fields when not_needed")
 
 
-def validate_focus_and_form(data):
+def validate_feature_focus(data):
     focus = data.get("feature_focus")
     ensure(isinstance(focus, dict), "V2.2 needs feature_focus")
     require_text(focus, "core_sentence")
@@ -247,6 +257,9 @@ def validate_focus_and_form(data):
         ensure(isinstance(item, dict) and item.get("status") in {"passed", "failed", "not_tested"},
                f"view_checks.{name} needs status")
         require_text(item, "evidence")
+
+
+def validate_body_form(data):
     body = data.get("body_form")
     ensure(isinstance(body, dict), "V2.2 needs body_form")
     for group, fields in {"proportions": ("torso_legs", "arm_segments", "leg_segments"),
@@ -259,6 +272,11 @@ def validate_focus_and_form(data):
             require_text(section, field)
     ensure(body["action_check"]["test_status"] in {"passed", "failed", "not_tested"},
            "body_form.action_check.test_status is invalid")
+
+
+def validate_focus_and_form(data):
+    validate_feature_focus(data)
+    validate_body_form(data)
 
 
 def validate_body_proportion_anchors(data):
@@ -420,7 +438,10 @@ def validate_design_handoffs(data, root):
                    f"Applied field empty: {mapping['field']}")
 
 
-def validate_world_and_face(data):
+def validate_world_and_face(data, allow_proposals=False):
+    statuses = {"script_fact", "approved_choice"}
+    if allow_proposals or data.get("schema_version") == "CharacterDesignCardV2.5":
+        statuses |= {"inference", "creative_choice"}
     world = data.get("world_influences")
     ensure(isinstance(world, dict), "V2.4 needs world_influences")
     for key in ("environment", "technology", "resources_and_access"):
@@ -431,7 +452,7 @@ def validate_world_and_face(data):
         ensure(isinstance(effect, dict), "World appearance effect must be an object")
         for key in ("feature", "mechanism", "basis", "evidence_status"):
             require_text(effect, key)
-        ensure(effect["evidence_status"] in {"script_fact", "approved_choice"},
+        ensure(effect["evidence_status"] in statuses,
                "World appearance effects must be script facts or approved choices")
     surface = data.get("facial_surface")
     ensure(isinstance(surface, dict), "V2.4 needs facial_surface")
@@ -442,7 +463,7 @@ def validate_world_and_face(data):
             ensure(isinstance(item, dict), f"facial_surface.{group} items must be objects")
             for key in ("feature", "placement", "visible_form", "narrative_basis", "continuity", "evidence_status"):
                 require_text(item, key)
-            ensure(item["evidence_status"] in {"script_fact", "approved_choice"},
+            ensure(item["evidence_status"] in statuses,
                    f"facial_surface.{group} must be script facts or approved choices")
     require_text(surface, "absence_or_focus_decision")
 
@@ -497,7 +518,7 @@ def load_source(path):
     ensure(suffix in SUPPORTED_INPUTS, f"Unsupported input: {path.name}")
     if suffix == ".json":
         return read_json(path)
-    if suffix in {".md", ".markdown"}:
+    if suffix in {".md", ".markdown", ".txt"}:
         lines = path.read_text(encoding="utf-8-sig").splitlines()
         return {"format": "markdown", "lines": [
             {"ref": f"{path.name}:L{i}", "text": text} for i, text in enumerate(lines, 1)]}
@@ -627,6 +648,8 @@ def _checked_record(root, state, key):
         card = read_json(root / value["path"])
         if card.get("schema_version") in {"CharacterDesignCardV2.2", "CharacterDesignCardV2.4"} and card.get("morphology") in {"human", "humanoid"}:
             validate_design_handoffs(card, root)
+    if phased.enabled(state):
+        phased.checked_dependencies(_runtime(), root, state, key, read_json(root / value["path"]))
     return value
 
 
@@ -647,6 +670,10 @@ def _checked_image(root, state, stage, character_id, variant_id):
         "prompt-package", character_id, variant_id, stage))
     ensure(image["prompt_sha256"] == prompt["sha256"],
            f"Image was generated from another prompt version: {image['id']}")
+    if phased.enabled(state):
+        package = read_json(root / prompt["path"])
+        phased.resolve_basis(_runtime(), root, state, package, character_id, variant_id, stage, force_approved=True)
+        ensure(image.get("purpose", "production") == "production", "Preview candidates cannot be downstream anchors")
     return image
 
 
@@ -671,6 +698,10 @@ def _invalidate(state, character_id=None, variant_id=None, start="visual-bible")
         "execution": {"execution"},
     }
     affected = downstream[start]
+    if phased.enabled(state) and start in {"visual-bible", "cast-plan", "design-card"}:
+        for key, value in state["records"].items():
+            if key.startswith(("design-brief:", "stage-design:")) and (not character_id or character_id in key.split(":")):
+                value.update(stale=True, approval=None)
     for key, value in state["records"].items():
         parts = key.split(":")
         if character_id and (len(parts) < 2 or character_id not in parts):
@@ -698,7 +729,7 @@ def _validate_record(kind, data, state, character_id=None, variant_id=None, stag
                 "prompt-package": "CharacterPromptPackageV1"}[kind]
     accepted = {"cast-plan": {"CastPlanV1", "CastPlanV2"},
                 "design-card": {"CharacterDesignCardV1", "CharacterDesignCardV2",
-                "CharacterDesignCardV2.1", "CharacterDesignCardV2.2", "CharacterDesignCardV2.4"}}
+                "CharacterDesignCardV2.1", "CharacterDesignCardV2.2", "CharacterDesignCardV2.4", "CharacterDesignCardV2.5"}}
     ensure(data.get("schema_version") in accepted.get(kind, {expected}),
            f"Expected one of {sorted(accepted.get(kind, {expected}))}")
     require_list(data, "unresolved") if kind != "prompt-package" else None
@@ -744,7 +775,7 @@ def _validate_record(kind, data, state, character_id=None, variant_id=None, stag
             require_text(choice, "field")
             require_text(choice, "value")
             require_text(choice, "rationale")
-        if data["schema_version"] in {"CharacterDesignCardV2", "CharacterDesignCardV2.1", "CharacterDesignCardV2.2", "CharacterDesignCardV2.4"}:
+        if data["schema_version"] in {"CharacterDesignCardV2", "CharacterDesignCardV2.1", "CharacterDesignCardV2.2", "CharacterDesignCardV2.4", "CharacterDesignCardV2.5"}:
             axes = data.get("recognition_axes")
             ensure(isinstance(axes, dict), "CharacterDesignCardV2 needs recognition_axes")
             for axis in RECOGNITION_AXES:
@@ -758,11 +789,11 @@ def _validate_record(kind, data, state, character_id=None, variant_id=None, stag
             if review["closest_character_ids"]:
                 ensure(review["distinct_features"],
                        "Describe visible differences from the closest cast members")
-        if data["schema_version"] in {"CharacterDesignCardV2.1", "CharacterDesignCardV2.2", "CharacterDesignCardV2.4"} and data["morphology"] in {"human", "humanoid"}:
+        if data["schema_version"] in {"CharacterDesignCardV2.1", "CharacterDesignCardV2.2", "CharacterDesignCardV2.4", "CharacterDesignCardV2.5"} and data["morphology"] in {"human", "humanoid"}:
             validate_visual_details(data)
-        if data["schema_version"] in {"CharacterDesignCardV2.2", "CharacterDesignCardV2.4"} and data["morphology"] in {"human", "humanoid"}:
+        if data["schema_version"] in {"CharacterDesignCardV2.2", "CharacterDesignCardV2.4", "CharacterDesignCardV2.5"} and data["morphology"] in {"human", "humanoid"}:
             validate_focus_and_form(data)
-        if data["schema_version"] == "CharacterDesignCardV2.4":
+        if data["schema_version"] in {"CharacterDesignCardV2.4", "CharacterDesignCardV2.5"}:
             validate_world_and_face(data)
     else:
         ensure(data.get("character_id") == character_id and data.get("variant_id") == variant_id,
@@ -773,7 +804,10 @@ def _validate_record(kind, data, state, character_id=None, variant_id=None, stag
         require_list(data, "reference_images")
         require_list(data, "prompts")
         require_list(data, "acceptance_checks")
-        require_text(data, "design_card_sha256")
+        if phased.enabled(state):
+            ensure(isinstance(data.get("design_basis"), dict), "Phased prompts need design_basis")
+        else:
+            require_text(data, "design_card_sha256")
         ensure(isinstance(data.get("anchor_images"), dict),
                "anchor_images must be a stage-to-SHA object")
         ensure(data["prompts"], "Prompt package is empty")
@@ -786,7 +820,8 @@ def _validate_record(kind, data, state, character_id=None, variant_id=None, stag
         ensure(len(set(prompt_ids)) == len(prompt_ids), "Prompt IDs must be unique")
         if stage in {"avatar", "full_body"}:
             if stage == "avatar":
-                ensure(2 <= len(data["prompts"]) <= 3, "Avatar requires 2–3 same-design candidates")
+                minimum = 1 if phased.enabled(state) else 2
+                ensure(minimum <= len(data["prompts"]) <= 3, "Avatar needs one recommended candidate or up to three alternatives")
             default_ratio = "3:4" if stage == "avatar" else "9:16"
             stage_label = "Avatar" if stage == "avatar" else "Full-body"
             ratio = data.get("aspect_ratio")
@@ -894,6 +929,7 @@ def cmd_init(args):
         if not (isinstance(value, dict) and kind == "asset_table" and "characters" in value):
             write_json(root / "inputs" / f"rev-001/{kind}.normalized.json", value)
     state = {"schema_version": SCHEMA, "pipeline_version": 2,
+             "design_progression": getattr(args, "design_progression", "phased"),
              "project_id": args.project_id, "created_at": now(),
              "revision": 1, "inputs": inputs, "roster": roster, "records": {},
              "images": [], "reviews": {}, "references": [], "pending_impact": None,
@@ -913,6 +949,7 @@ def cmd_init(args):
             "submitted_at": now(), "approval": bible["approval"], "stale": False}
     write_json(root / "project.json", state)
     return {"project_root": str(root), "characters": len(roster),
+            "design_progression": state["design_progression"],
             "deep_design": [row["id"] for row in roster if row["priority"] == "deep"],
             "scene_log_present": bool(args.scene_log)}
 
@@ -921,6 +958,7 @@ def cmd_status(args):
     root = Path(args.project_root).expanduser().resolve()
     state = read_json(root / "project.json")
     return {"project_id": state["project_id"], "revision": state["revision"],
+            "design_progression": state.get("design_progression", "complete"),
             "pipeline_version": state.get("pipeline_version", 1),
             "inputs": state["inputs"], "roster": state["roster"],
             "records": {key: {"approved": bool(v.get("approval")), "stale": v.get("stale", False)}
@@ -963,7 +1001,9 @@ def cmd_plan(args):
             if state.get("pending_impact"):
                 blockers.append("Unresolved upstream impact")
             card_variant = variant
-            for key in ("visual-bible", "cast-plan", _record_key("design-card", person["id"], card_variant)):
+            design_dependencies = (phased.basis_keys(person["id"], variant, stage) if phased.enabled(state)
+                                   else [_record_key("design-card", person["id"], card_variant)])
+            for key in ("visual-bible", "cast-plan", *design_dependencies):
                 try:
                     _checked_record(root, state, key)
                 except (ValueError, KeyError) as exc:
@@ -986,10 +1026,22 @@ def cmd_plan(args):
                 status = "blocked" if blockers else "approved"
             except (ValueError, KeyError):
                 status = "blocked" if blockers else "ready"
-            tasks.append({"asset_name": person["name"], "character_id": person["id"],
+            task = {"asset_name": person["name"], "character_id": person["id"],
                           "variant_id": variant, "variant_name": variant_name(state, person["id"], variant),
-                          "stage": stage, "status": status, "blockers": blockers})
+                           "stage": stage, "status": status, "blockers": blockers}
+            if phased.enabled(state) and stage == "avatar":
+                task["preview_modes"] = {}
+                for mode in ("direction_first", "image_first"):
+                    try:
+                        candidate = {"purpose": "preview", "preview_mode": mode, "design_basis": {"records": {
+                            k: phased.draft(_runtime(), root, state, k)["sha256"] for k in design_dependencies}}}
+                        phased.resolve_basis(_runtime(), root, state, candidate, person["id"], variant, stage)
+                        task["preview_modes"][mode] = {"status": "ready"}
+                    except (ValueError, KeyError) as exc:
+                        task["preview_modes"][mode] = {"status": "blocked", "reason": str(exc)}
+            tasks.append(task)
     return {"mode": "single" if len(requested) == 1 else "batch",
+            "design_progression": state.get("design_progression", "complete"),
             "pipeline_version": 2 if modern else 1,
             "tasks": tasks}
 
@@ -997,6 +1049,11 @@ def cmd_plan(args):
 def cmd_submit(args):
     with locked_project(args.project_root) as (root, state):
         ensure(not state["pending_impact"], "Resolve upstream impact before new design decisions")
+        if args.kind in phased.KINDS:
+            return phased.submit(_runtime(), args, root, state)
+        ensure(not (phased.enabled(state) and args.kind == "design-card"),
+               "Phased cards are mechanically composed with compile-design-card")
+        content = read_json(args.file)
         character_id = args.character_id
         variant_id = args.variant_id or "base"
         modern = state.get("pipeline_version", 1) >= 2
@@ -1017,7 +1074,11 @@ def cmd_submit(args):
             _checked_record(root, state, dep)
         if args.kind == "prompt-package":
             card_key = _record_key("design-card", character_id, variant_id)
-            card_record = _checked_record(root, state, card_key)
+            if phased.enabled(state):
+                card = phased.resolve_basis(_runtime(), root, state, content, character_id, variant_id, args.stage)
+                card_record = None
+            else:
+                card_record = _checked_record(root, state, card_key)
             anchors = {}
             if modern:
                 predecessors = {"avatar": (), "expression": ("avatar",),
@@ -1035,7 +1096,6 @@ def cmd_submit(args):
                     for anchor_stage in ("expression", "full_body"):
                         anchors[anchor_stage] = _checked_image(
                             root, state, anchor_stage, character_id, variant_id)["sha256"]
-        content = read_json(args.file)
         if args.kind == "design-card" and content.get("morphology") in {"human", "humanoid"}:
             roster_item = next((row for row in state["roster"] if row["id"] == character_id), {})
             if roster_item.get("tier") in HEAVY_TIERS or roster_item.get("priority") == "deep":
@@ -1047,19 +1107,21 @@ def cmd_submit(args):
             validate_body_proportion_anchors(content)
             validate_design_handoffs(content, root)
         if args.kind == "prompt-package":
-            ensure(content["design_card_sha256"] == card_record["sha256"],
-                   "Prompt package refers to a different design card version")
+            if not phased.enabled(state):
+                ensure(content["design_card_sha256"] == card_record["sha256"],
+                       "Prompt package refers to a different design card version")
             ensure(content["anchor_images"] == anchors,
                    "Prompt package anchor image versions do not match the current approvals")
-            card = read_json(root / state["records"][
-                _record_key("design-card", character_id, variant_id)]["path"])
+            if not phased.enabled(state):
+                card = read_json(root / state["records"][
+                    _record_key("design-card", character_id, variant_id)]["path"])
             validate_model_card_attire(content, card)
             if args.stage == "expression" and card.get("morphology") in {"human", "humanoid"}:
                 avatar_record = state["records"][_record_key(
                     "prompt-package", character_id, "base" if modern else variant_id, "avatar")]
                 validate_expression_attire_transition(
                     content, read_json(root / avatar_record["path"]))
-            if args.stage == "full_body" and card.get("schema_version") in {"CharacterDesignCardV2.2", "CharacterDesignCardV2.4"} and card.get("morphology") in {"human", "humanoid"}:
+            if args.stage == "full_body" and (phased.enabled(state) or card.get("schema_version") in {"CharacterDesignCardV2.2", "CharacterDesignCardV2.4"}) and card.get("morphology") in {"human", "humanoid"}:
                 validate_full_body_prompt_proportions(content, card)
             if args.stage == "execution":
                 ensure(content.get("morphology") == card["morphology"],
@@ -1095,6 +1157,8 @@ def cmd_submit(args):
 def cmd_approve_record(args):
     with locked_project(args.project_root) as (root, state):
         ensure(not state["pending_impact"], "Unresolved upstream impact")
+        if args.kind in phased.KINDS:
+            return phased.approve(_runtime(), args, root, state)
         ensure(args.kind != "prompt-package", "Prompt packages become ready after contract check")
         key = _record_key(args.kind, args.character_id, args.variant_id or "base")
         value = state["records"].get(key)
@@ -1175,6 +1239,7 @@ def cmd_import_image(args):
                "path": str(target.relative_to(root)),
                "sha256": sha, "prompt_sha256": state["records"][key]["sha256"],
                "imported_at": now(), "approval": None, "stale": False}
+        row["purpose"] = read_json(root / state["records"][key]["path"]).get("purpose", "production")
         state["images"].append(row)
         return row
 
@@ -1217,6 +1282,13 @@ def cmd_approve_image(args):
     with locked_project(args.project_root) as (root, state):
         ensure(not state["pending_impact"], "Unresolved upstream impact")
         image = _image(state, args.image_id)
+        ensure(image.get("purpose", "production") != "preview", "Use promote-candidate to explicitly adopt a preview")
+        if phased.enabled(state):
+            prompt_key = _record_key("prompt-package", image["character_id"], image["variant_id"], image["stage"])
+            prompt = _checked_record(root, state, prompt_key)
+            ensure(prompt["sha256"] == image["prompt_sha256"], "Image prompt version changed")
+            phased.resolve_basis(_runtime(), root, state, read_json(root / prompt["path"]), image["character_id"],
+                                 image["variant_id"], image["stage"], force_approved=True)
         entry = state["reviews"].get(image["id"])
         ensure(entry, "Image must be reviewed first")
         ensure(digest(root / image["path"]) == image["sha256"],
@@ -1320,9 +1392,14 @@ def cmd_package(args):
                f"Imported {kind} file changed after intake")
     _checked_record(root, state, "visual-bible")
     _checked_record(root, state, "cast-plan")
-    card_variants = ["base", variant] if modern and variant != "base" else [variant]
+    card_variants = ([variant] if phased.enabled(state) else
+                     ["base", variant] if modern and variant != "base" else [variant])
     records = [_checked_record(root, state, _record_key("design-card", ident, v))
                for v in card_variants]
+    phase_keys = []
+    if phased.enabled(state):
+        phase_keys = ["script-context", *phased.basis_keys(ident, variant, "execution")[:-1]]
+        records.extend(_checked_record(root, state, item) for item in phase_keys)
     images = []
     for stage in pipeline_stages(state):
         stage_variant = "base" if modern and stage in IDENTITY_STAGES else variant
@@ -1346,6 +1423,40 @@ def cmd_package(args):
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(source, target)
             copied.append({"path": str(target.relative_to(out)), "sha256": digest(target)})
+    if phased.enabled(state):
+        for item in phase_keys:
+            if not item.startswith("stage-design:"):
+                continue
+            data = read_json(root / state["records"][item]["path"])
+            for work in data["specialist_execution"].values():
+                for knowledge in work.get("knowledge_refs", []):
+                    source = root / "knowledge-snapshots" / knowledge["sha256"]
+                    ensure(source.is_file() and digest(source) == knowledge["sha256"], "Knowledge snapshot changed before packaging")
+                    target = out / "knowledge-snapshots" / knowledge["sha256"]
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(source, target)
+                    if not any(x["path"] == str(target.relative_to(out)) for x in copied):
+                        copied.append({"path": str(target.relative_to(out)), "sha256": digest(target)})
+                if work.get("mode") != "independent":
+                    continue
+                source = root / work["proposal_ref"]
+                ensure(digest(source) == work["proposal_sha256"], "Specialist proposal changed before packaging")
+                target = out / work["proposal_ref"]
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(source, target)
+                if not any(x["path"] == str(target.relative_to(out)) for x in copied):
+                    copied.append({"path": str(target.relative_to(out)), "sha256": digest(target)})
+                proposal = read_json(source)
+                for knowledge in (proposal.get("knowledge_refs", [])
+                                  if proposal.get("schema_version") == "CharacterSpecialistProposalV1.2" else []):
+                    knowledge_source = root / "knowledge-snapshots" / knowledge["sha256"]
+                    ensure(knowledge_source.is_file() and digest(knowledge_source) == knowledge["sha256"],
+                           "Independent knowledge snapshot changed before packaging")
+                    knowledge_target = out / "knowledge-snapshots" / knowledge["sha256"]
+                    knowledge_target.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(knowledge_source, knowledge_target)
+                    if not any(x["path"] == str(knowledge_target.relative_to(out)) for x in copied):
+                        copied.append({"path": str(knowledge_target.relative_to(out)), "sha256": digest(knowledge_target)})
     relevant_refs = [x for x in state["references"] if x.get("character_id") in
                      {None, ident}]
     for item in relevant_refs:
@@ -1366,6 +1477,7 @@ def cmd_package(args):
         copied.append({"path": str(target.relative_to(out)), "sha256": digest(target)})
     image_ids = {x["id"] for x in images}
     record_keys = {"visual-bible", "cast-plan"}
+    record_keys.update(phase_keys)
     record_keys.update(_record_key("design-card", ident, v) for v in card_variants)
     record_keys.update(_record_key("prompt-package", ident,
                                    "base" if modern and stage in IDENTITY_STAGES else variant, stage)
@@ -1391,6 +1503,12 @@ def cmd_package(args):
                                                 if x.get("key") in record_keys or
                                                 x.get("image_id") in image_ids],
                 "reference_images": relevant_refs}
+    manifest["design_progression"] = state.get("design_progression", "complete")
+    if phased.enabled(state):
+        context = read_json(root / state["records"]["script-context"]["path"])
+        manifest["context_source_receipt"] = {"source_sha256": context["source_sha256"],
+                                                "context_sha256": state["records"]["script-context"]["sha256"],
+                                                "read_units": len(context["read_units"])}
     write_json(out / "manifest.json", manifest)
     return {"asset_pack": str(out), "files": len(copied) + 1}
 
@@ -1405,6 +1523,11 @@ def build_parser():
     init.add_argument("--asset-table")
     init.add_argument("--scene-log")
     init.add_argument("--snapshot", help="Approved AssetProjectSnapshotV1 from the parent plugin")
+    init.add_argument("--design-progression", choices=("phased", "complete"), default="phased")
+    context = sub.add_parser("context-units", help="Enumerate the complete source for reading coverage")
+    context.add_argument("--project-root")
+    context.add_argument("--source", help="Standalone screenplay or biography; no asset table required")
+    context.add_argument("--output")
     status = sub.add_parser("status")
     status.add_argument("--project-root", required=True)
     plan = sub.add_parser("plan", help="Read-only stage queue for one character or the full roster")
@@ -1414,17 +1537,28 @@ def build_parser():
     plan.add_argument("--stage", choices=STAGES)
     submit = sub.add_parser("submit", help="Register a structured design/prompt draft")
     submit.add_argument("--project-root", required=True)
-    submit.add_argument("--kind", choices=("visual-bible", "cast-plan", "design-card", "prompt-package"), required=True)
+    submit.add_argument("--kind", choices=("visual-bible", "cast-plan", "design-card", "prompt-package", *sorted(phased.KINDS)), required=True)
     submit.add_argument("--file", required=True)
     submit.add_argument("--character-id")
     submit.add_argument("--variant-id", default="base")
     submit.add_argument("--stage", choices=STAGES)
+    submit.add_argument("--scope", choices=sorted(phased.SCOPES))
     approve = sub.add_parser("approve-record")
     approve.add_argument("--project-root", required=True)
-    approve.add_argument("--kind", choices=("visual-bible", "cast-plan", "design-card"), required=True)
+    approve.add_argument("--kind", choices=("visual-bible", "cast-plan", "design-card", *sorted(phased.KINDS)), required=True)
     approve.add_argument("--character-id")
     approve.add_argument("--variant-id", default="base")
     approve.add_argument("--operator", required=True)
+    approve.add_argument("--scope", choices=sorted(phased.SCOPES))
+    compile_card = sub.add_parser("compile-design-card", help="Compose approved scope snapshots without new creative decisions")
+    compile_card.add_argument("--project-root", required=True)
+    compile_card.add_argument("--character-id", required=True)
+    compile_card.add_argument("--variant-id", default="base")
+    promote = sub.add_parser("promote-candidate", help="Explicitly approve an unchanged, reviewed avatar preview")
+    promote.add_argument("--project-root", required=True)
+    promote.add_argument("--image-id", required=True)
+    promote.add_argument("--operator", required=True)
+    promote.add_argument("--approve-design-basis", action="store_true", help="Explicitly approve the exact bound brief and identity snapshot")
     reference = sub.add_parser("import-reference")
     reference.add_argument("--project-root", required=True)
     reference.add_argument("--path", required=True)
@@ -1466,6 +1600,9 @@ def build_parser():
 def main():
     args = build_parser().parse_args()
     actions = {"init": cmd_init, "status": cmd_status, "plan": cmd_plan, "submit": cmd_submit,
+               "context-units": lambda args: phased.context_units(_runtime(), args),
+               "compile-design-card": lambda args: phased.compile_card(_runtime(), args),
+               "promote-candidate": lambda args: phased.promote(_runtime(), args),
                "approve-record": cmd_approve_record, "import-reference": cmd_import_reference,
                "import-image": cmd_import_image, "submit-review": cmd_submit_review,
                "approve-image": cmd_approve_image, "refresh": cmd_refresh,

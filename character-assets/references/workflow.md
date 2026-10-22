@@ -1,54 +1,62 @@
-# 角色资产项目工作流
+# 角色资产项目工作流 v0.2.5
 
-插件主入口是 `$character-assets`。先读 `knowledge/index.md`，只加载本阶段的规则。所有创作内容由 Codex Skill 编写；`scripts/character_project.py` 负责文件、版本、批准与发布门槛。不要把 CLI 的合同通过冒充为视觉审查通过。
+主入口 `$character-assets`。先读 `knowledge/index.md` 与 [人物总控](director-understanding.md)，根据人物问题加载已有知识。模型负责阅读理解和创作，`scripts/character_project.py` 管理文件、哈希、批准和发布门槛；CLI 合同通过不证明人物或画面质量通过。
 
-## 1. 建项目并检查来源
+## 1. 接入与阅读
 
-操作者可以在聊天上传文件，也可以给本地路径。将可访问的附件路径交给 CLI；项目工作目录由操作者指定，不放入插件目录。标准剧本和资产表必填，场记可选。
+可以先独立接剧本、小传或片段做人物分析，说明范围；无项目且未指定阶段时默认identity/头像，只交人物定位、当前身份首稿和关键路由，身体衣装留方向或约束，正式登记时再补生产JSON。正式项目在用户工作目录初始化，剧本、资产表必填，场记可选；不把项目数据写插件目录。
 
 ```sh
-python scripts/character_project.py init --project-root /work/role-project --project-id PROJECT_ID --screenplay /input/standardized_screenplay.json --asset-table /input/assets.json --scene-log /input/scene_log.json
+python scripts/character_project.py init --project-root /work/role-project --project-id PROJECT_ID --screenplay /input/standardized_screenplay.json --asset-table /input/assets.json --design-progression phased
+python scripts/character_project.py context-units --project-root /work/role-project
 python scripts/character_project.py status --project-root /work/role-project
 ```
 
-如果没有场记，省略 `--scene-log` 并在表情/镜头需求中注明少了一条校对来源。CLI 复制原件并记录 SHA；JSON 优先，Markdown 次之，Excel 最后。不要把仅供浏览的 Excel 当作比原文更高优先级的证据。
+已有快照可改用 `init --project-root /work/role-project --snapshot /input/asset-project-snapshot.json`，先校验来源及可选视觉基准批准记录。需要场记加 `--scene-log`；未提供时注明缺少的校对来源。新项目默认 phased；先完整定卡用 complete；旧项目无字段按 complete。
 
-若顶层插件已生成 `AssetProjectSnapshotV1`，改用 `init --project-root /work/role-project --snapshot /input/asset-project-snapshot.json`。CLI 核对来源文件哈希；快照里如有已批准视觉基准，也同步导入其批准记录。详见 [接口](interfaces.md)。
+实际阅读全文，长文分批并记录覆盖，建立轻量覆盖全roster的 `ScriptContextV1`；理解全剧因果后再检索目标角色、联读跨场言行和关系。已读内容按源哈希复用，不每位人物重读全剧；不能只检索姓名或仅读摘要就声称全文理解。context-units 是核对入口，不代替阅读。
 
-## 2. 项目与角色决策
+## 2. 基准、人物方向与阶段设计
 
-从三份输入形成 `ProjectVisualBibleV1`，人工确认；再由 `$character-cast-differentiation` 建比较组与五轴矩阵，形成覆盖资产表角色 ID 的 `CastPlanV2`，人工确认。新提交的重点人形角色按分轮 Grill Me 生成含[具象细节与专项覆盖](design-detail-standard.md)的 `CharacterDesignCardV2.4`，人工确认。旧项目的 V1/V2/V2.1 批准记录继续有效；新项目重点人形卡重新提交时使用 V2.4。草案可以列 `unresolved`，但不能批准。使用 `submit` 保存 JSON，再用 `approve-record --operator 操作者姓名` 确认。设计卡变更会让该角色的后续提示词与图片失效，历史文件保留。
-
-在轻规划草案提交前及每张重点角色设计卡定稿前，按 [差异化框架](differentiation-framework.md) 检查最相近角色。先按[焦点与三维形体交接](feature-focus-and-body-form.md)写逐人专项路由，再对有缺口的专项实际调用并保存提案；特征焦点与体块动作均纳入路由。used 项必须有提案原文件、哈希、被选方案和采纳字段映射；专项提案先并入当前审阅轮，不为每个维度单开确认。可用 `python scripts/cast_diff_audit.py --cast-plan /draft/cast-plan.json --output /draft/cast-audit.json` 找出同字段和缺轴候选；人仍需审查近义撞型与全员美型。已有已批准角色不会因插件升级自动被改写。
+提交阅读综合：来源SHA、覆盖与结构完整且未决为空即自动ready，系统只确认阅读声明合同，interpretation_confirmed:false，不增加用户审批；未决非空须复核，手动approve可选。项目视觉基准和轻规划按原流程确认；人物解释在方向稿集中确认。人物定位先于外观：原文行为和评价分开，分析矛盾、弧线和观众信息，再提出一套推荐意图与确有必要的备选。普通细节主动补齐，有剧情含义的新经历或身份显式提出。
 
 ```sh
+python scripts/character_project.py submit --project-root /work/role-project --kind script-context --file /draft/context.json
 python scripts/character_project.py submit --project-root /work/role-project --kind visual-bible --file /draft/visual-bible.json
 python scripts/character_project.py approve-record --project-root /work/role-project --kind visual-bible --operator OPERATOR
 python scripts/character_project.py submit --project-root /work/role-project --kind cast-plan --file /draft/cast-plan.json
 python scripts/character_project.py approve-record --project-root /work/role-project --kind cast-plan --operator OPERATOR
-python scripts/character_project.py submit --project-root /work/role-project --kind design-card --character-id CHR-001 --variant-id base --file /draft/card.json
-python scripts/character_project.py approve-record --project-root /work/role-project --kind design-card --character-id CHR-001 --variant-id base --operator OPERATOR
+python scripts/character_project.py submit --project-root /work/role-project --kind design-brief --character-id CHR-001 --variant-id base --file /draft/direction.json
+python scripts/character_project.py approve-record --project-root /work/role-project --kind design-brief --character-id CHR-001 --variant-id base --operator OPERATOR
+python scripts/character_project.py submit --project-root /work/role-project --kind stage-design --scope identity --character-id CHR-001 --variant-id base --file /draft/identity.json
 ```
 
-参考图先通过 `import-reference --role identity|costume|style|inspiration --desired-strength '具体提取点'` 登记。`desired-strength` 写要吸收的可见优点；操作者确认后才进入设计卡。个人参考图可以加 `--character-id`。
+approve 命令在用户已确认相应内容后执行，不把示例命令当作模型自行批准的授权。方向默认先确认；用户明确先看图时才走 image_first 预览。常规项由主控执行规范、记 inline 结果，复杂项独立会诊、保存真实提案；见 [专项合同](specialist-contract.md)。阶段门槛、payload 与全部命令见 [分阶段设计](phased-design.md)。不为十三专项固定十三轮。
 
-## 3. 提示词与图片回流
+参考图通过 `import-reference --role identity|costume|style|inspiration --desired-strength '具体提取点'` 登记，按用户已指定用途采纳，不整体照搬。近邻比较按 [差异化框架](differentiation-framework.md) 执行；`cast_diff_audit.py` 只找相同文本/缺轴候选，不证明成图辨识度。
 
-每阶段由 `$character-image-prompt` 编写 `CharacterPromptPackageV1`，经 `submit --kind prompt-package --stage ...` 合同检查后可用于外部出图。头像默认 3:4 竖版，全身图默认 9:16 竖版，只有明确的用户决定可覆盖；人形头像、表情和单独全身采用[模卡式基础形体图](model-card-baseline.md)，正式服装在执行资产表恢复。头像以脸为主体，可取完整头部、双肩及上胸；服装不入画用 `face_only`，上胸入画直接用对应白色背心。表情继承头像取景和着装，从 `face_only` 切换背心时记录原因并重审整表；全身使用指定背心、短裤并赤脚。详细卡若仍是概括句，先回设计轮补细，不靠提示词现编。按[真实质感规则](render-texture-standard.md)选择皮肤、布料、光线和修复策略。新项目顺序为头像 → 九宫格表情 → 全身模卡 → 每状态服饰设计图 → 对应执行资产图；单张和批量均由[需求路由与整合](routing-and-integration.md)规划。每阶段图片用 `import-image` 登记，再由 `$character-image-review` 实际看图、保存 `CharacterImageReviewV1`。报告通过后，操作者用 `approve-image` 选定唯一当前版本。只报“通过”而不见图、未经操作者确认，都不能推进。
+## 3. 首图快看与正式五阶段
 
-头像与全身图回流审查时，若已有同剧定稿图片，增加并排比较：批准的主锚点、脸型、发结构、体态和皮肤是否在成图里保持区别；无法取得其他角色图片时写明只做单人核验。差异问题先定位设计卡还是出图偏差，修设计卡须重走批准，单纯出图偏差可走局部修图。
+phased 身份草案可先生成 preview 头像。提示词使用冻结的 `design_basis.records`，填写 `purpose:preview`；默认 direction_first 的 brief 已批准、identity 可未批。image_first 只按明确先图需求允许两者冻结未批；script-context须ready，项目基准和cast-plan仍先批。preview 不能作为正式下游锚点或打包。
 
 ```sh
 python scripts/character_project.py submit --project-root /work/role-project --kind prompt-package --character-id CHR-001 --variant-id base --stage avatar --file /draft/avatar-prompt.json
 python scripts/character_project.py import-image --project-root /work/role-project --character-id CHR-001 --variant-id base --stage avatar --path /images/avatar-1.png
 python scripts/character_project.py submit-review --project-root /work/role-project --image-id avatar-HASH --file /draft/avatar-review.json
-python scripts/character_project.py approve-image --project-root /work/role-project --image-id avatar-HASH --operator OPERATOR
 ```
 
-`$character-image-edit` 读取缺陷报告，输出目标明确的局部修图提示词；修改图重新导入、审查、确认。表情和全身均定稿后，每个资产表状态分别提交服饰设计图；该状态服饰图定稿后才提交其执行资产图提示词。最终 `package --character-id ... --variant-id STATE_ID --output NEW_DIRECTORY` 汇总五阶段定稿图片、设计与提示词、审查和版本记录。输出目录必须是新目录，避免覆盖旧包。
+实际看图并保存 `CharacterImageReviewV1`。方向、身份与该图获用户确认，review pass、无待采纳新细节、依据和图片 SHA 不变后，可 `promote-candidate --project-root /work/role-project --image-id avatar-HASH --operator OPERATOR --approve-design-basis`，显式承接同 SHA 方向/身份审批并同图转正；已先批依据则省略 flag。不需要重新生图，不能自动接纳其他候选。改变身份快照后原图不能沿旧 SHA 转正。
 
-## 4. 剧本侧改版
+正式顺序保持头像 → 九宫格 → 全身模卡 → 每状态服饰设计图 → 对应执行图。后续阶段的设计快照按需深化并批准，图像提示词只取当前可见项。头像默认3:4，身体图默认9:16；基础图采用 [模卡基线](model-card-baseline.md)，正式服饰图和执行图恢复角色衣装。头像可完整头部、双肩与上胸，不强制锁骨以上；上胸入画可直接白背心；全身背心、短裤、赤脚。背景未另获批时用中性纯色。
 
-`refresh` 只导入确有变化的来源。资产表角色记录变化会自动让相关角色设计和下游失效；剧本或场记变化需给出影响分析。处于 `pending_impact` 时禁止新设计决策和发布。检查变化后执行 `resolve-impact --affected CHR-001 CHR-002 --operator OPERATOR`；若改变全剧画风/世界规则，另加 `--global-style`。不可断言“无影响”而不检查新旧内容。未受影响角色仍保留原批准版本。
+正式图片继续 import-image → 实际审图 → submit-review → `approve-image --image-id ... --operator ...`。与近邻已有图并排比较；只换衣发色却同脸同体型属于设计或执行缺陷，分别回设计或修图。`character-image-edit` 针对具体缺陷修图，重新导入后整图复核。
 
-CLI 是本地状态管理器，不负责发图、读懂画面或自动给历史文化结论；这些由技能和操作者处理。
+## 4. 合成、打包与变更
+
+body和当前状态costume快照批准后，`compile-design-card --project-root /work/role-project --character-id CHR-001 --variant-id STATE_ID` 合成 V2.5 卡。它只合并同 SHA 已批准快照，冲突阻断，并记录 `system:approved-scope-composition` 与 `inherited_from`，不新增设计也不重复要求批准同一套细节。新创意必须回阶段快照，不直接 submit 手写 V2.5 卡。
+
+本状态服饰图批准后才能做其执行图；execution 另绑定合成卡。最终 `package --character-id ... --variant-id STATE_ID --output NEW_DIRECTORY` 汇总正式五阶段、设计、提示词、审查、批准与来源；输出目录必须新建，preview不能混入。
+
+来源改版用 refresh。资产表变化按角色定位，剧本/场记先补读并分析影响，pending_impact 时停止新决策和发布。核对后 `resolve-impact --affected CHR-001 CHR-002 --operator OPERATOR`，改变整体风格/世界规则加 `--global-style`。未受影响批准保留，不凭空断言无影响。
+
+旧 complete 保留先完整设计卡批准后出图，旧四阶段继续原打包链路；旧卡与提案回读、不自动迁移和重画。新总控分析不自动覆盖已批准身份。CLI不发图、不读懂画面、不自动得出历史文化结论。

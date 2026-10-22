@@ -1,43 +1,61 @@
-# 接口与文件契约 v0.1
+# 接口与文件契约 v0.2.5
 
-所有文件为 UTF-8 JSON。每份产物含 `schema_version`，用资产表的稳定 `CHR-...` 角色 ID。`source_refs` 引用标准剧本位置；若上游只提供 Markdown/Excel，使用导入后保留的 `文件名:L行号` 或 `文件名:工作表!R行号`。键值的具体描述可扩充，下面的必填字段及含义不能改。
+文件为 UTF-8 JSON，含 `schema_version`，角色/状态 ID 沿用资产表。`source_refs` 使用标准剧本位置、JSON 集场 ID 或保留的 `文件名:L行号`、`文件名:工作表!R行号`。合同校验不证明人物理解或画面质量。
 
-## 顶层兼容输入
+## 输入与项目兼容
 
-角色插件可直接接收三份文件，也可用 `init --snapshot` 读取 `AssetProjectSnapshotV1`。快照至少包含 `project_id`、`sources.screenplay` 与 `sources.asset_table` 的 `{path,sha256}`；`sources.scene_log` 可选。`visual_bible` 可选，但存在时须是 `{path,sha256,approval:{operator,at,sha256}}`。相对路径相对于快照文件所在目录。接入时校验文件 SHA 与批准状态，再映射为本插件状态；不能只靠同名文件猜测版本。
+可以独立接剧本、片段或小传先分析；声明范围和来源。受管理的正式项目使用剧本、资产表，可选场记，或 `init --snapshot` 的 `AssetProjectSnapshotV1`。快照至少含 `project_id`、`sources.screenplay` 与 `sources.asset_table` 的 `{path,sha256}`；scene_log 可选。可选 `visual_bible` 为 `{path,sha256,approval:{operator,at,sha256}}`，相对路径基于快照所在目录。
 
-## ProjectVisualBibleV1
+`init --design-progression phased|complete` 新默认 phased；旧状态无字段按 complete。五阶段链路与设计深化方式是两个不同设置；旧四阶段不自动改为五阶段。
 
-`project_id`、`world_rules`（世界规则及其可见后果）、`style`（媒介、写实度、时代、色彩、材质、光线等已确认维度）、`evidence[{claim,source_refs}]`、`unresolved[]`。风格项注明原文约束或获准创作选择；全剧共用，不覆盖个别角色的特殊事实。
+## 项目基准与阅读
 
-## CastPlanV1 / CastPlanV2
+`ProjectVisualBibleV1` 含 `project_id`、`world_rules`、`style`、`evidence[{claim,source_refs}]`、`unresolved`。风格分媒介、写实度、时代、配色、材质和光线，区分原文约束与批准选择。
 
-`characters[]` 必须覆盖资产表每个角色 ID，各项至少有 `id`、`design_distinction`，推荐附 `tier`、`narrative_role`、`relationships`、`visual_anchor`、`candidate_variants`、`source_refs`；另有 `unresolved[]`。轻规划不需要填每人的完整脸型。
+`CastPlanV2.characters` 覆盖全部角色 ID，至少 `id`、`design_distinction` 和 `recognition_axes{silhouette,face_structure,body_posture,hair_structure,costume_color}`；可附层级、剧情作用、关系、锚点、状态与来源。轻规划未知轴可待定；非人/群像写 `morphology:nonhuman|group` 并说明不适用项。五轴不是角色理解的替代品。
 
-0.2.0 新轻规划使用 `CastPlanV2`。每行加 `recognition_axes`，含 `silhouette`、`face_structure`、`body_posture`、`hair_structure`、`costume_color` 五个非空字符串；轻规划时未知可写“待定”。非人或群像行还应写 `morphology: nonhuman|group`，不适用的轴可写“不适用：原因”，审查脚本会单列而不算缺失。每个轴写可见结构而非“美丽/英俊/特别”。旧项目的已批准 `CastPlanV1` 保持可读，不因升级自动作废。
+当前新流程新增：
 
-## CharacterDesignCardV1 / V2 / V2.1 / V2.2 / V2.4
+- `ScriptContextV1`：`source_sha256`、`source_kind:screenplay|biography`、`read_units[{unit_id,sha256}]`、`synopsis`、`world_summary`、`narrative_structure`、`character_index[{character_id,name,role_in_story,arc_summary,relationships,evidence_unit_ids}]`、`unresolved`。read_units 必须匹配 `context-units` 输出全部单元与 SHA，character_index轻量覆盖全roster，后续逐人复用同源context。来源SHA/覆盖/结构完整且unresolved为空后自动ready，系统approval仅为 `system:context-contract-check`、scope `source-coverage-and-structure`，返回 `interpretation_confirmed:false`，无需增加用户审批。未决非空待复核，手动approve可选；人物解释在brief集中确认。
+- `DesignDirectionBriefV1`：`asset_domain:character`、角色、base 状态、`context_sha256`、`understanding`、`design_thesis`、`visual_strategy:direct|contrast|concealed|mixed`、`recommended_direction`、`alternatives`、`delegated_dimensions`、十三项 `specialist_plan`、`unresolved`。understanding 为 `CharacterUnderstandingV1`，含 `role_in_story,core_motivation,central_tension,world_and_life,relationships,arc,evidence_unit_ids`。专项规划状态为 `inline|independent|defer|not_needed`，各写 reason；前两项还须 `task{objective,character_context,constraints[],expected_result}`。
+- `CharacterStageDesignV1`：`character_id,variant_id,scope,parent_refs,payload,specialist_execution,deferred_dimensions,unresolved`。scope 为 identity/body/costume；字段分域、依据关系与命令见 [阶段设计](phased-design.md)。`parent_refs` 为实际记录键到 SHA 的映射。
 
-必填 `character_id`、`variant_id`、`morphology`（`human|humanoid|nonhuman`）、`facts[{text,source_refs}]`、`inferences[{text,basis_refs}]`、`approved_choices[{field,value,rationale}]`、`identity_invariants[]`、`appearance{}`、`costume{}`、`unresolved[]`。可加 `reference_extracts`、`variant_of`、`execution_layout`、`forbidden_changes`。事实一定有来源；推导不能伪装成事实。变体沿用同一个角色 ID，并注明与基础造型的变化范围。
+以上用 `submit --kind script-context|design-brief|stage-design` 保存；context按完整合同自动ready，方向与阶段设计按用户确认 `approve-record`；stage-design 指定 `--scope`。阅读、定位和分析方法见 [总控](director-understanding.md)。字段不代表必须把六组维度逐项填满。
 
-0.2.0 新设计卡使用 `CharacterDesignCardV2`，额外包含同样五轴的 `recognition_axes` 和 `differentiation_review{closest_character_ids[],shared_features[],distinct_features[],realism_check}`。`distinct_features` 应写实在可见的对照结果，而非“更漂亮”。无可比角色时 `closest_character_ids` 可空并说明依据。旧 `CharacterDesignCardV1` 仍可读取和打包；只在用户请求修改时按原审批流程升级。
+阶段metadata与可见字段同样守分域：identity_invariants只属identity；approved_choices.field须指向当前payload实际存在的本域字段；recognition_axes中face_structure/hair_structure属identity，silhouette/body_posture属body，costume_color属costume。morphology_details只含当前scope。body/costume若追加world_influences，只能写appearance_effects数组，各项除feature/mechanism/basis/evidence_status外须有field，指向本域实际可见字段；不得重设environment/technology/resources_and_access或改写身份世界规则。
 
-0.2.1 起新提交的重点人形卡使用 `CharacterDesignCardV2.1`，继承 V2 字段，并要求 `visual_details` 六组 18 个具象字段：`face{contour,brow_eyes,nose_mouth}`、`hair{hairline_part,volume_flow,length_texture_color}`、`body{frame_proportions,weight_posture}`、`skin{tone_variation,surface_distribution}`、`costume{silhouette_layers,neckline,shoulder_sleeve,seams_fastening_mobility,material_drape_wear,color_placement}`、`adornments{head_neck,body_hands}`。另有 `specialist_coverage`，10 个专项 ID 各填 `{status:used|not_needed,decision,proposal_ref?,applied_fields?}`，used 时 `proposal_ref` 与指向 `visual_details` 的非空 `applied_fields[]` 必填。文本应写形状、位置/比例、连接或材料行为，不用“结构清楚、自然垂落”作唯一设计。具体方法和示意见[具象描述标准](design-detail-standard.md)。既有 V1/V2 卡继续可读、已有批准保持有效；重点人形卡重新提交时须升级到 V2.1。非人仍可用 V2，并按形态提供对应的可见结构。
+独立分析首稿可为简洁可读草案，写了schema_version不表示可直接submit。正式提交时按本文转换为完整生产对象；不能把understanding写成无schema的摘要、specialist_plan写成列表、appearance写成字符串，identity.parent_refs也不能额外塞script-context。最小合法结构见 [身份合同样例](../examples/phased-identity-contract.md)。
 
-新专项提案是 `CharacterSpecialistProposalV1.1`，每选项增加至少两条 `design_elements[{part,visible_feature,placement_or_structure,basis}]`；旧 V1 可回读。格式见 [专项交接](specialist-contract.md)，属于草案，不自动写进设计卡。全员差异化文本审查用 `CastDifferentiationAuditV1`，不代替看图；运行 `python scripts/cast_diff_audit.py --project-root PROJECT --output PROJECT/drafts/cast-differentiation-audit.json`，或用 `--cast-plan FILE` 审查未提交草案。
+## 当前 CharacterDesignCardV2.5
 
-0.2.2 起新提交的重点人形卡使用 `CharacterDesignCardV2.2`。除六组细节外，新增 `feature_focus`、`body_form`、`route_ref`、`route_sha256`，并覆盖 11 个专项。used 项另需 `proposal_sha256`、`selected_option_id`、`applied_elements[{field,element_index}]`；提案必须是目标角色与专项的 V1.1 原样 JSON，文件放项目 `drafts/specialists/`。路由须是同一角色/变体的 `CharacterSpecialistRouteV1`，invoke/skip 与 used/not_needed 一一对应。提交、批准及后续读取时校验哈希。旧已批准卡仍可读；重新提交重点人形卡用 V2.2。详见[焦点与三维形体交接](feature-focus-and-body-form.md)。
+phased 项目通过 `compile-design-card --character-id CHR --variant-id STATE` 机械合成当前已批准的 base identity、base body 与 STATE costume。公共字段为 `character_id,variant_id,morphology,facts,inferences,approved_choices,identity_invariants,appearance,costume,unresolved`，并继承 `recognition_axes`、`differentiation_review`、`feature_focus`、`body_form`、`world_influences`、`facial_surface` 和 `visual_details`。
 
-0.2.3 不改卡的 `schema_version`；新提交的人形 V2.2 卡增加 `body_form.proportion_anchors`。其中 `measurement_frame` 写测量姿态与端点，`head_body`、`shoulder_hip`、`torso_legs`、`arm_segments`、`leg_segments` 各为 `{mode:"numeric"|"landmark",reference_points:[至少两个],relation,basis}`。`head_body` 必须是明确的头高与全高数值比；其他项可用数值或具体骨点相对位置。`relation` 必须逐字包含列出的 `reference_points`，并同步进入设计卡身体摘要；全身提示词须继承已批准的头身、肩胯与躯腿关系，验收项须核对头身与躯腿。原有已批准 V2.2 卡仍可读取和打包，但缺这些锚点的卡不得新提交全身提示词；先经操作者确认比例并更新设计卡。示例见[身体比例交接样例](../examples/body-proportion-contract.md)。
+非人新phased可用 `morphology_details{identity,body,costume}` 提供各阶段形态描述，visual_details可空，不强套人脸毛发和人类比例；共同世界/身份/焦点/证据仍适用。`asset_domain`当前只接受character，其他值明确拒绝，未来域不在本轮隐式启用。
 
-0.2.4.1 新项目的重点人形卡使用 `CharacterDesignCardV2.4`，延续 V2.2 的具象与比例合同，路由覆盖 13 项。新增 `world_influences:{environment,technology,resources_and_access,appearance_effects:[{feature,mechanism,basis,evidence_status}]}`，以及 `facial_surface:{stable_marks:[],applied_decoration:[],temporary_effects:[],absence_or_focus_decision}`。面部数组非空项必有 `feature,placement,visible_form,narrative_basis,continuity,evidence_status`。`evidence_status` 只能是 `script_fact` 或 `approved_choice`；未批准的创意只留在提案，不写入正式卡。空数组可表示有依据的无妆/无标记决定。旧批准卡继续有效。
+六组具象字段见 [细节标准](design-detail-standard.md)，身体测量见 [焦点和形体](feature-focus-and-body-form.md)。`world_influences` 含 `environment,technology,resources_and_access,appearance_effects[{feature,mechanism,basis,evidence_status}]`；`facial_surface` 含 `stable_marks,applied_decoration,temporary_effects,absence_or_focus_decision`，非空项含 `feature,placement,visible_form,narrative_basis,continuity,evidence_status`。阶段快照与V2.5的 `evidence_status` 可为 `script_fact|approved_choice|inference|creative_choice`，保留来源性质；creative_choice不代表尚未审批，实际批准由快照外层approval、SHA和stage_receipts证明。旧V2.4仍仅script_fact/approved_choice。inline执行结果同样保留script_fact/inference/creative_choice，不把创意伪写原文。
+
+V2.5 增加 `stage_receipts`（方向与阶段记录键到 SHA）和十三项 `specialist_coverage{ID:{plan,executions[]}}`。executions 从阶段的实际工作承接，保留 scope 和 variant_id；完整卡不能仍有未执行的 defer 任务，not_needed 有具体理由。inline 的 knowledge_refs/rules_applied/results 或 independent 的真实提案/哈希/采用映射见 [专项合同](specialist-contract.md)。合成不产生新选择，冲突阻断；批准由已确认源快照继承并记录，不代表系统替用户决定人物。
+
+## 当前专项提案
+
+新独立交接使用 `CharacterSpecialistProposalV1.2`，包含任务、知识哈希与执行方式；默认一套推荐，重要分歧才备选，1–3 项。每套至少两个有结构与来源性质的 design_elements。真实会诊与主控 inline 执行分开，详情见 [专项合同](specialist-contract.md)。
 
 ## CharacterPromptPackageV1
 
-必填 `stage`（`avatar|expression|full_body|costume_design|execution`）、`target_model`（GPT Image 2.5）、`character_id`、`variant_id`、`design_card_sha256`、`anchor_images{}`、`reference_images[]`、`prompts[{id,text}]`、非空 `acceptance_checks[]`。新项目的 `avatar`、`expression`、`full_body` 用 `base` 卡；`costume_design` 与 `execution` 用当前资产表状态卡。新项目阶段锚点依次为：头像空；九宫格含头像；全身含头像和九宫格；状态服饰图含三张基础图；执行图再含本状态服饰图。头像有同设计 2–3 条；表情默认 `labels[]` 长度 9 且每项有中文，16 格仅在 `grid_explicit_user_override:true` 与 `grid_override_basis` 记录用户明确选择时使用；单独全身图加 `head_visible:true` 与 `feet_visible:true`；服饰图加与资产表一致的 `variant_name`，验收项须核对服饰结构；人形执行表加：
+共同字段为 `stage:avatar|expression|full_body|costume_design|execution`、`target_model`、`character_id`、`variant_id`、`anchor_images`、`reference_images`、`prompts[{id,text}]`、非空 `acceptance_checks`。target_model 使用当前目标 GPT Image 2.5。
+
+complete 模式填写已批准的 `design_card_sha256`。phased 模式省略该字段，使用 `design_basis:{records:{记录键:sha}}`，严格匹配 [阶段依据表](phased-design.md)：avatar/expression 用 brief+identity；full_body 加 body；costume_design 加当前状态 costume；execution 再加当前状态合成卡。正式依据全部已批准，预览例外仅限头像。
+
+头像预览填 `purpose:preview`、`preview_mode:direction_first|image_first`。direction_first 需要已批 brief、冻结 identity；image_first 仅在明确先图后确认需求时允许未批但冻结的 brief/identity。script-context须ready，visual-bible、cast-plan仍先批准。预览不是正式锚点。`promote-candidate --image-id ID --operator NAME` 在原依据已批、SHA一致且回图pass时同图转正；明确合并确认可用 `--approve-design-basis`。未决项、意外新增细节和不一致须先解决。
+
+新五阶段前三图用 base，后两图用当前状态。图片锚点：头像空，九宫格含头像，全身含头像和九宫格，服饰含三张基础图，执行再含本状态服饰图。phased头像1–3条，默认一套推荐；complete沿用2–3条。九宫格 labels 长9且各含中文；16格要求 `grid_explicit_user_override:true` 和 `grid_override_basis`。全身加 `head_visible:true,feet_visible:true`；服饰加资产表一致的 `variant_name`。
+
+头像 `aspect_ratio:3:4`，全身 `aspect_ratio:9:16`，每条写对应比例，全身验收也核比例。明确用户改比例时填 `aspect_ratio_explicit_user_override:true` 和 `aspect_ratio_basis`。人形基础图带 `reference_attire`：头像/表情 `face_only|white_tank|white_sports_tank`，全身 `white_tank_shorts_barefoot|white_sports_tank_black_shorts_barefoot`。头像可取双肩与上胸，不强制锁骨以上；上胸入画可直接白背心，不生成裸体躯干。从 face_only 头像切背心表情须 `reference_attire_basis`。例外用 `approved_exception`，附 basis 和 description。模卡衣装不是剧情状态，执行图恢复正式衣装。
+
+人形 execution 的 layout：
 
 ```json
-"layout": {
+{
   "top_left": "front_face",
   "top_right": "three_quarter_face_45",
   "bottom_left": "headless_enlarged_front_costume",
@@ -45,14 +63,12 @@
 }
 ```
 
-非人执行表在设计卡中批准替代布局，提示词包的 `layout` 必须与设计卡一致。包内设计卡与锚点图片哈希必须匹配当前批准版本，防止误用旧版身份锚点。
+非人按批准替代布局，所有依据/锚点绑定当前 SHA，不能使用过期版本。
 
-头像和全身提示词包都必须有 `aspect_ratio`：头像默认 `"3:4"`，全身默认 `"9:16"`。每条 `prompts[].text` 都要写出对应比例；全身 `acceptance_checks[]` 还须核对 9:16。仅当操作者明确要求其他比例时，填写新比例、`aspect_ratio_explicit_user_override:true` 和 `aspect_ratio_basis`（记录具体用户决定）。现有批准的旧包不会因缺新字段而自动失效。
+## 审查、打包与历史兼容
 
-新提交的人形头像、表情与单独全身提示词包还必须有 `reference_attire`，按[模卡规则](model-card-baseline.md)选择：头像/表情为 `face_only`（服装不入画，取景不限制在锁骨以上）、`white_tank` 或 `white_sports_tank`（上胸入画时可直接选用）；全身为 `white_tank_shorts_barefoot` 或 `white_sports_tank_black_shorts_barefoot`。从已批准的 `face_only` 头像切换到背心表情时填写 `reference_attire_basis`；不适用模卡方案时用 `approved_exception`，同时填写 `reference_attire_basis` 和 `reference_attire_description`。每条提示词及验收项均须写明对应可见着装。全身图的模卡服装不是剧情换装；执行资产表恢复设计卡中获批准的正式服装、鞋履与饰物。旧已批准包仍保持可读。
+`CharacterImageReviewV1` 有 `image_sha256,stage,verdict:pass|revise|uncertain`，数组 `factual_conflicts,identity_issues,layout_issues,label_issues,blocking_issues,adoption_proposals`。pass 时缺陷为空；没有图片不能给视觉结论。preview 转正前新细节提案也须解决。
 
-## CharacterImageReviewV1 与 CharacterAssetPackV1/V2
+`CharacterAssetPackV2` 含当前状态五阶段正式图片、设计/提示词/审查、来源和批准记录，列 SHA、插件版本和用途；preview 不打包。保留context_source_receipt与项目knowledge-snapshots，重新核验所有哈希；插件升级不破坏已冻结知识依据。图片文件以真实资产名、状态名、阶段和短 SHA 命名。旧四阶段用 V1 清单。
 
-审查报告必填 `image_sha256`、`stage`、`verdict`（`pass|revise|uncertain`），及数组 `factual_conflicts`、`identity_issues`、`layout_issues`、`label_issues`、`blocking_issues`、`adoption_proposals`。`pass` 时缺陷数组都应为空；视觉判断必须基于实际收到的图片。
-
-打包包含 `manifest.json`、已批准设计/提示词/图片/审查报告及插件来源收据。清单列每个文件 SHA、插件版本、上游来源版本、图片用途和审批记录。打包时重新计算输入、记录、图片、审查和参考图的哈希；任何内容与批准版本不符即停止。新项目使用 `CharacterAssetPackV2`：base 三张身份图与当前状态的服饰、执行图均须审查通过且由操作者批准；旧项目继续按 `CharacterAssetPackV1` 四阶段打包。新图片文件名以角色资产名和状态名开头，后接阶段名与短 SHA，确保可读且避免同名覆盖。
+历史合同继续回读：V1基础字段；V2增加五轴和近邻复核；V2.1增加六组细节及10项覆盖；V2.2增加焦点、身体、11项路由和真实提案映射；v0.2.3增加比例锚点；V2.4增加世界/面部表面及13项覆盖。旧V1/V1.1提案、CastPlanV1及批准提示词保持有效。complete 的现有 V2.4 整卡流程继续可用，不能把新 inline 收据强塞给旧 used 合同。任何新修改按其模式和合同提交，不自动升级、重画或使旧批准无效。

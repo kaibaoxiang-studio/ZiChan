@@ -1,0 +1,42 @@
+{
+  "schema_version": "DesignConsultationTaskV1",
+  "asset_domain": "character",
+  "character_id": "DRAFT-LIN-CHE",
+  "variant_id": "WORK",
+  "scope": "costume",
+  "character_context": "林澈，32岁潮汐站维修班长；公开言语克制、回避援助曝光，实际以行动照顾同事；面孔和身体身份不在本任务重设计。",
+  "design_intent": "保留克制可靠的值班形象和清楚领口，职务识别简洁可读；衣装应支持下井动作，不用英雄化饰件外化隐秘善意。",
+  "constraints": [
+    "同套衣装用于正常值班与第四场下井",
+    "狭窄舱道中衣摆与饰件不得下垂",
+    "救援安全带经过双肩、胸前与腰髋",
+    "保留很窄、可读的胸前职务识别条与清晰日常领口",
+    "不重设已定人物身份，不新增伤疤、身世、组织或技术装置",
+    "不改动安全带本体；未实际动作试验须记待验证"
+  ],
+  "evidence": [
+    {
+      "path": "/Users/chenhaojia/Documents/ChatGPT/产研项目/ZiChan/creator-src/tests/fixtures/v025/潮汐站_全文_A.md",
+      "sha256": "de2b6ed7a9c1d26d65ee570c2b7a83f1ff83177ef6374cbcf923c9826110ed4b"
+    },
+    {
+      "path": "/Users/chenhaojia/Documents/ChatGPT/产研项目/ZiChan/creator-src/tests/fixtures/v025/呈现目标与结构冲突.md",
+      "sha256": "60686c8352a0f55ce75f88f995fd91caf2c18e84579ead2fe50798d8e3590cd9"
+    }
+  ],
+  "specialist": "character-costume-cut-design",
+  "execution_mode": "independent",
+  "task": {
+    "objective": "解决领口、前中闭合、肩袖与衣摆的结构，使同一工装在平时清楚且不与安全带交叠冲突",
+    "character_context": "林澈，32岁潮汐站维修班长；公开言语克制、回避援助曝光，实际以行动照顾同事；面孔和身体身份不在本任务重设计。",
+    "constraints": [
+      "同套衣装用于正常值班与第四场下井",
+      "狭窄舱道中衣摆与饰件不得下垂",
+      "救援安全带经过双肩、胸前与腰髋",
+      "保留很窄、可读的胸前职务识别条与清晰日常领口",
+      "不重设已定人物身份，不新增伤疤、身世、组织或技术装置",
+      "不改动安全带本体；未实际动作试验须记待验证"
+    ],
+    "expected_result": "一套可画的剪裁推荐，标出固定与收束部位、活动余量、需饰品专项配合的边界"
+  }
+}

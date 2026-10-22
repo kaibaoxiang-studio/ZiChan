@@ -1,0 +1,14 @@
+{
+  "classification": "early incomplete 0.2.5 candidate; fixed snapshot before final contract/document integration",
+  "run_id": "run-7a05f54dac864472",
+  "thread_id": "01a16456-6fdf-75a3-9e22-3fcc8e0b7cc9",
+  "dispatcher_status": "failed",
+  "error": "Agent exceeded 600 seconds",
+  "elapsed_seconds": 600.922,
+  "tool_calls": 7,
+  "independent_consultations": 0,
+  "human_decision_rounds_executed": 0,
+  "artifacts": [],
+  "snapshot_sha256": "f764f014d7ac4c8dd463c19772c35a5cec948c0506106ea014f7f6daac629904",
+  "interpretation": "Loaded fixed candidate knowledge but timed out before artifact. Cannot claim semantic pass, actual consultation, or speed improvement."
+}

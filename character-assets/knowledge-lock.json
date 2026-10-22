@@ -56,7 +56,7 @@
       "source_sha256": "129d6c39ad61723a17e709b5e3efd09b7615caca7c7245fd0b4a7240d923bc10",
       "origin": "local:五官与面部差异化设计知识库.zip",
       "path": "references/knowledge/character-face-design/face.md",
-      "rules_sha256": "6a1e5b9064a35c6c22096ba732e6b3a2ab866ad8283bdfbe8e436aaf6db39c20",
+      "rules_sha256": "62e7f973e7965ce60867af9fa87358df7bdf6e3cb5da293199e47aec2b8dc0c0",
       "capability_ids": [
         "character-face-design"
       ]
@@ -156,7 +156,7 @@
       "source_sha256": "d4d7644dece0d3ee4fcc73c76b59c520b08964a487deffdc110a3b9eae8e69f2",
       "origin": "local:拒绝脸谱化人物设计-知识库.zip",
       "path": "references/knowledge/character-design/anti-stereotype-texture.md",
-      "rules_sha256": "2723dafe6d995679adab41d889a83728aa90e11d2a0d7597b07c513e7d6f3051",
+      "rules_sha256": "a6cf5e4b1f14520d35dbaf5ed96855e3c7b500c5d6265e40478a669df7c36ada",
       "capability_ids": [
         "character-design"
       ]
@@ -276,7 +276,7 @@
       "source_sha256": "13bd2996eb7f8c6e0f7f100e32bb63c7bdb3e70b17e5adb9ddf494bdb5d720b0",
       "origin": "local:人种环境与科技外貌设计-知识库.zip",
       "path": "references/knowledge/character-world-appearance-design/world-appearance.md",
-      "rules_sha256": "dbeecf675a0fe0fbdaf1812613a541bc6059efe24457725a9232b5aff363f11e",
+      "rules_sha256": "6f50a8de6095aa62016fb2a3d8c627faef3ba5b92a6dbdd5ec281831c87292cc",
       "capability_ids": [
         "character-world-appearance-design"
       ]

@@ -25,14 +25,14 @@ def text_field():
     return {"type": "string", "minLength": 1}
 
 
-RESULT = schema({"status": {"type": "string"}, "artifact_path": {"type": "string"},
+RESULT = schema({"status": {"type": "string"}, "artifact_path": {"type": "string", "description": "Main output path relative to artifact_dir, for example design.md; never an absolute path."},
                  "summary": {"type": "string"}, "questions": {"type": "array", "items": {"type": "string"}}},
                 ("status", "artifact_path", "summary", "questions"))
 
 
 SPECIALISTS = [
     ("character-world-appearance-design", "环境与技术外貌设计：世界压力、资源与可达技术", "world-appearance",
-     "先核对世界与角色接触证据，再提出能在身体、护理、装备或材料上看到的影响；不得把气候、族群或阶层直接映射成固定五官和人格。"),
+     "读取总控的人物定位、世界条件与设计任务；由实际接触和资源条件提出身体、护理、装备或材料的可见影响。剧本未写外观结果时仍可提出明确标记的创作选择；不能虚构接触经历或把气候、族群、阶层映射成固定五官和人格。"),
     ("character-feature-focus", "特征聚焦：主锚点、安静区与自然不对称", "feature-focus",
      "从剧本处境提炼一句辨识核心；提出少量主锚点与退居次要的特征，核对正侧背可见性、近邻撞型和自然不对称。不得自动添加伤痕或痣。"),
     ("character-hair-design", "发型设计：发流、体积、轮廓与跨视角连续性", "hair",
@@ -71,7 +71,12 @@ def capability(ident, description, instructions, refs, properties, required=()):
 def blueprint():
     refs = "先读 [知识索引](../../knowledge/index.md)，按情景只加载本轮需要的 reference。"
     common = {"project_root": text_field(), "character_id": text_field(),
-              "variant_id": text_field(), "request": text_field()}
+              "variant_id": text_field(), "request": text_field(),
+              "sources": {"type": "array", "items": text_field()},
+              "script_context_path": text_field(), "direction_brief_path": text_field(),
+              "scope": text_field(),
+              "review_mode": {"type": "string", "enum": ["direction_first", "image_first"]},
+              "execution_mode": {"type": "string", "enum": ["inline", "independent"]}}
     capabilities = [
         capability(
             "character-assets", "角色资产主控：从剧本依据到可复用角色资产包",
@@ -80,9 +85,10 @@ def blueprint():
             "先用 [需求路由与整合](../../references/routing-and-integration.md) 标定单张或批量范围、当前状态与前置门槛。"
             "先定位用户项目和当前阶段；没有项目时用内置 scripts/character_project.py 导入标准剧本与资产表，场记可选。"
             "从角色清单做第 -1 阶段视觉基准和全员轻规划；用群像差异化总控建立比较组与五轴矩阵，"
-            "先形成逐人专项路由，再对特征焦点、发型、体型、五官、皮肤和服饰按缺口实际调用专项；每个 used 项保存有效提案和所选方案。"
-            "提交重点人形卡必须写清脸、发、三维体块、皮肤、服饰和饰件的可画细节；身体要有头身数值与其余骨点参照，不能只写身高体重或修长。列十三专项的采纳结果或不启用理由，并记录环境技术影响与面部表面状态。"
-            "主角与重要角色分轮 Grill Me，普通角色分层处理；已批准角色不因新方法自动重做。"
+            "由人物设计总控先阅读全文，建立按来源版本复用的 ScriptContextV1，再形成 DesignDirectionBriefV1：人物定位、言行与关系、目标矛盾、人物弧线、观众信息、设计意图和专项任务。"
+            "按 [人物理解与设计统筹](../../references/director-understanding.md) 从人物需要路由 Skill 或 knowledge/reference；未写外观不等于不需设计。常规问题同轮执行专项规范，复杂冲突独立会诊，保存真实参与方式和可见成果。"
+            "新项目默认按 [分阶段设计](../../references/phased-design.md) 提交身份、身体与各状态服饰快照，当前画幅做实后再推进；头像前不强迫补齐全部衣装。身体阶段仍须有五组比例锚点；全部完成后机械合成完整卡。"
+            "默认一套连贯推荐，关键分歧给备选；先集中确认人物方向，再审当前阶段设计，不为微参数反复采访。用户要求先看一版时使用 preview 候选流程，实际审图和明确确认后同图转正。普通角色分层处理；已批准角色不因新方法自动重做。"
             "每轮只推进一个已授权且依赖已批准的阶段；及时提交结构化 JSON 并通过 CLI 记录批准、图片、审查和来源。"
             "本插件只写 GPT Image 2.5 提示词，不调用生图工具。用户回图后必须实际查看图片，"
             "通过审查与操作者确认后才进入下一阶段。新细节先提议，获批后修改设计卡。"
@@ -91,7 +97,8 @@ def blueprint():
             "全身图用白色背心、短裤、赤脚作模卡参考，执行资产表恢复已批准正式服装。"
             "新项目依次完成头像、九宫格、全身模卡、每状态服饰设计图、执行资产图；每张图按资产名命名，逐图通过后才打包。旧项目沿用原四阶段。运行中报告实际文件路径、未解决疑点与下一步；不虚报成图质量。",
             ["knowledge/index.md", "references/workflow.md", "references/interfaces.md",
-             "references/routing-and-integration.md", "references/costume-design-stage.md",
+             "references/routing-and-integration.md", "references/director-understanding.md",
+             "references/phased-design.md", "references/costume-design-stage.md",
              "references/model-card-baseline.md",
              "references/evidence.md", "references/source-notes.md",
              "references/differentiation-framework.md", "references/specialist-contract.md",
@@ -114,21 +121,19 @@ def blueprint():
             ["knowledge/index.md", "references/evidence.md", "references/interfaces.md"],
             common, ("project_root", "request")),
         capability(
-            "character-design", "建立全剧视觉基准、阵容差异与逐人设计卡",
-            "# 角色设计\n\n" + refs + "\n\n"
-            "读取 [角色方法](../../references/character-design.md) 和"
-            " [服装与形态](../../references/costume-and-morphology.md)。"
-            "先由世界环境与技术专项给出可见的环境/技术影响，再按缺口路由面部装饰与妆容专项；两者都须有角色证据或批准。"
-            "先依据世界规则提出视觉基准供操作者确认，再调用群像差异化总控建立全员轻规划。"
-            "重点角色逐轮给有依据的"
-            " 2–3 个具体方向；记录已确定、待选和已委托事项，不能把单一画风选择扩大成外貌定稿。"
-            "默认检查发型、体型、五官是否落入全员美型模板；按实际缺口加载对应专项知识，"
-            "近邻角色并排比较，保留普通相貌和真实皮肤的可能。"
-            "先写可复核的专项路由；按具象标准把十三专项的已采用结果或不启用理由写入设计稿，used 必须提交真实提案文件及被选方案。"
-            "新项目重点人形卡用 CharacterDesignCardV2.4，记录世界影响、面部表面层、特征主次、自然不对称决定与五组身体比例锚点。"
-            "设计卡区分原文事实、推导、参考图提取优点与已批准选择；仅明显换装、年龄或严重外观变化建变体。"
-            "非人角色按形态改执行参考板。提交 JSON 草案；未解决项清空后请操作者批准。",
+            "character-design", "人物设计总控：全文理解、人物定位与专项设计统筹",
+            "# 人物设计总控\n\n" + refs + "\n\n"
+            "先读取用户全文或来源版本一致的上下文，再按当前设计任务加载知识。先用 [人物理解方法](../../references/director-understanding.md)；正式项目再读 [阶段合同](../../references/phased-design.md)，具体制作问题再查 [角色方法](../../references/character-design.md) 或 [服装与形态](../../references/costume-and-morphology.md)。打包的参考列表是检索目录，不要求逐份通读。"
+            "核心方法在 [全文人物理解与设计统筹](../../references/director-understanding.md)：先阅读全文和跨场综合，不能只读资产表、角色出场片段或性格标签。记录阅读覆盖；已存在且来源 SHA 未变的上下文直接复用。"
+            "区分人物自述、他人评价、实际行为和叙述事实，解析叙事作用、目标矛盾、自我呈现、关系权力、生活世界与资源、人物变化和观众信息，形成有来源的简短人物定位。"
+            "从理解中提炼设计意图、约束、可画结果与真正需要专项解决的问题。生活因果与自由外观选择分别标记；主动补足剧本留白，不能用无外貌原文作为跳过理由。普通痣、淡雀斑和微不对称可随首稿整体确认，重大身份或剧情新设定单独提出。"
+            "正式项目依据世界规则提出视觉基准并建立全员比较组；依 [专项交接](../../references/specialist-contract.md) 逐项选择 inline、independent、defer 或 not_needed。常规项实际读相应 Skill/知识并执行，复杂结构或跨专业冲突独立会诊；每项保留任务、知识来源和具体成果，不把知识加载写成独立调用。"
+            "默认一套完整推荐，只有重要分歧才给备选。总控合成、取舍和核对成果是否服务同一个人，再由群像总控检查近邻撞型；避免全员美型和为差异强加疤痕。"
+            "依 [分阶段规则](../../references/phased-design.md) 保存 DesignDirectionBriefV1 和 CharacterStageDesignV1，身份先于身体和状态服饰，最后合成 CharacterDesignCardV2.5。当前阶段必须具体，后续内容明确延后而非伪填为无；身体阶段写五组比例锚点。"
+            "默认方向先确认；用户要求先看一版时保存冻结草案并交 preview 提示词，回图确认后可原图转正。已批准旧项目继续原流程。"
+            "只有 project_root 内存在 project.json 才是已建正式项目；只有一个目录路径仍按独立设计处理。没有项目时可从 sources 或 request 中的剧本/小传独立分析设计，使用明确的草案角色标识，标明材料覆盖范围；建正式资产时再映射标准 ID，不凭空新增剧本人物。未指定阶段时默认只深化 identity/头像：交人物定位、当前身份设计和关键路由；身体与衣装只留方向和约束，不提前完成其详细合同。独立首稿不强制建项目、全员详设或准备整套生产JSON；输出简洁可读推荐与必要的依据草案，正式登记时再按接口写全。普通任务一次合成，只有具体未解问题才再次会诊，不为展示过程重复分析全文。不调用生图工具。",
             ["knowledge/index.md", "references/character-design.md",
+             "references/director-understanding.md", "references/phased-design.md",
              "references/costume-and-morphology.md", "references/interfaces.md",
              "references/differentiation-framework.md", "references/specialist-contract.md",
              "references/design-detail-standard.md", "references/feature-focus-and-body-form.md",
@@ -137,22 +142,23 @@ def blueprint():
              "references/knowledge/character-face-decoration-design/face-decoration.md",
              "references/knowledge/character-design/feature-focus-design.md",
              "references/knowledge/character-design/anti-stereotype-texture.md"],
-            common, ("project_root", "request")),
+            common, ("request",)),
         capability(
             "character-image-prompt", "把已批准设计转成 GPT Image 2.5 分阶段提示词",
             "# 图像提示词\n\n" + refs + "\n\n"
             "读取 [出图规则](../../references/prompting.md) 与当前阶段规则。"
-            "先检查已批准卡是否具象，空泛则回设计轮补细；按真实质感规则选择适量可见肌理和材料词。"
-            "只使用已批准设计卡及当前选定图片，按画幅抽取主锚点，标注每张参考图的身份/服装/风格职责。"
+            "先检查当前阶段的设计依据是否具象：新项目读取对应阶段快照，旧项目读取整卡；空泛则回设计轮补细。按真实质感规则选择适量可见肌理和材料词。"
+            "正式提示词使用本阶段已批准的设计依据及当前选定图片；新项目按 [阶段合同](../../references/phased-design.md) 的 design_basis 绑定快照。avatar preview 可引用冻结未批准草案，须明确候选用途，未转正不能作下游锚点。按画幅抽取主锚点，标注每张参考图的身份/服装/风格职责。"
             "背景也是设计维度：无明确批准时仅用无场景、无纹理的中性底色作核对背景；"
             "不得自行加入地点、建筑、地貌、天气或借光线描述暗示剧情场景。"
-            "头像默认 3:4 竖版且每条提示词写明比例，只有操作者明确指定才覆盖；产 2–3 条同设计候选；"
+            "头像默认 3:4 竖版且每条提示词写明比例，只有操作者明确指定才覆盖；新分阶段项目默认一条推荐提示词，重要分歧再给备选；旧项目保留其候选合同；"
             "人形头像与表情以脸为主体，可取完整头部、双肩及上胸，不固定裁到锁骨以上；服装不入画用 face_only，上胸入画用对应白色背心，整组模式一致；新项目默认九宫格并写中文标签，16 格须有用户明确要求；"
-            "全身图默认 9:16 竖版，每条提示词与验收项写明比例，穿对应白色背心、短裤并赤脚，头到双脚完整并留边界，逐条继承已批准设计卡中的头身、肩胯与腿身关系并核对；"
+            "全身图默认 9:16 竖版，每条提示词与验收项写明比例，穿对应白色背心、短裤并赤脚，头到双脚完整并留边界，逐条继承已批准身体快照（旧项目为设计卡）中的头身、肩胯与腿身关系并核对；"
             "九宫格和全身模卡批准后，每个状态先做独立服饰设计图并批准；执行表必须引用该状态服饰图，按上正脸/45°半侧脸、下无头放大正面服装/完整背面四格。"
             "非人使用已批准替代布局。输出 CharacterPromptPackageV1 与检查点，经 CLI 合同校验后交操作者外部出图。",
             ["knowledge/index.md", "references/prompting.md", "references/model-card-baseline.md", "references/expression.md",
              "references/execution-sheet.md", "references/costume-design-stage.md", "references/interfaces.md",
+             "references/phased-design.md",
              "references/design-detail-standard.md", "references/render-texture-standard.md",
              "references/knowledge/character-image-prompt/feature-focus-prompt.md",
              "references/knowledge/character-image-prompt/hedgehog-2d3d.md",
@@ -220,15 +226,15 @@ def blueprint():
             ident, description,
             "# " + description + "\n\n读取 [专项交接](../../references/specialist-contract.md)、"
             "[群像差异化框架](../../references/differentiation-framework.md) 与本专项知识快照。"
-            + method + "读取已批准视觉基准、当前设计卡与比较组；输出有依据的 2–3 个可见方案，"
+            + method + "读取总控的 DesignDirectionBriefV1、当前阶段任务、已有视觉基准与最近比较组；没有项目时可直接接人物材料，注明草案与材料范围。先回应任务目标、人物语境、约束和所需成果，默认一套推荐，仅重要分歧增加备选，"
             "每方案列至少两个部位、形状、位置/连接和依据明确的设计元素，供设计卡实际采纳；"
-            "明确原文事实、创作提案、制作核对点及与近邻的差异。"
-            "新特征只能作为待选方案，不能代替操作者批准。"
-            "提案包含当前 variant_id；提交 CharacterSpecialistProposalV1.1 JSON 与短 Markdown，运行 scripts/validate_specialist_proposal.py；不调用生图。",
+            "明确原文事实、合理推导、创作选择、制作核对点及与近邻的差异。把人物未写明的外观当作需要设计的空白；无须编造身世证明某种脸型。"
+            "常规项可由总控同轮执行本 Skill 的规范并记录 inline 成果；独立会诊记录 independent 原始返回物。新特征仍是待审设计，不能自行批准。"
+            "提案包含当前 variant_id；新独立提案提交 CharacterSpecialistProposalV1.2 JSON 与短 Markdown，执行 scripts/validate_specialist_proposal.py；旧 V1/V1.1 仍可回读；不调用生图。",
             ["knowledge/index.md", "references/specialist-contract.md",
              "references/differentiation-framework.md", "references/design-detail-standard.md",
              *specialist_refs, *extra_refs],
-            common, ("project_root", "character_id", "request")))
+            common, ("request",)))
     files = {path.relative_to(CONTENT).as_posix(): path.read_text(encoding="utf-8")
              for path in CONTENT.rglob("*") if path.is_file() and
              "__pycache__" not in path.parts and path.suffix != ".pyc"}
@@ -271,14 +277,16 @@ def blueprint():
                  " 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"}
                 for item in adoption["sources"]]
     return {"schema_version": "HarnessBlueprintV1",
-            "plugin": {"name": "character-assets", "version": "0.2.4.1",
+            "plugin": {"name": "character-assets", "version": "0.2.5",
                        "description": "从剧本依据建设可追溯的角色视觉资产包与 GPT Image 2.5 提示词",
                        "author": {"name": "开宝箱工作室"}},
             "goal": "独立运行的角色资产子插件：设计、提示词、回图审查与可复用资产包",
             "acceptance_criteria": ["三份输入和顶层快照契约可接入", "阶段批准和图片回流可恢复",
                                     "错误/冲突阻断发布", "知识按情景加载且来源可追溯",
-                                    "群像比较组识别发型、体型和面孔模板化", "专项只按缺口启用且不改已批准卡",
-                                    "新重点人形卡交世界影响、面部状态、可追溯比例锚点与十三专项覆盖", "used 专项有真实提案及所选方案哈希交接",
+                                    "全文阅读覆盖与跨场人物理解按来源版本复用", "人物定位和设计意图决定专项及知识路由",
+                                    "群像比较组识别发型、体型和面孔模板化", "专项按设计任务启用且不改已批准卡",
+                                    "身份、身体及状态服饰按阶段深化，合成完整卡保留具体设计与来源", "知识加载与独立会诊分别记录真实成果",
+                                    "首图候选经实际审图和明确确认可同图转正，未确认候选不能充当正式锚点",
                                     "头像默认 3:4、全身图默认 9:16，且仅明确用户要求可覆盖",
                                     "人形头像以脸为主体，允许头肩至上胸取景；服装不入画用 face_only，上胸入画用对应白色背心，表情继承模式；全身图采用背心短裤赤脚模卡，执行表恢复正式服装",
                                     "五阶段单张和批量任务按资产状态、依赖和批准流转，图片文件名包含资产名",
@@ -303,8 +311,19 @@ def finalize_output(output):
     if old not in source:
         raise RuntimeError("Harness Creator version validator changed; review version compatibility")
     validator.write_text(source.replace(old, new, 1), encoding="utf-8")
+    # The actual run exposed absolute artifact paths in otherwise valid model
+    # replies. Clarify the existing relative-path contract at the call boundary.
+    client = output / "runtime" / "harness_core" / "appserver.py"
+    source = client.read_text(encoding="utf-8")
+    prompt_rule = "Write permitted artifacts only inside artifact_dir. "
+    artifact_schema = "'artifacts':{'type':'array','items':{'type':'string'}}"
+    if prompt_rule not in source or artifact_schema not in source:
+        raise RuntimeError("Harness artifact envelope changed; review artifact-path compatibility")
+    source = source.replace(prompt_rule, "Write permitted artifacts only inside artifact_dir. Return every artifacts entry and result.artifact_path as a path relative to artifact_dir (e.g. design.md), never an absolute path. ", 1)
+    source = source.replace(artifact_schema, "'artifacts':{'type':'array','items':{'type':'string','description':'File path relative to artifact_dir, e.g. design.md; never absolute.'}}", 1)
+    client.write_text(source, encoding="utf-8")
     names = {"character-assets": "角色资产主控", "character-evidence": "角色证据核对",
-             "character-design": "角色设计", "character-image-prompt": "角色出图提示词",
+             "character-design": "人物设计总控", "character-image-prompt": "角色出图提示词",
              "character-image-review": "角色回图审查", "character-image-edit": "角色精确修图",
              "character-cast-differentiation": "角色群像差异化"}
     names.update({ident: description.split("：", 1)[0]

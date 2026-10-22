@@ -1,0 +1,15 @@
+{
+  "classification": "valid fixed baseline exposure; timed out without artifact",
+  "run_id": "run-97f0be62691e4280",
+  "thread_id": "01a1645a-0d88-7d73-8566-99e95fd0744e",
+  "dispatcher_status": "failed",
+  "error": "Agent exceeded 600 seconds",
+  "elapsed_seconds": 600.763,
+  "tool_calls": 5,
+  "independent_consultations": 0,
+  "human_decision_rounds_executed": 0,
+  "artifacts": [],
+  "model": "gpt-6.1-sol",
+  "effort": "xhigh",
+  "audit": "Actual tool paths were the isolated /private/tmp baseline plugin and fixture, plus working artifact directory. No creator-src or installed candidate content read."
+}

@@ -1,0 +1,63 @@
+{
+  "version": "0.2.5",
+  "regression_tests": {
+    "passed": 32,
+    "failed": 0
+  },
+  "doctor": {
+    "valid": true,
+    "capabilities": 20,
+    "skills": 20
+  },
+  "package": {
+    "path": "dist/character-assets-0.2.5.zip",
+    "sha256": "1c24a56d41dbcff7afa8fb69975f3b40d8a3195594c8312e94a1c4a5d4d7070d",
+    "files": 135,
+    "smoke_checks": [
+      "unpacked doctor",
+      "default phased init with required project ID",
+      "full-source context-units",
+      "7 blocked dependency tasks before design setup"
+    ]
+  },
+  "local_install": {
+    "plugin_id": "character-assets@zichan-local",
+    "version": "0.2.5",
+    "verified_files": [
+      {
+        "path": ".codex-plugin/plugin.json",
+        "sha256": "9f7067b06a405d11af22b43b3c106baa70914e81bf7914dcd0a7db4226197ff0"
+      },
+      {
+        "path": "skills/character-design/SKILL.md",
+        "sha256": "1dca1a62873dda2de6d8fc9dfad1924a149e4636ee485a9aa4a791bac23bdd8d"
+      },
+      {
+        "path": "scripts/character_project.py",
+        "sha256": "3a4755c305a7af749800eafc83063bbfa9d6ce7e74ba0b6ad929420b6bcb57f3"
+      },
+      {
+        "path": "scripts/phased_design.py",
+        "sha256": "58f1fe13db6553a3e5f32bd6a92ab8da2c54c8881efbff309a3330aeb699565b"
+      },
+      {
+        "path": "references/phased-design.md",
+        "sha256": "769d30631cca04a27af429c2f0e4611bff7376fa194b4665d49a91c04f23991a"
+      },
+      {
+        "path": "examples/sample-identity-stage-v025.json",
+        "sha256": "311addac7826e6981ff2cfdb26d8dc6ffe19e9f978b05d5e86d11bb96af270b8"
+      },
+      {
+        "path": "runtime/harness_core/appserver.py",
+        "sha256": "6db80680d45422fb133f49154f206a5e22e8cad3b0ec7461c257a9ea953bd5ad"
+      }
+    ]
+  },
+  "real_validation": "README.md",
+  "notes": [
+    "No generated image or user asset approval was performed.",
+    "Standalone model drafts require conversion to the formal submit contract before asset registration.",
+    "The final App Server text-design call took 536.047 seconds; no speed superiority claim."
+  ]
+}
