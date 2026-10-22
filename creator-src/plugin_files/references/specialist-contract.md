@@ -8,9 +8,9 @@
 
 ## 输出
 
-在本次调用允许的 `artifact_dir` 写一份 `CharacterSpecialistProposalV1.1` JSON 和供人审阅的简短 Markdown；主控收到后可复制到项目 `drafts/`。JSON 至少包含 `schema_version`、`specialist`、`character_id`、`scope`、`facts[{text,source_refs}]`、`options[{id,visible_design,design_elements[{part,visible_feature,placement_or_structure,basis}],rationale,comparison_difference,production_check}]`、`recommended_option_id`、`unresolved[]`、`not_applicable_reason`。每套选项至少两个可画设计元素；分别给出部位、可见形态、位置/连接关系与来源状态。一般给 2–3 套真正不同的方向；若事实只允许一套，加 `single_option_reason`；专项不适用时说明 `not_applicable_reason` 且不交设计选项。未获得操作者选择时，`recommended_option_id` 只是建议，不能写入 `approved_choices`。旧 V1 提案仍可校验和回读。
+在本次调用允许的 `artifact_dir` 写一份 `CharacterSpecialistProposalV1.1` JSON 和供人审阅的简短 Markdown；主控收到后将原样 JSON 复制到项目 `drafts/specialists/` 并计算 SHA-256。JSON 至少包含 `schema_version`、`specialist`、`character_id`、`variant_id`、`scope`、`facts[{text,source_refs}]`、`options[{id,visible_design,design_elements[{part,visible_feature,placement_or_structure,basis}],rationale,comparison_difference,production_check}]`、`recommended_option_id`、`unresolved[]`、`not_applicable_reason`。每套选项至少两个可画设计元素；分别给出部位、可见形态、位置/连接关系与来源状态。一般给 2–3 套真正不同的方向；若事实只允许一套，加 `single_option_reason`；专项不适用时说明 `not_applicable_reason` 且不交设计选项。未获得操作者选择时，`recommended_option_id` 只是建议，不能写入 `approved_choices`。旧 V1 提案仍可校验和回读。
 
-交接前执行 `python scripts/validate_specialist_proposal.py --file /absolute/artifact_dir/proposal.json`；脚本检查必填、事实来源、选项数量、设计元素、比较与制作核对字段。它只验证结构，方案质量仍由主控与操作者判断。主控在最终设计稿列出十个专项的 `used/not_needed` 与可见结果，不能只列名称；详见[设计卡具象标准](design-detail-standard.md)。
+交接前执行 `python scripts/validate_specialist_proposal.py --file /absolute/artifact_dir/proposal.json`；脚本检查必填、事实来源、选项数量、设计元素、比较与制作核对字段。它只验证结构，方案质量仍由主控与操作者判断。主控先写覆盖十一项的 `CharacterSpecialistRouteV1`，再在最终设计稿列出十一项的 `used/not_needed` 与可见结果。used 项记录真实提案哈希、所选方案及元素到字段的映射，不能只列名称；详见[设计卡具象标准](design-detail-standard.md)。
 
 群像总控的审查报告单独写在允许的 `artifact_dir`，使用 `CharacterCastDifferentiationReviewV1`：标明文本或实图证据等级、比较组及来源、五轴矩阵、具体混淆点、真实度疑点、尚未做的视觉检查和未实施建议。报告是复核材料，不修改项目批准状态。
 

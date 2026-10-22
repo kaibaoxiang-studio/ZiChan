@@ -16,7 +16,7 @@
 
 0.2.0 新轻规划使用 `CastPlanV2`。每行加 `recognition_axes`，含 `silhouette`、`face_structure`、`body_posture`、`hair_structure`、`costume_color` 五个非空字符串；轻规划时未知可写“待定”。非人或群像行还应写 `morphology: nonhuman|group`，不适用的轴可写“不适用：原因”，审查脚本会单列而不算缺失。每个轴写可见结构而非“美丽/英俊/特别”。旧项目的已批准 `CastPlanV1` 保持可读，不因升级自动作废。
 
-## CharacterDesignCardV1 / CharacterDesignCardV2 / CharacterDesignCardV2.1
+## CharacterDesignCardV1 / CharacterDesignCardV2 / CharacterDesignCardV2.1 / CharacterDesignCardV2.2
 
 必填 `character_id`、`variant_id`、`morphology`（`human|humanoid|nonhuman`）、`facts[{text,source_refs}]`、`inferences[{text,basis_refs}]`、`approved_choices[{field,value,rationale}]`、`identity_invariants[]`、`appearance{}`、`costume{}`、`unresolved[]`。可加 `reference_extracts`、`variant_of`、`execution_layout`、`forbidden_changes`。事实一定有来源；推导不能伪装成事实。变体沿用同一个角色 ID，并注明与基础造型的变化范围。
 
@@ -25,6 +25,8 @@
 0.2.1 起新提交的重点人形卡使用 `CharacterDesignCardV2.1`，继承 V2 字段，并要求 `visual_details` 六组 18 个具象字段：`face{contour,brow_eyes,nose_mouth}`、`hair{hairline_part,volume_flow,length_texture_color}`、`body{frame_proportions,weight_posture}`、`skin{tone_variation,surface_distribution}`、`costume{silhouette_layers,neckline,shoulder_sleeve,seams_fastening_mobility,material_drape_wear,color_placement}`、`adornments{head_neck,body_hands}`。另有 `specialist_coverage`，10 个专项 ID 各填 `{status:used|not_needed,decision,proposal_ref?,applied_fields?}`，used 时 `proposal_ref` 与指向 `visual_details` 的非空 `applied_fields[]` 必填。文本应写形状、位置/比例、连接或材料行为，不用“结构清楚、自然垂落”作唯一设计。具体方法和示意见[具象描述标准](design-detail-standard.md)。既有 V1/V2 卡继续可读、已有批准保持有效；重点人形卡重新提交时须升级到 V2.1。非人仍可用 V2，并按形态提供对应的可见结构。
 
 新专项提案是 `CharacterSpecialistProposalV1.1`，每选项增加至少两条 `design_elements[{part,visible_feature,placement_or_structure,basis}]`；旧 V1 可回读。格式见 [专项交接](specialist-contract.md)，属于草案，不自动写进设计卡。全员差异化文本审查用 `CastDifferentiationAuditV1`，不代替看图；运行 `python scripts/cast_diff_audit.py --project-root PROJECT --output PROJECT/drafts/cast-differentiation-audit.json`，或用 `--cast-plan FILE` 审查未提交草案。
+
+0.2.2 起新提交的重点人形卡使用 `CharacterDesignCardV2.2`。除六组细节外，新增 `feature_focus`、`body_form`、`route_ref`、`route_sha256`，并覆盖 11 个专项。used 项另需 `proposal_sha256`、`selected_option_id`、`applied_elements[{field,element_index}]`；提案必须是目标角色与专项的 V1.1 原样 JSON，文件放项目 `drafts/specialists/`。路由须是同一角色/变体的 `CharacterSpecialistRouteV1`，invoke/skip 与 used/not_needed 一一对应。提交、批准及后续读取时校验哈希。旧已批准卡仍可读；重新提交重点人形卡用 V2.2。详见[焦点与三维形体交接](feature-focus-and-body-form.md)。
 
 ## CharacterPromptPackageV1
 

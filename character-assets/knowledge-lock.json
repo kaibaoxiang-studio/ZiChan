@@ -220,6 +220,56 @@
       "capability_ids": [
         "character-image-edit"
       ]
+    },
+    {
+      "source_id": "feature-focus",
+      "source_sha256": "ab7c938604140e073c334a1e377479f3381241e2d1c9426ce8e3c5f0e28aafb2",
+      "origin": "local:不完美美学与特征聚焦知识库.zip",
+      "path": "references/knowledge/character-feature-focus/feature-focus.md",
+      "rules_sha256": "a34fa6815f186af72626fd48286edd0ba89de0b4b6a3ed879d17ab136ad0f59c",
+      "capability_ids": [
+        "character-feature-focus"
+      ]
+    },
+    {
+      "source_id": "feature-focus-design",
+      "source_sha256": "ab7c938604140e073c334a1e377479f3381241e2d1c9426ce8e3c5f0e28aafb2",
+      "origin": "local:不完美美学与特征聚焦知识库.zip",
+      "path": "references/knowledge/character-design/feature-focus-design.md",
+      "rules_sha256": "a0c9e3ffea970fa51472ef61514da59b6a75f239d06d9cf5e03b0e6830de52c1",
+      "capability_ids": [
+        "character-design"
+      ]
+    },
+    {
+      "source_id": "feature-focus-prompt",
+      "source_sha256": "ab7c938604140e073c334a1e377479f3381241e2d1c9426ce8e3c5f0e28aafb2",
+      "origin": "local:不完美美学与特征聚焦知识库.zip",
+      "path": "references/knowledge/character-image-prompt/feature-focus-prompt.md",
+      "rules_sha256": "6218eb555fd823723835b895d989372ed793b7b3e13c2e0d79cc7d3ee065c318",
+      "capability_ids": [
+        "character-image-prompt"
+      ]
+    },
+    {
+      "source_id": "feature-focus-review",
+      "source_sha256": "ab7c938604140e073c334a1e377479f3381241e2d1c9426ce8e3c5f0e28aafb2",
+      "origin": "local:不完美美学与特征聚焦知识库.zip",
+      "path": "references/knowledge/character-image-review/feature-focus-review.md",
+      "rules_sha256": "a572bb780c5c2856085b3a189d921047d167d275b591c02760958449f0aceeff",
+      "capability_ids": [
+        "character-image-review"
+      ]
+    },
+    {
+      "source_id": "body-proportion-3d",
+      "source_sha256": "d8e465b2fab48a72f9a2b74c8923d2f4655e225b0e15ff1fc1eaa99e395bceb6",
+      "origin": "local:身体比例与三维形体塑造-知识库 (1).zip",
+      "path": "references/knowledge/character-body-design/body-proportion-3d.md",
+      "rules_sha256": "babb1cc42ea3b1d45a708a700dad295bdca6053ee99036d704189de4d46cb4fa",
+      "capability_ids": [
+        "character-body-design"
+      ]
     }
   ]
 }

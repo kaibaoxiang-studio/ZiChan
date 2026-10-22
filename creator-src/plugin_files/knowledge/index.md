@@ -1,12 +1,13 @@
-# 角色资产知识索引 v0.2.1
+# 角色资产知识索引 v0.2.2
 
 先读取当前任务对应的 reference，不要在每次调用中加载整个知识库。任何 reference 的示例都只是方法，剧本事实与操作者已批准的决定优先。
 
 | 情景 | 加载 | 用途 |
 | --- | --- | --- |
 | 项目启动、全员规划 | `references/evidence.md`、`references/character-design.md`、`references/differentiation-framework.md`、`references/knowledge/character-cast-differentiation/ensemble.md` | 建立第 -1 阶段视觉基准、比较组与五轴矩阵；旧 Skill 的占用表方法按需加载 `legacy-visual.md` |
+| 特征主次与三维形体缺口 | `references/feature-focus-and-body-form.md`；按路由分别加载 `character-feature-focus/feature-focus.md`、`character-body-design/body-proportion-3d.md` | 先路由再实际调用、保存提案哈希；检查锚点视角、颅胸盆体块和剧本动作 |
 | 逐人设计、Grill Me | `references/character-design.md`、`references/costume-and-morphology.md`、`references/specialist-contract.md` | 先定位具体缺口，再调用下表的专项，避免全员强制走完所有岗位 |
-| 新建重点人形设计卡过于概括 | `references/design-detail-standard.md`、`references/knowledge/character-design/anti-stereotype-texture.md` | 六组具象细节、十专项实际成果与 V2.1 卡门槛 |
+| 新建重点人形设计卡过于概括 | `references/design-detail-standard.md`、`references/knowledge/character-design/anti-stereotype-texture.md` | 六组具象细节、十专项实际成果与 V2.2 卡门槛 |
 | 剧本与三份输入冲突 | `references/evidence.md` | 按原文证据优先列疑点，不暗改事实 |
 | 头像、全身图提示词 | `references/prompting.md` | 从已确认设计卡抽取可见锚点，指定参考图职责 |
 | 油亮、蜡感、材质空泛或脏糊 | `references/render-texture-standard.md`，再按设计/提示词/审查/修图的对应 `anti-stereotype-texture.md` 快照加载 | 分开设计层与渲染层；按媒介、证据和回图缺陷选词与修复 |
@@ -21,10 +22,11 @@
 
 本索引只描述何时加载。每份规则的出处、采用方式和未采用内容见 `references/source-notes.md` 与插件根目录 `sources.lock.json`。历史服装知识是灵感入口；需要具体时代准确性时另查可靠材料，记录查证位置。
 
-## 0.2.0 专项知识加载
+## 专项知识加载
 
 | 缺口 | Skill 与知识快照 |
 | --- | --- |
+| 主锚点、安静区、自然不对称 | `$character-feature-focus` → `references/knowledge/character-feature-focus/feature-focus.md` |
 | 发际、发流、发型块面与背面 | `$character-hair-design` → `references/knowledge/character-hair-design/hair.md` |
 | 年龄比例、骨架、体重分布、体态 | `$character-body-design` → `references/knowledge/character-body-design/body.md` |
 | 五官与脸部骨相、模板脸 | `$character-face-design` → `references/knowledge/character-face-design/face.md` |
@@ -39,3 +41,5 @@
 群像差异化总控是横向审查，不代替以上专项。每个技能只加载本轮相关知识快照；同一件越过锁骨的饰品由主控指定唯一主责。
 
 0.2.1 新增《拒绝脸谱化人物设计》来源的 7 份定点快照：`character-design`、`character-cast-differentiation`、`character-skin-design`、`character-costume-material-design`、`character-image-prompt`、`character-image-review`、`character-image-edit`。头像 3:4 规则在 `references/prompting.md` 和 CLI 提示词包合同中，回图按 `references/review.md` 核对。
+
+0.2.2 新增特征聚焦与身体比例/三维体块两份来源，分别落在设计、形体、提示词、回图审查的 5 份定点快照。逐人设计先保存专项路由；used 交接必须有提案文件、SHA、所选方案和字段映射。

@@ -5,7 +5,7 @@ description: "面部记忆点与锁骨以上饰品设计"
 
 # 面部记忆点与锁骨以上饰品设计
 
-读取 [专项交接](../../references/specialist-contract.md)、[群像差异化框架](../../references/differentiation-framework.md) 与本专项知识快照。先用已有结构识别，再考虑面部记号、发饰、耳饰和颈饰；写固定点与连续性，新增伤痕纹身必须待批准。读取已批准视觉基准、当前设计卡与比较组；输出有依据的 2–3 个可见方案，每方案列至少两个部位、形状、位置/连接和依据明确的设计元素，供设计卡实际采纳；明确原文事实、创作提案、制作核对点及与近邻的差异。新特征只能作为待选方案，不能代替操作者批准。提交 CharacterSpecialistProposalV1.1 JSON 与短 Markdown，运行 scripts/validate_specialist_proposal.py；不调用生图。
+读取 [专项交接](../../references/specialist-contract.md)、[群像差异化框架](../../references/differentiation-framework.md) 与本专项知识快照。先用已有结构识别，再考虑面部记号、发饰、耳饰和颈饰；写固定点与连续性，新增伤痕纹身必须待批准。读取已批准视觉基准、当前设计卡与比较组；输出有依据的 2–3 个可见方案，每方案列至少两个部位、形状、位置/连接和依据明确的设计元素，供设计卡实际采纳；明确原文事实、创作提案、制作核对点及与近邻的差异。新特征只能作为待选方案，不能代替操作者批准。提案包含当前 variant_id；提交 CharacterSpecialistProposalV1.1 JSON 与短 Markdown，运行 scripts/validate_specialist_proposal.py；不调用生图。
 
 ## Packaged references
 

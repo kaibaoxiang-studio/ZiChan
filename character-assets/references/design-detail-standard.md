@@ -2,7 +2,7 @@
 
 ## 交付目标
 
-重点人形角色的设计卡应让另一位设计师不靠形容词猜测，就能画出同一个人。新卡使用 `CharacterDesignCardV2.1`。既有 V1/V2 批准记录继续有效；发现旧卡只有概括句时，先提出补细方案，经操作者批准后再改卡和下游提示词。不能把知识库示例直接当剧本事实。
+重点人形角色的设计卡应让另一位设计师不靠形容词猜测，就能画出同一个人。新卡使用 `CharacterDesignCardV2.2`。既有 V1/V2 批准记录继续有效；发现旧卡只有概括句时，先提出补细方案，经操作者批准后再改卡和下游提示词。不能把知识库示例直接当剧本事实。
 
 `visual_details` 分六组记录；每一组都写可见的**形状、位置/比例、结构关系或物理表现**，再说明与角色行动、世界工艺或近邻角色的关系。没有首饰也要写清哪些位置留空以及造型重心在哪里；不得因表格存在而硬添首饰、伤疤或脏污。非人形态按实际部件改写，允许继续用 V2 合同。
 
@@ -17,7 +17,7 @@
 | `costume` | `silhouette_layers`, `neckline`, `shoulder_sleeve`, `seams_fastening_mobility`, `material_drape_wear`, `color_placement` | 衣层轮廓、领肩袖腰摆、缝线闭合、材料厚度/垂坠/磨损、主辅色面积和落点如何？ |
 | `adornments` | `head_neck`, `body_hands` | 头耳颈与衣身腰手的饰件是否存在；若存在，形制、尺度、固定与道具连续性如何？ |
 
-另交 `specialist_coverage`，10 个专项各有 `status: used|not_needed` 和 `decision`。`used` 给 `proposal_ref` 及非空 `applied_fields[]`（如 `costume.neckline`、`costume.shoulder_sleeve`），指向上表中实际写入的可见成果；`not_needed` 解释为何当前事实和设计已足够。覆盖表是来源交接，不要求每位角色走十轮。不得只列 Skill 名称而不呈现造型结果。
+另交 `specialist_coverage`，11 个专项各有 `status: used|not_needed` 和 `decision`。`used` 给真实提案 `proposal_ref`、`proposal_sha256`、`selected_option_id`、`applied_elements[]` 及非空 `applied_fields[]`（如 `costume.neckline`、`costume.shoulder_sleeve`），指向上表中实际写入的可见成果；`not_needed` 解释为何当前事实和设计已足够。覆盖表是来源交接，不要求每位角色走十一轮。不得只列 Skill 名称而不呈现造型结果。
 
 ## 从概括句到可画设计
 
@@ -37,6 +37,6 @@
 ## 提交与出图前审查
 
 1. 草案列出每组的原文事实、获批准选择、待审提案；对尚未决定的设计元素保留 `unresolved`，不得靠生成图“碰运气”。
-2. 提交新 V2.1 卡时，CLI 检查上述字段和专项覆盖；结构检查无法判断美感，主控还要逐句问“可画在哪里、怎么连接、与谁不同、依据是什么”。“清秀、利落、质感好、结构清楚、自然垂落”单独出现仍属缺项。
-3. 设计稿 Markdown 将六组字段写成可读段落，附十项覆盖/未启用理由、近邻比较与待审选择。JSON 与 Markdown 不得一详一略。
+2. 提交新 V2.2 卡时，CLI 检查上述字段和专项覆盖；结构检查无法判断美感，主控还要逐句问“可画在哪里、怎么连接、与谁不同、依据是什么”。“清秀、利落、质感好、结构清楚、自然垂落”单独出现仍属缺项。
+3. 设计稿 Markdown 将六组字段写成可读段落，附十一项覆盖/未启用理由、近邻比较与待审选择。JSON 与 Markdown 不得一详一略。
 4. 提示词按画幅提取**可见**锚点。头像不强塞鞋和背面，完整细节留在设计卡/全身/执行表；每次只强调少量识别锚点，避免相互矛盾或过度堆词。旧卡若不够具体，先补设计，不擅自在出图阶段创作。

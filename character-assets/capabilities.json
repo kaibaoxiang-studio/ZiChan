@@ -71,7 +71,8 @@
         "references/differentiation-framework.md",
         "references/specialist-contract.md",
         "references/design-detail-standard.md",
-        "references/render-texture-standard.md"
+        "references/render-texture-standard.md",
+        "references/feature-focus-and-body-form.md"
       ],
       "explicit_only": true
     },
@@ -214,6 +215,8 @@
         "references/differentiation-framework.md",
         "references/specialist-contract.md",
         "references/design-detail-standard.md",
+        "references/feature-focus-and-body-form.md",
+        "references/knowledge/character-design/feature-focus-design.md",
         "references/knowledge/character-design/anti-stereotype-texture.md"
       ],
       "explicit_only": true
@@ -299,6 +302,7 @@
         "references/interfaces.md",
         "references/design-detail-standard.md",
         "references/render-texture-standard.md",
+        "references/knowledge/character-image-prompt/feature-focus-prompt.md",
         "references/knowledge/character-image-prompt/hedgehog-2d3d.md",
         "references/knowledge/character-image-prompt/hedgehog-general-image-skill.md",
         "references/knowledge/character-image-prompt/anti-stereotype-texture.md"
@@ -388,6 +392,7 @@
         "references/execution-sheet.md",
         "references/interfaces.md",
         "references/render-texture-standard.md",
+        "references/knowledge/character-image-review/feature-focus-review.md",
         "references/knowledge/character-image-review/anti-stereotype-texture.md"
       ],
       "explicit_only": true
@@ -558,6 +563,79 @@
       "explicit_only": true
     },
     {
+      "id": "character-feature-focus",
+      "skill_name": "character-feature-focus",
+      "description": "特征聚焦：主锚点、安静区与自然不对称",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "project_root": {
+            "type": "string",
+            "minLength": 1
+          },
+          "character_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "variant_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "request": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "project_root",
+          "character_id",
+          "request"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "artifact_path": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "status",
+          "artifact_path",
+          "summary",
+          "questions"
+        ],
+        "additionalProperties": false
+      },
+      "execution": {
+        "kind": "agent",
+        "access": "workspace-write",
+        "network": false
+      },
+      "knowledge_refs": [
+        "knowledge/index.md",
+        "references/specialist-contract.md",
+        "references/differentiation-framework.md",
+        "references/design-detail-standard.md",
+        "references/knowledge/character-feature-focus/feature-focus.md",
+        "references/feature-focus-and-body-form.md"
+      ],
+      "explicit_only": true
+    },
+    {
       "id": "character-hair-design",
       "skill_name": "character-hair-design",
       "description": "发型设计：发流、体积、轮廓与跨视角连续性",
@@ -697,7 +775,8 @@
         "references/specialist-contract.md",
         "references/differentiation-framework.md",
         "references/design-detail-standard.md",
-        "references/knowledge/character-body-design/body.md"
+        "references/knowledge/character-body-design/body.md",
+        "references/knowledge/character-body-design/body-proportion-3d.md"
       ],
       "explicit_only": true
     },

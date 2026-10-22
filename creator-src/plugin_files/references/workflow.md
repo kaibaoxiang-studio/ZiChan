@@ -17,9 +17,9 @@ python scripts/character_project.py status --project-root /work/role-project
 
 ## 2. 项目与角色决策
 
-从三份输入形成 `ProjectVisualBibleV1`，人工确认；再由 `$character-cast-differentiation` 建比较组与五轴矩阵，形成覆盖资产表角色 ID 的 `CastPlanV2`，人工确认。新提交的重点人形角色按分轮 Grill Me 生成含[具象细节与专项覆盖](design-detail-standard.md)的 `CharacterDesignCardV2.1`，人工确认。旧项目的 V1/V2 批准记录继续有效；重点人形卡若重新提交则使用 V2.1。草案可以列 `unresolved`，但不能批准。使用 `submit` 保存 JSON，再用 `approve-record --operator 操作者姓名` 确认。设计卡变更会让该角色的后续提示词与图片失效，历史文件保留。
+从三份输入形成 `ProjectVisualBibleV1`，人工确认；再由 `$character-cast-differentiation` 建比较组与五轴矩阵，形成覆盖资产表角色 ID 的 `CastPlanV2`，人工确认。新提交的重点人形角色按分轮 Grill Me 生成含[具象细节与专项覆盖](design-detail-standard.md)的 `CharacterDesignCardV2.2`，人工确认。旧项目的 V1/V2/V2.1 批准记录继续有效；重点人形卡若重新提交则使用 V2.2。草案可以列 `unresolved`，但不能批准。使用 `submit` 保存 JSON，再用 `approve-record --operator 操作者姓名` 确认。设计卡变更会让该角色的后续提示词与图片失效，历史文件保留。
 
-在轻规划草案提交前及每张重点角色设计卡定稿前，按 [差异化框架](differentiation-framework.md) 检查最相近角色。只有发型、体型、面孔、皮肤或服饰存在实际缺口时调用相应专项；专项提案先并入当前审阅轮，不为每个维度单开确认。可用 `python scripts/cast_diff_audit.py --cast-plan /draft/cast-plan.json --output /draft/cast-audit.json` 找出同字段和缺轴候选；人仍需审查近义撞型与全员美型。已有已批准角色不会因插件升级自动被改写。
+在轻规划草案提交前及每张重点角色设计卡定稿前，按 [差异化框架](differentiation-framework.md) 检查最相近角色。先按[焦点与三维形体交接](feature-focus-and-body-form.md)写逐人专项路由，再对有缺口的专项实际调用并保存提案；特征焦点与体块动作均纳入路由。used 项必须有提案原文件、哈希、被选方案和采纳字段映射；专项提案先并入当前审阅轮，不为每个维度单开确认。可用 `python scripts/cast_diff_audit.py --cast-plan /draft/cast-plan.json --output /draft/cast-audit.json` 找出同字段和缺轴候选；人仍需审查近义撞型与全员美型。已有已批准角色不会因插件升级自动被改写。
 
 ```sh
 python scripts/character_project.py submit --project-root /work/role-project --kind visual-bible --file /draft/visual-bible.json
@@ -36,7 +36,7 @@ python scripts/character_project.py approve-record --project-root /work/role-pro
 
 每阶段由 `$character-image-prompt` 编写 `CharacterPromptPackageV1`，经 `submit --kind prompt-package --stage ...` 合同检查后可用于外部出图。头像默认 3:4 竖版，只有明确的用户决定可覆盖；详细卡若仍是概括句，先回设计轮补细，不靠提示词现编。按[真实质感规则](render-texture-standard.md)选择皮肤、布料、光线和修复策略。顺序为头像 → 表情与全身并行 → 执行资产表。每阶段图片用 `import-image` 登记，再由 `$character-image-review` 实际看图、保存 `CharacterImageReviewV1`。报告通过后，操作者用 `approve-image` 选定唯一当前版本。只报“通过”而不见图、未经操作者确认，都不能推进。
 
-头像与全身图回流审查时，若已有同剧定稿图片，增加并排比较：脸型、发结构、体态和皮肤是否在成图里保持区别；无法取得其他角色图片时写明只做单人核验。差异问题先定位设计卡还是出图偏差，修设计卡须重走批准，单纯出图偏差可走局部修图。
+头像与全身图回流审查时，若已有同剧定稿图片，增加并排比较：批准的主锚点、脸型、发结构、体态和皮肤是否在成图里保持区别；无法取得其他角色图片时写明只做单人核验。差异问题先定位设计卡还是出图偏差，修设计卡须重走批准，单纯出图偏差可走局部修图。
 
 ```sh
 python scripts/character_project.py submit --project-root /work/role-project --kind prompt-package --character-id CHR-001 --variant-id base --stage avatar --file /draft/avatar-prompt.json

@@ -22,7 +22,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 
 SCHEMA = "CharacterProjectV1"
-PLUGIN_VERSION = "0.2.1"
+PLUGIN_VERSION = "0.2.2"
 STAGES = ("avatar", "expression", "full_body", "execution")
 HEAVY_TIERS = {"主角", "重要角色"}
 SUPPORTED_INPUTS = {".json", ".md", ".markdown", ".xlsx"}
@@ -43,6 +43,19 @@ SPECIALIST_DOMAINS = ("character-hair-design", "character-body-design",
                       "character-skin-design", "character-costume-style-design",
                       "character-costume-cut-design", "character-costume-color-design",
                       "character-costume-material-design", "character-costume-accessory-design")
+SPECIALIST_DOMAINS_V22 = ("character-feature-focus", *SPECIALIST_DOMAINS)
+VISIBLE_VIEWS = {"front", "side", "back", "avatar", "full_body"}
+SPECIALIST_FIELD_DOMAINS = {
+    "character-hair-design": {"hair"}, "character-body-design": {"body"},
+    "character-face-design": {"face"},
+    "character-face-signature-design": {"face", "hair", "adornments"},
+    "character-skin-design": {"skin"},
+    "character-costume-style-design": {"costume"},
+    "character-costume-cut-design": {"costume"},
+    "character-costume-color-design": {"costume"},
+    "character-costume-material-design": {"costume"},
+    "character-costume-accessory-design": {"costume", "adornments"},
+}
 NS = {"m": "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
       "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
       "p": "http://schemas.openxmlformats.org/package/2006/relationships"}
@@ -122,7 +135,8 @@ def validate_visual_details(data):
     coverage = data.get("specialist_coverage")
     ensure(isinstance(coverage, dict), "CharacterDesignCardV2.1 needs specialist_coverage")
     valid_detail_paths = {f"{domain}.{field}" for domain, fields in DETAIL_FIELDS.items() for field in fields}
-    for specialist in SPECIALIST_DOMAINS:
+    domains = SPECIALIST_DOMAINS_V22 if data["schema_version"] == "CharacterDesignCardV2.2" else SPECIALIST_DOMAINS
+    for specialist in domains:
         item = coverage.get(specialist)
         ensure(isinstance(item, dict), f"specialist_coverage.{specialist} must be an object")
         ensure(item.get("status") in {"used", "not_needed"},
@@ -137,6 +151,116 @@ def validate_visual_details(data):
         else:
             ensure(item.get("applied_fields") in (None, []),
                    f"specialist_coverage.{specialist} cannot apply fields when not_needed")
+
+
+def validate_focus_and_form(data):
+    focus = data.get("feature_focus")
+    ensure(isinstance(focus, dict), "V2.2 needs feature_focus")
+    require_text(focus, "core_sentence")
+    anchors = focus.get("primary_anchors")
+    ensure(isinstance(anchors, list) and anchors, "feature_focus needs primary_anchors")
+    for anchor in anchors:
+        ensure(isinstance(anchor, dict), "Each primary anchor must be an object")
+        for key in ("part", "geometry", "basis"):
+            require_text(anchor, key)
+        views = anchor.get("visible_views")
+        ensure(isinstance(views, list) and views and set(views) <= VISIBLE_VIEWS,
+               "Anchor visible_views must name supported views")
+    if len(anchors) not in (2, 3):
+        require_text(focus, "anchor_count_rationale")
+    quiet = focus.get("quiet_features")
+    ensure(isinstance(quiet, list), "feature_focus.quiet_features must be a list")
+    for item in quiet:
+        ensure(isinstance(item, dict), "Each quiet feature must be an object")
+        require_text(item, "part")
+        require_text(item, "decision")
+    imperfection = focus.get("imperfection_policy")
+    ensure(isinstance(imperfection, dict), "feature_focus needs imperfection_policy")
+    ensure(imperfection.get("status") in {"none", "existing", "operator_approved"},
+           "imperfection_policy.status must be none, existing or operator_approved")
+    require_text(imperfection, "detail")
+    require_text(imperfection, "basis")
+    checks = focus.get("view_checks")
+    ensure(isinstance(checks, dict), "feature_focus needs view_checks")
+    for name in ("silhouette", "occlusion"):
+        item = checks.get(name)
+        ensure(isinstance(item, dict) and item.get("status") in {"passed", "failed", "not_tested"},
+               f"view_checks.{name} needs status")
+        require_text(item, "evidence")
+    body = data.get("body_form")
+    ensure(isinstance(body, dict), "V2.2 needs body_form")
+    for group, fields in {"proportions": ("torso_legs", "arm_segments", "leg_segments"),
+                          "masses": ("head", "ribcage", "pelvis", "relationships"),
+                          "views": ("front", "side", "back"),
+                          "action_check": ("stance", "script_action", "mobility_result", "test_status")}.items():
+        section = body.get(group)
+        ensure(isinstance(section, dict), f"body_form.{group} must be an object")
+        for field in fields:
+            require_text(section, field)
+    ensure(body["action_check"]["test_status"] in {"passed", "failed", "not_tested"},
+           "body_form.action_check.test_status is invalid")
+
+
+def checked_handoff_file(root, relative, expected_sha, label):
+    ensure(isinstance(relative, str) and relative.startswith("drafts/specialists/") and
+           relative.endswith(".json") and ".." not in Path(relative).parts,
+           f"{label} must be a project-relative drafts/specialists JSON path")
+    base = (root / "drafts" / "specialists").resolve()
+    target = (root / relative).resolve()
+    ensure(target.is_relative_to(base) and target.is_file(), f"{label} missing or outside project")
+    ensure(isinstance(expected_sha, str) and re.fullmatch(r"[0-9a-f]{64}", expected_sha) and
+           digest(target) == expected_sha, f"{label} SHA mismatch")
+    return read_json(target)
+
+
+def validate_design_handoffs(data, root):
+    from validate_specialist_proposal import validate as validate_proposal
+    route = checked_handoff_file(root, data.get("route_ref"), data.get("route_sha256"), "design route")
+    ensure(route.get("schema_version") == "CharacterSpecialistRouteV1" and
+           route.get("character_id") == data["character_id"] and
+           route.get("variant_id") == data["variant_id"], "Design route target mismatch")
+    entries = route.get("specialists")
+    ensure(isinstance(entries, dict) and set(entries) == set(SPECIALIST_DOMAINS_V22),
+           "Design route must cover eleven specialists")
+    details = data["visual_details"]
+    for specialist in SPECIALIST_DOMAINS_V22:
+        entry = entries[specialist]
+        ensure(isinstance(entry, dict) and entry.get("decision") in {"invoke", "skip"},
+               f"Invalid route decision: {specialist}")
+        require_text(entry, "trigger")
+        require_text(entry, "reason")
+        coverage = data["specialist_coverage"][specialist]
+        used = coverage["status"] == "used"
+        ensure((entry["decision"] == "invoke") == used,
+               f"Route/coverage mismatch: {specialist}")
+        if not used:
+            continue
+        proposal = checked_handoff_file(root, coverage["proposal_ref"],
+                                        coverage.get("proposal_sha256"), specialist)
+        ensure(proposal.get("schema_version") == "CharacterSpecialistProposalV1.1",
+               f"V2.2 handoff needs V1.1 proposal: {specialist}")
+        validate_proposal(proposal)
+        ensure(proposal["specialist"] == specialist and
+               proposal["character_id"] == data["character_id"] and
+               proposal.get("variant_id") == data["variant_id"],
+               f"Proposal target mismatch: {specialist}")
+        chosen = coverage.get("selected_option_id")
+        option = next((x for x in proposal["options"] if x["id"] == chosen), None)
+        ensure(option is not None, f"Selected option missing: {specialist}")
+        mappings = coverage.get("applied_elements")
+        ensure(isinstance(mappings, list) and mappings, f"Applied element trace missing: {specialist}")
+        ensure({x.get("field") for x in mappings if isinstance(x, dict)} ==
+               set(coverage["applied_fields"]), f"Applied field trace mismatch: {specialist}")
+        for mapping in mappings:
+            ensure(isinstance(mapping, dict) and isinstance(mapping.get("element_index"), int) and
+                   not isinstance(mapping["element_index"], bool) and
+                   0 <= mapping["element_index"] < len(option["design_elements"]),
+                   f"Applied element index invalid: {specialist}")
+            domain, field = mapping["field"].split(".", 1)
+            ensure(domain in SPECIALIST_FIELD_DOMAINS.get(specialist, set(DETAIL_FIELDS)),
+                   f"Applied field outside specialist scope: {specialist}/{mapping['field']}")
+            ensure(isinstance(details[domain][field], str) and details[domain][field].strip(),
+                   f"Applied field empty: {mapping['field']}")
 
 
 def _xlsx_rows(path):
@@ -315,6 +439,10 @@ def _checked_record(root, state, key):
            f"Approved record contents changed: {key}")
     ensure(value["approval"].get("sha256") == value["sha256"],
            f"Approval refers to another record version: {key}")
+    if key.startswith("design-card:"):
+        card = read_json(root / value["path"])
+        if card.get("schema_version") == "CharacterDesignCardV2.2" and card.get("morphology") in {"human", "humanoid"}:
+            validate_design_handoffs(card, root)
     return value
 
 
@@ -385,7 +513,7 @@ def _validate_record(kind, data, state, character_id=None, variant_id=None, stag
                 "prompt-package": "CharacterPromptPackageV1"}[kind]
     accepted = {"cast-plan": {"CastPlanV1", "CastPlanV2"},
                 "design-card": {"CharacterDesignCardV1", "CharacterDesignCardV2",
-                                "CharacterDesignCardV2.1"}}
+                                "CharacterDesignCardV2.1", "CharacterDesignCardV2.2"}}
     ensure(data.get("schema_version") in accepted.get(kind, {expected}),
            f"Expected one of {sorted(accepted.get(kind, {expected}))}")
     require_list(data, "unresolved") if kind != "prompt-package" else None
@@ -431,7 +559,7 @@ def _validate_record(kind, data, state, character_id=None, variant_id=None, stag
             require_text(choice, "field")
             require_text(choice, "value")
             require_text(choice, "rationale")
-        if data["schema_version"] in {"CharacterDesignCardV2", "CharacterDesignCardV2.1"}:
+        if data["schema_version"] in {"CharacterDesignCardV2", "CharacterDesignCardV2.1", "CharacterDesignCardV2.2"}:
             axes = data.get("recognition_axes")
             ensure(isinstance(axes, dict), "CharacterDesignCardV2 needs recognition_axes")
             for axis in RECOGNITION_AXES:
@@ -445,8 +573,10 @@ def _validate_record(kind, data, state, character_id=None, variant_id=None, stag
             if review["closest_character_ids"]:
                 ensure(review["distinct_features"],
                        "Describe visible differences from the closest cast members")
-        if data["schema_version"] == "CharacterDesignCardV2.1" and data["morphology"] in {"human", "humanoid"}:
+        if data["schema_version"] in {"CharacterDesignCardV2.1", "CharacterDesignCardV2.2"} and data["morphology"] in {"human", "humanoid"}:
             validate_visual_details(data)
+        if data["schema_version"] == "CharacterDesignCardV2.2" and data["morphology"] in {"human", "humanoid"}:
+            validate_focus_and_form(data)
     else:
         ensure(data.get("character_id") == character_id and data.get("variant_id") == variant_id,
                "Prompt target does not match character/variant")
@@ -621,9 +751,11 @@ def cmd_submit(args):
         if args.kind == "design-card" and content.get("morphology") in {"human", "humanoid"}:
             roster_item = next((row for row in state["roster"] if row["id"] == character_id), {})
             if roster_item.get("tier") in HEAVY_TIERS or roster_item.get("priority") == "deep":
-                ensure(content.get("schema_version") == "CharacterDesignCardV2.1",
-                       "Submitted lead/important human design cards require CharacterDesignCardV2.1; existing approvals remain readable")
+                ensure(content.get("schema_version") == "CharacterDesignCardV2.2",
+                       "Submitted lead/important human design cards require CharacterDesignCardV2.2; existing approvals remain readable")
         _validate_record(args.kind, content, state, character_id, variant_id, args.stage)
+        if args.kind == "design-card" and content.get("schema_version") == "CharacterDesignCardV2.2" and content.get("morphology") in {"human", "humanoid"}:
+            validate_design_handoffs(content, root)
         if args.kind == "prompt-package":
             ensure(content["design_card_sha256"] == card_record["sha256"],
                    "Prompt package refers to a different design card version")
@@ -669,6 +801,10 @@ def cmd_approve_record(args):
                "Record contents changed after submission")
         ensure(not read_json(root / value["path"])["unresolved"],
                "Resolve pending design decisions before approval")
+        if args.kind == "design-card":
+            card = read_json(root / value["path"])
+            if card.get("schema_version") == "CharacterDesignCardV2.2" and card.get("morphology") in {"human", "humanoid"}:
+                validate_design_handoffs(card, root)
         if args.kind == "cast-plan":
             _require_approved(state, "visual-bible")
         elif args.kind == "design-card":
