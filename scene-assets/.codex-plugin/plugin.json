@@ -1,0 +1,15 @@
+{
+  "name": "scene-assets",
+  "version": "0.1.0",
+  "description": "从剧本证据建立可审查的场景静帧资产和外部出图提示词",
+  "author": {
+    "name": "开宝箱工作室"
+  },
+  "skills": "./skills/",
+  "requires_local_executor": true,
+  "interface": {
+    "displayName": "场景资产插件",
+    "shortDescription": "从剧本依据到场景静帧资产",
+    "defaultPrompt": "Use $scene-assets to plan scene assets from my screenplay and asset table."
+  }
+}

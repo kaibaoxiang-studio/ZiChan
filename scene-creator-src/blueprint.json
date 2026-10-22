@@ -1,0 +1,426 @@
+{
+  "schema_version": "HarnessBlueprintV1",
+  "plugin": {
+    "name": "scene-assets",
+    "version": "0.1.0",
+    "description": "从剧本证据建立可审查的场景静帧资产和外部出图提示词",
+    "author": {
+      "name": "开宝箱工作室"
+    }
+  },
+  "goal": "可独立安装的场景资产子插件，中式幻想尺度为条件知识",
+  "acceptance_criteria": [
+    "标准剧本与资产表可追溯",
+    "场景设计与图片逐阶段审批",
+    "幻想知识条件加载",
+    "图片回流审查阻断无效结果"
+  ],
+  "open_questions": [],
+  "capabilities": [
+    {
+      "id": "scene-assets",
+      "skill_name": "scene-assets",
+      "description": "场景资产主控：证据、设计、静帧提示词和回图审查",
+      "instructions": "# 场景资产主控\n\n先读 [知识索引](../../knowledge/index.md)，按任务加载本轮 reference。\n\n读取 [工作流](../../references/workflow.md) 和 [接口](../../references/interfaces.md)。按剧本/资产表原文核对场景，再提出全剧视觉基准与场景设计卡；批准后写外部出图提示词，回图必须实际打开审查，操作者批准后才能打包。中式幻想知识只在项目视觉基准批准且当前场景适用时加载，不默认添加仙宫、人物或超现实规则。用 scripts/scene_project.py 保存源文件哈希、版本与审批；不调用生图或视频工具。任何缺失材料、冲突或未批准选择列为待裁决，报告真实文件路径。",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "project_root": {
+            "type": "string",
+            "minLength": 1
+          },
+          "scene_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "variant_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "request": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "request"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "artifact_path": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "status",
+          "summary",
+          "questions"
+        ],
+        "additionalProperties": false
+      },
+      "execution": {
+        "kind": "agent",
+        "access": "workspace-write",
+        "network": false
+      },
+      "knowledge_refs": [
+        "knowledge/index.md",
+        "references/workflow.md",
+        "references/interfaces.md",
+        "references/evidence.md",
+        "references/source-notes.md"
+      ],
+      "explicit_only": true
+    },
+    {
+      "id": "scene-evidence",
+      "skill_name": "scene-evidence",
+      "description": "核对场景原文、资产表和可选场记的来源与冲突",
+      "instructions": "# 场景证据核对\n\n先读 [知识索引](../../knowledge/index.md)，按任务加载本轮 reference。\n\n读取 [证据规则](../../references/evidence.md)。用资产表稳定场景 ID 定位剧本原文，列地点、时段、天气、物件、活动空间与连续性事实；每条事实附 source_refs，推导另列。场记只补镜头线索，不覆盖原文。有冲突就列双方位置与受影响设计，不自行改写。输出可供设计卡读取的证据记录。",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "project_root": {
+            "type": "string",
+            "minLength": 1
+          },
+          "scene_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "variant_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "request": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "project_root",
+          "scene_id",
+          "request"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "artifact_path": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "status",
+          "summary",
+          "questions"
+        ],
+        "additionalProperties": false
+      },
+      "execution": {
+        "kind": "agent",
+        "access": "workspace-write",
+        "network": false
+      },
+      "knowledge_refs": [
+        "knowledge/index.md",
+        "references/evidence.md",
+        "references/interfaces.md"
+      ],
+      "explicit_only": true
+    },
+    {
+      "id": "scene-design",
+      "skill_name": "scene-design",
+      "description": "建立全剧视觉基准与逐场景设计卡",
+      "instructions": "# 场景设计\n\n先读 [知识索引](../../knowledge/index.md)，按任务加载本轮 reference。\n\n读取 [设计规则](../../references/design.md) 与证据。先区分原文事实、风格板可见观察、推导和创作选择；视觉基准需操作者批准。逐场景定主空间、活动路线、尺度参照、材料光向、前中后景和连续性不变量。中式幻想方向已批准时才读 [尺度知识](../../references/knowledge/chinese-fantasy-scale.md)，源案例的仙人人数、画幅和工具参数不当默认。用 CLI 提交设计卡并等待操作者批准。",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "project_root": {
+            "type": "string",
+            "minLength": 1
+          },
+          "scene_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "variant_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "request": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "project_root",
+          "scene_id",
+          "request"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "artifact_path": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "status",
+          "summary",
+          "questions"
+        ],
+        "additionalProperties": false
+      },
+      "execution": {
+        "kind": "agent",
+        "access": "workspace-write",
+        "network": false
+      },
+      "knowledge_refs": [
+        "knowledge/index.md",
+        "references/design.md",
+        "references/evidence.md",
+        "references/interfaces.md",
+        "references/knowledge/chinese-fantasy-scale.md"
+      ],
+      "explicit_only": true
+    },
+    {
+      "id": "scene-image-prompt",
+      "skill_name": "scene-image-prompt",
+      "description": "从已批准场景卡编写外部静帧提示词",
+      "instructions": "# 场景静帧提示词\n\n先读 [知识索引](../../knowledge/index.md)，按任务加载本轮 reference。\n\n读取 [提示词方法](../../references/prompting.md)、当前已批准视觉基准与设计卡。参考图逐张标职责；列场景事实、空间主次、活动区域、尺度、材料光线、不变量和回图检查点。当前场景已批准幻想尺度时才加载专项知识。输出 ScenePromptPackageV1 并通过 scripts/scene_project.py submit 合同检查；交操作者外部出图。不写 Midjourney 固定参数，不调用生图 API。",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "project_root": {
+            "type": "string",
+            "minLength": 1
+          },
+          "scene_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "variant_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "request": {
+            "type": "string",
+            "minLength": 1
+          },
+          "target_model": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "project_root",
+          "scene_id",
+          "request"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "artifact_path": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "status",
+          "summary",
+          "questions"
+        ],
+        "additionalProperties": false
+      },
+      "execution": {
+        "kind": "agent",
+        "access": "workspace-write",
+        "network": false
+      },
+      "knowledge_refs": [
+        "knowledge/index.md",
+        "references/prompting.md",
+        "references/interfaces.md",
+        "references/knowledge/chinese-fantasy-scale.md"
+      ],
+      "explicit_only": true
+    },
+    {
+      "id": "scene-image-review",
+      "skill_name": "scene-image-review",
+      "description": "按剧本事实和场景设计审查回流静帧",
+      "instructions": "# 场景图片审查\n\n先读 [知识索引](../../knowledge/index.md)，按任务加载本轮 reference。\n\n必须实际打开回流图，再读取 [审查规则](../../references/review.md)、当前设计卡与剧本证据。比较地点事实、活动空间、结构连续性、尺度、人物/道具新增和构图。对无法看清之处标 uncertain；有缺陷标 revise。提交 SceneImageReviewV1，给可定位的局部返修方向；通过后仍由操作者用 CLI 批准图片。",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "project_root": {
+            "type": "string",
+            "minLength": 1
+          },
+          "scene_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "variant_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "request": {
+            "type": "string",
+            "minLength": 1
+          },
+          "image_path": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "project_root",
+          "scene_id",
+          "image_path",
+          "request"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "artifact_path": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "status",
+          "summary",
+          "questions"
+        ],
+        "additionalProperties": false
+      },
+      "execution": {
+        "kind": "agent",
+        "access": "workspace-write",
+        "network": false
+      },
+      "knowledge_refs": [
+        "knowledge/index.md",
+        "references/review.md",
+        "references/interfaces.md",
+        "references/knowledge/chinese-fantasy-scale.md"
+      ],
+      "explicit_only": true
+    }
+  ],
+  "files": {
+    "knowledge-lock.json": "{\n  \"schema_version\": \"KnowledgeSnapshotsV1\",\n  \"snapshots\": [\n    {\n      \"source_id\": \"hedgehog-03-skill\",\n      \"source_sha256\": \"eda4207aca0d204a9fb2182051465f05a18bf9617ed7db5ab87031e8319e2f8f\",\n      \"origin\": \"SKILL.md\",\n      \"path\": \"references/knowledge/chinese-fantasy-scale.md\",\n      \"rules_sha256\": \"2bd170005046471bf08f2fd87834c90e9a3500c9f560b974ab34154f5e66f5f6\",\n      \"capability_ids\": [\"scene-design\", \"scene-image-prompt\", \"scene-image-review\"]\n    }\n  ]\n}\n",
+    "README.md": "# 场景资产插件 v0.1.0\n\n独立的 `$scene-assets` 插件：依据标准剧本、资产表和可选场记，建立可追溯的场景设计卡，编写外部出图提示词，并审查回流图。`$scene-evidence`、`$scene-design`、`$scene-image-prompt`、`$scene-image-review` 可单独使用。插件不调用生图或视频 API。\n\n中式幻想尺度方法是**按项目批准才加载**的知识情景。普通现实场景不自动加入仙宫、女性仙人或超现实空间。源方法缺少许可证，包内只有独立改写的规则和文件哈希收据，不包含原 Skill、示例提示词或图片。\n\n## 本地使用\n\n保留完整目录，用 Python 3.12+ 运行 `python3 scripts/bootstrap.py --install` 和 `python3 harness.py doctor`。从仓库的 `dist/scene-assets-local-marketplace.zip` 解压本地市场后，执行 `codex plugin marketplace add /absolute/path/to/scene-assets-local-marketplace`、`codex plugin add scene-assets@scene-assets-local`。安装后选择“场景资产插件”或明确调用 `$scene-assets`。聊天附件或本地路径均可作为输入；结构化接口见 [接口说明](references/interfaces.md)。\n\n```text\n$scene-assets 依据这份标准剧本和资产表建立场景项目。先列场景原文事实与疑点，再给出全剧视觉基准和场景设计卡；在我确认后写外部出图提示词。\n```\n\n若剧本已经批准中式幻想视觉方向，可追加“为 SCN-001 使用中式幻想尺度知识”；未批准时先提出选择，不能直接写成项目事实。操作者外部出图后用 `$scene-image-review` 回传并审查。小型项目状态 CLI 的命令见 [工作流](references/workflow.md)；手动验收路径见 [样例](examples/manual-acceptance.md)。\n\n## 已知边界\n\n首版只处理场景静帧资产。场景内部人物由已批准角色资产提供身份参考，不在这里重新设计角色；首尾帧视频提示词留给后续能力。输入改版会保守地使当前审批全部失效，由操作者核对并重新提交；尚未提供自动场景级差异判定。\n",
+    "references/evidence.md": "# 场景证据核对\n\n标准剧本决定地点、时代、时段、天气、空间动作和剧情明确写出的场景物件。资产表提供稳定场景 ID、别名及状态索引；场记表可以补充镜头和连续性线索，但不能覆盖原文。每条事实写来源文件及段落/行号/场次；推导和审美提案分开列。\n\n先核对同一场景是否跨集/跨场复用、哪些状态必须连续、哪些变化属于地点的版本（例如破损、雨后或布景迁移）。冲突保留双方原文位置并交操作者裁决；不可因想做宏大画面而改写剧本中的室内、尺寸、人数或可用道具。中式幻想的超现实空间只有原文规定或操作者作为创作选择批准后，才能变成设计卡的空间规则。\n",
+    "references/workflow.md": "# 工作流与项目状态\n\n主控先接收标准剧本、资产表和可选场记，使用 `scripts/scene_project.py init` 建立本地项目。随后依次提交视觉基准、场景设计卡、静帧提示词、外部回流图和审查 JSON；每个批准动作记录操作者、UTC 时间与对象 SHA。\n\nCLI 入口：`init --project-root DIR --project-id ID --screenplay FILE --asset-table FILE [--scene-log FILE]`；`submit --project-root DIR --kind visual-bible|design|prompt|review --file FILE [--scene-id ID --variant-id ID --image-id ID]`；`approve-record --project-root DIR --kind visual-bible|design --operator NAME [--scene-id ID --variant-id ID]`；`add-image --project-root DIR --scene-id ID --variant-id ID --file FILE`；`approve-image --project-root DIR --scene-id ID --variant-id ID --image-id ID --operator NAME`；`refresh --project-root DIR [--screenplay FILE --asset-table FILE --scene-log FILE]`；`package --project-root DIR --scene-id ID --variant-id ID --output DIR`；`status --project-root DIR`。命令逐步检查当前来源和批准依赖；失败时保留旧文件和错误说明。\n\n首版 `refresh` 对任一输入 SHA 变化撤销所有记录与图片审批；操作者核对影响后重新提交并批准。场景级自动差异分析与完整图生视频工作流留待后续版本。\n",
+    "references/interfaces.md": "# 场景插件接口 v0.1\n\nJSON 文件使用 UTF-8，关键记录含 `schema_version`。场景 ID 使用上游资产表的稳定 ID；文件来源以 `{path,sha256}` 保存，事实以 `source_refs` 指向原文位置。若上游已有带批准记录的 `ProjectVisualBibleV1`，读取并核对其哈希与操作者审批。\n\n- `ProjectVisualBibleV1`：`project_id`、`world_rules[]`、`style{fantasy_scale_enabled:boolean}`、`evidence[]`、`unresolved[]`。把来源观察事实与批准的创作选择分开。\n- `SceneDesignCardV1`：`scene_id`、`variant_id`、`visual_bible_sha256`、`facts[{text,source_refs}]`、`approved_choices[]`、`primary_space{}`、`scale_cues[]`、`composition{}`、`continuity_invariants[]`、`source_refs[]`、`unresolved[]`、`fantasy_scale_enabled`。为真时须能追溯到已批准视觉基准或单场批准记录。\n- `ScenePromptPackageV1`：`scene_id`、`variant_id`、`design_card_sha256`、`target_model`、`reference_images[]`、`prompts[{id,text}]`、非空 `acceptance_checks[]`。提示词只给外部操作者，不内置生图调用。\n- `SceneImageReviewV1`：`image_sha256`、`verdict`、`factual_conflicts[]`、`continuity_issues[]`、`space_scale_issues[]`、`layout_issues[]`、`blocking_issues[]`、`adoption_proposals[]`。`pass` 时全部缺陷数组为空。\n- `SceneAssetPackV1`：已批准视觉基准、场景设计卡、提示词、实际选定的图、审查与操作者审批、上游文件 SHA、插件来源收据。\n\n主流程：输入版本 → 视觉基准批准 → 场景设计卡批准 → 提示词 → 外部出图 → 实图审查 → 操作者批准 → 打包。首版输入更新时保守撤销全部旧审批，要求重新核对并提交；不静默沿用，也不声称已完成场景级影响分析。\n",
+    "references/design.md": "# 全剧视觉基准与场景设计\n\n先把剧本时代、类型、世界物理规则、场景清单与可选风格板的**可观察事实**列出；与设计推导分开。提出 2–3 个有证据的视觉方向，指出各方向对建筑/地形、材料、色彩和光线的影响，待操作者批准 `ProjectVisualBibleV1`。如上游已给带哈希与审批的视觉基准，核对后复用。\n\n每个 `SceneDesignCardV1` 必须写清：剧情用途、地点事实、主要空间结构、人物/道具活动所需的可用空间、前中后景、尺度参照、光源与时段、材料、连续性不变量、未解决项。设计卡只固定已证实或已批准内容；未知背面、不可见结构或历史工艺标待定。现实场景可有视觉张力，不能强加超现实元素。若同一地点有明确状态改变，用同一场景 ID 的变体，记录变化与共享不变量。\n\n当全剧视觉基准明确批准中式幻想方向时，读取[尺度知识](knowledge/chinese-fantasy-scale.md)：以一项主要空间规则、一处主要空间主体和可辨的尺度关系组织场景，再用可查的建筑/材料线索使其自洽。这里的“一项/一处”是控制画面主次的设计起点；剧本明确多主体或复杂空间时以剧本为准。人物数量、性别与服装必须来自剧本和角色资产，不采用来源案例的固定仙人配方。\n",
+    "references/review.md": "# 场景回图审查\n\n实际打开回流图片后才作视觉判断。并排查看剧本证据、已批准设计卡和参考图；按下列顺序记录：①地点/时段/天气等原文事实；②主结构与活动空间；③连续性不变量；④尺度关系与前中远景；⑤材料、光向和画面中新增人物/道具。看不到的背面或材料不报“已通过”，记为待核实。\n\n若使用中式幻想情景，另看空间异常是否按已批准设计出现、主体轮廓是否清楚、场景是否误变成普通旅游景点、建筑是否形变、尺度参照是否可信。源案例中的人数、性别和服装不能作为审查标准。\n\n报告 `SceneImageReviewV1`：`pass|revise|uncertain`，分列事实冲突、连续性、空间/尺度、版式与可保留的新细节。阻断项或不确定项不能自动批准；操作者批准应绑定图片哈希与审查报告哈希。局部返修时说清目标区域、唯一改动、保留项及回图复查点；每次回图重新检查整张图。\n",
+    "references/source-notes.md": "# 来源与改造\n\n用户提供的本地 `03-宏大中式幻想图像与视频` 入口及 `visual-language.md`、`still-prompts.md`、`video-motion.md` 经静态阅读后作为方法研究输入，详细 SHA-256 见根目录 `sources.lock.json`。该目录未见许可证；本插件的业务规则独立编写，未复制原提示词、案例、图片或参数串。\n\n采用：空间规则要有画面后果；主结构与尺度参照分明；中式建筑的轮廓与材料要自洽；复杂画面控制主体层级；回图诊断主次、尺度和形变。只在已批准中式幻想场景加载。未采用：固定 1–3 名女性仙人、固定人物面积、固定 Midjourney 参数/英文提示词、固定 5 秒图生视频。图生视频单运镜与分层运动作为未来视频能力候选，不在场景静帧插件中执行。\n",
+    "references/prompting.md": "# 场景静帧提示词\n\n输入只取已批准视觉基准、已批准场景设计卡、当前场景的剧本证据及获批准的参考图。输出 `ScenePromptPackageV1`，供操作者在外部工具使用。参考图编号并说明各自负责建筑结构、地形、色彩、材质、光向或角色身份中的哪一项；不得把参考图的无关人物和道具带入。\n\n建议顺序：`产物与用途 → 地点/时间事实 → 主空间结构与允许的空间规则 → 活动区域和尺度锚点 → 前/中/远景与取景 → 材料、光线和色彩 → 各参考图职责 → 不变量及禁止新增 → 回图核对点`。具体设计卡已足够详细时只做清晰整理，不补虚构地理或建筑史；缺关键构造时先给有理由的选项请操作者批准。\n\n中式幻想仅在设计卡标记适用时加入[尺度知识](knowledge/chinese-fantasy-scale.md)。不要直接复制来源 Midjourney 尾参、固定“女仙人”、固定画幅或不适合本项目的负面词。人物若出现，用角色资产包的身份和服装锚点；场景插件不重画角色设计。每条提示词列 `acceptance_checks`，至少包含剧本事实、场景连续性、空间尺度和不得新增的内容。\n",
+    "knowledge/index.md": "# 场景资产知识索引\n\n按情景读取，不把所有参考资料塞进单轮。\n\n| 任务 | 读取 |\n| --- | --- |\n核对剧本与资产表 | `references/evidence.md`、`references/interfaces.md` |\n全剧视觉基准与场景设计 | `references/design.md`、`references/evidence.md` |\n已批准的中式幻想尺度方向 | `references/knowledge/chinese-fantasy-scale.md`、`references/design.md` |\n静帧提示词 | `references/prompting.md`；若方向已批准，再读 `references/knowledge/chinese-fantasy-scale.md` |\n回图审查 | `references/review.md`；按设计卡选择是否读中式幻想知识 |\n状态、审批和打包 | `references/workflow.md`、`references/interfaces.md` |\n\n剧本原文和操作者批准的选择优先于方法示例。`references/source-notes.md` 记录研究材料与未采用部分。\n",
+    "examples/manual-acceptance.md": "# 手动验收建议\n\n1. 现实内景：原文无超现实元素时，设计卡与提示词不出现仙宫、悬浮建筑或凭空人物。\n2. 已批准中式幻想：一场有明确巨型门阙与云海的剧本，设计卡列来源、主结构、尺度参照、留白和通行动线；提示词不包含固定女性仙人人数或 Midjourney 尾参。\n3. 参考图越权：外部风格图里有陌生角色，提示词只借已批准画风，回图若带入陌生角色须标问题。\n4. 场景变体：同一地点雨后/破损版保留共同结构，变化单独记录，不生成竞争的场景 ID。\n5. 回图错误：建筑形变、尺度失真、遮挡通道或与剧本时段冲突时，报告 `revise`；操作者未批准时不能打包。\n6. 上游改版：修改输入文件后旧版审批应被状态检查阻断，不静默复用。\n\n图片是否达到制作要求由操作者逐阶段判断；结构检查只证明文件与接口完整。\n",
+    "scripts/scene_project.py": "#!/usr/bin/env python3\n\"\"\"Local, deterministic state and approval gates for scene assets.\"\"\"\nfrom __future__ import annotations\n\nimport argparse\nimport hashlib\nimport json\nfrom pathlib import Path\nimport shutil\nimport sys\nfrom datetime import datetime, timezone\n\nKINDS = {\"visual-bible\": \"ProjectVisualBibleV1\", \"design\": \"SceneDesignCardV1\",\n         \"prompt\": \"ScenePromptPackageV1\", \"review\": \"SceneImageReviewV1\"}\nIMAGE_SUFFIXES = {\".png\", \".jpg\", \".jpeg\", \".webp\"}\n\n\ndef fail(message: str) -> None:\n    raise SystemExit(message)\n\n\ndef now() -> str:\n    return datetime.now(timezone.utc).isoformat()\n\n\ndef digest(path: Path) -> str:\n    h = hashlib.sha256()\n    with path.open(\"rb\") as stream:\n        for chunk in iter(lambda: stream.read(1024 * 1024), b\"\"):\n            h.update(chunk)\n    return h.hexdigest()\n\n\ndef input_fingerprint(state: dict) -> str:\n    versions = {name: item[\"sha256\"] for name, item in state[\"inputs\"].items()}\n    return hashlib.sha256(json.dumps(versions, sort_keys=True).encode(\"utf-8\")).hexdigest()\n\n\ndef load_json(path: Path) -> dict:\n    try:\n        value = json.loads(path.read_text(encoding=\"utf-8\"))\n    except (OSError, ValueError) as exc:\n        fail(f\"Cannot read JSON {path}: {exc}\")\n    if not isinstance(value, dict):\n        fail(f\"Expected JSON object: {path}\")\n    return value\n\n\ndef save_json(path: Path, value: dict) -> None:\n    path.parent.mkdir(parents=True, exist_ok=True)\n    temporary = path.with_suffix(path.suffix + \".tmp\")\n    temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2) + \"\\n\", encoding=\"utf-8\")\n    temporary.replace(path)\n\n\ndef safe_id(value: str) -> str:\n    if not value or not all(c.isascii() and (c.isalnum() or c in \"-_\") for c in value):\n        fail(f\"ID must use ASCII letters, numbers, - or _: {value!r}\")\n    return value\n\n\ndef state_path(root: Path) -> Path:\n    return root / \"project.json\"\n\n\ndef read_state(root: Path) -> dict:\n    path = state_path(root)\n    if not path.is_file():\n        fail(f\"Project not initialized: {root}\")\n    state = load_json(path)\n    if state.get(\"schema_version\") != \"SceneProjectStateV1\":\n        fail(\"Unsupported project state\")\n    for source in state[\"inputs\"].values():\n        stored = root / source[\"stored_path\"]\n        if not stored.is_file() or digest(stored) != source[\"sha256\"]:\n            fail(f\"Stored input changed: {source['stored_path']}\")\n    for rows in state[\"records\"].values():\n        for record in rows:\n            path = root / record[\"path\"]\n            if not path.is_file() or digest(path) != record[\"sha256\"]:\n                fail(f\"Recorded document changed: {record['path']}\")\n    for image in state[\"images\"]:\n        path = root / image[\"path\"]\n        if not path.is_file() or digest(path) != image[\"sha256\"]:\n            fail(f\"Imported image changed: {image['path']}\")\n    if state.get(\"stale\"):\n        fail(\"Inputs were refreshed; resubmit and approve the visual bible before continuing\")\n    return state\n\n\ndef key(kind: str, scene_id: str | None = None, variant_id: str | None = None,\n        image_id: str | None = None) -> str:\n    if kind == \"visual-bible\":\n        return kind\n    if not scene_id or not variant_id:\n        fail(f\"{kind} requires --scene-id and --variant-id\")\n    parts = [kind, safe_id(scene_id), safe_id(variant_id)]\n    if kind == \"review\":\n        if not image_id:\n            fail(\"review requires --image-id\")\n        parts.append(safe_id(image_id))\n    return \"/\".join(parts)\n\n\ndef latest(state: dict, record_key: str) -> dict | None:\n    rows = state[\"records\"].get(record_key, [])\n    return rows[-1] if rows else None\n\n\ndef approved(state: dict, record_key: str) -> dict:\n    item = latest(state, record_key)\n    if item is None or not item.get(\"approval\"):\n        fail(f\"Approved record required: {record_key}\")\n    return item\n\n\ndef require_fields(data: dict, names: tuple[str, ...]) -> None:\n    for name in names:\n        if name not in data:\n            fail(f\"Missing required field: {name}\")\n\n\ndef check_document(kind: str, data: dict, state: dict, args) -> None:\n    if data.get(\"schema_version\") != KINDS[kind]:\n        fail(f\"Expected schema_version {KINDS[kind]}\")\n    if kind == \"visual-bible\":\n        require_fields(data, (\"project_id\", \"world_rules\", \"style\", \"evidence\", \"unresolved\"))\n        if data[\"project_id\"] != state[\"project_id\"] or not isinstance(data[\"style\"], dict):\n            fail(\"Visual bible project_id/style mismatch\")\n        if not isinstance(data[\"style\"].get(\"fantasy_scale_enabled\"), bool):\n            fail(\"style.fantasy_scale_enabled must be a boolean\")\n        if any(not isinstance(data[name], list) for name in (\"world_rules\", \"evidence\", \"unresolved\")):\n            fail(\"Visual bible rules, evidence and unresolved must be lists\")\n        if not data[\"evidence\"]:\n            fail(\"Visual bible needs at least one source-backed observation\")\n    elif kind == \"design\":\n        require_fields(data, (\"scene_id\", \"variant_id\", \"visual_bible_sha256\", \"facts\", \"approved_choices\",\n                              \"primary_space\", \"scale_cues\", \"composition\",\n                              \"continuity_invariants\", \"source_refs\", \"unresolved\",\n                              \"fantasy_scale_enabled\"))\n        visual = approved(state, \"visual-bible\")\n        bible = load_json(args.project_root / visual[\"path\"])\n        if data[\"scene_id\"] != args.scene_id or data[\"variant_id\"] != args.variant_id:\n            fail(\"Design scene_id/variant_id mismatch\")\n        if data[\"visual_bible_sha256\"] != visual[\"sha256\"]:\n            fail(\"Design must use current approved visual bible SHA\")\n        if not isinstance(data[\"fantasy_scale_enabled\"], bool):\n            fail(\"fantasy_scale_enabled must be a boolean\")\n        if data[\"fantasy_scale_enabled\"] and not bible[\"style\"][\"fantasy_scale_enabled\"]:\n            fail(\"Fantasy scale must be approved in the visual bible\")\n        if not isinstance(data[\"facts\"], list) or not data[\"facts\"] or any(\n            not isinstance(item, dict) or not item.get(\"source_refs\") for item in data[\"facts\"]):\n            fail(\"Each scene fact needs source_refs\")\n        if any(not isinstance(data[name], list) for name in\n               (\"approved_choices\", \"scale_cues\", \"continuity_invariants\", \"source_refs\", \"unresolved\")):\n            fail(\"Design lists have an invalid type\")\n        if not data[\"source_refs\"]:\n            fail(\"Design needs scene source_refs\")\n        if not isinstance(data[\"primary_space\"], dict) or not isinstance(data[\"composition\"], dict):\n            fail(\"primary_space and composition must be objects\")\n    elif kind == \"prompt\":\n        require_fields(data, (\"scene_id\", \"variant_id\", \"design_card_sha256\", \"target_model\",\n                              \"reference_images\", \"prompts\", \"acceptance_checks\"))\n        design = approved(state, key(\"design\", args.scene_id, args.variant_id))\n        if data[\"scene_id\"] != args.scene_id or data[\"variant_id\"] != args.variant_id:\n            fail(\"Prompt scene_id/variant_id mismatch\")\n        if data[\"design_card_sha256\"] != design[\"sha256\"]:\n            fail(\"Prompt must use current approved design SHA\")\n        if (not isinstance(data[\"target_model\"], str) or not data[\"target_model\"].strip()\n            or not isinstance(data[\"prompts\"], list) or not data[\"prompts\"]\n            or not isinstance(data[\"acceptance_checks\"], list) or not data[\"acceptance_checks\"]\n            or not isinstance(data[\"reference_images\"], list)):\n            fail(\"Prompt text and acceptance checks cannot be empty\")\n        if any(not isinstance(item, dict) or not item.get(\"id\") or not item.get(\"text\")\n               for item in data[\"prompts\"]):\n            fail(\"Each prompt requires id and text\")\n    else:\n        require_fields(data, (\"image_sha256\", \"verdict\", \"factual_conflicts\", \"continuity_issues\",\n                              \"space_scale_issues\", \"layout_issues\", \"blocking_issues\",\n                              \"adoption_proposals\"))\n        image = next((row for row in state[\"images\"] if row[\"id\"] == args.image_id), None)\n        if image is None or (image[\"scene_id\"], image[\"variant_id\"]) != (args.scene_id, args.variant_id):\n            fail(\"Review image ID does not match scene/variant\")\n        if data[\"image_sha256\"] != image[\"sha256\"]:\n            fail(\"Review image SHA does not match imported image\")\n        if data[\"verdict\"] not in {\"pass\", \"revise\", \"uncertain\"}:\n            fail(\"Invalid review verdict\")\n        if any(not isinstance(data[field], list) for field in\n               (\"factual_conflicts\", \"continuity_issues\", \"space_scale_issues\",\n                \"layout_issues\", \"blocking_issues\", \"adoption_proposals\")):\n            fail(\"Review issue fields must be lists\")\n        if data[\"verdict\"] == \"pass\" and any(data[field] for field in\n            (\"factual_conflicts\", \"continuity_issues\", \"space_scale_issues\", \"layout_issues\", \"blocking_issues\")):\n            fail(\"Pass review cannot contain defects\")\n\n\ndef command_init(args) -> dict:\n    root = args.project_root.resolve()\n    if state_path(root).exists():\n        fail(f\"Project already initialized: {root}\")\n    safe_id(args.project_id)\n    inputs = {}\n    for label in (\"screenplay\", \"asset_table\", \"scene_log\"):\n        source = getattr(args, label)\n        if source is None:\n            continue\n        source = source.resolve()\n        if not source.is_file():\n            fail(f\"Missing input: {source}\")\n        target = root / \"inputs\" / (label + source.suffix.lower())\n        target.parent.mkdir(parents=True, exist_ok=True)\n        shutil.copy2(source, target)\n        inputs[label] = {\"name\": source.name, \"stored_path\": str(target.relative_to(root)),\n                         \"sha256\": digest(target)}\n    state = {\"schema_version\": \"SceneProjectStateV1\", \"project_id\": args.project_id,\n             \"created_at\": now(), \"inputs\": inputs, \"stale\": False,\n             \"records\": {}, \"images\": [], \"events\": []}\n    save_json(state_path(root), state)\n    return {\"project_root\": str(root), \"inputs\": inputs}\n\n\ndef command_submit(args) -> dict:\n    root = args.project_root.resolve()\n    state = read_state(root)\n    data = load_json(args.file)\n    check_document(args.kind, data, state, args)\n    record_key = key(args.kind, args.scene_id, args.variant_id, args.image_id)\n    version = len(state[\"records\"].get(record_key, [])) + 1\n    target = root / \"records\" / record_key / f\"v{version:03d}.json\"\n    if target.exists():\n        fail(f\"Record path already exists: {target}\")\n    save_json(target, data)\n    record = {\"version\": version, \"path\": str(target.relative_to(root)),\n              \"sha256\": digest(target), \"input_fingerprint\": input_fingerprint(state),\n              \"created_at\": now(), \"approval\": None}\n    state[\"records\"].setdefault(record_key, []).append(record)\n    if args.kind == \"visual-bible\":\n        for rows in state[\"records\"].values():\n            for row in rows:\n                if row is not record:\n                    row[\"approval\"] = None\n        for image in state[\"images\"]:\n            image[\"approval\"] = None\n    elif args.kind in {\"design\", \"prompt\"}:\n        prefix = \"/\".join((safe_id(args.scene_id), safe_id(args.variant_id)))\n        for rk, rows in state[\"records\"].items():\n            if rk in {f\"prompt/{prefix}\"} or rk.startswith(f\"review/{prefix}/\"):\n                for row in rows:\n                    row[\"approval\"] = None\n        for image in state[\"images\"]:\n            if (image[\"scene_id\"], image[\"variant_id\"]) == (args.scene_id, args.variant_id):\n                image[\"approval\"] = None\n    state[\"events\"].append({\"at\": now(), \"type\": \"submit\", \"key\": record_key,\n                            \"version\": version, \"sha256\": record[\"sha256\"]})\n    save_json(state_path(root), state)\n    return {\"key\": record_key, **record}\n\n\ndef command_approve_record(args) -> dict:\n    root = args.project_root.resolve()\n    state = read_state(root)\n    record_key = key(args.kind, args.scene_id, args.variant_id)\n    record = latest(state, record_key)\n    if record is None:\n        fail(f\"No record to approve: {record_key}\")\n    if record.get(\"input_fingerprint\") != input_fingerprint(state):\n        fail(\"Record was submitted against an older input version\")\n    data = load_json(root / record[\"path\"])\n    if data.get(\"unresolved\"):\n        fail(\"Resolve open questions before approval\")\n    if args.kind == \"design\":\n        visual = approved(state, \"visual-bible\")\n        if data[\"visual_bible_sha256\"] != visual[\"sha256\"]:\n            fail(\"Design belongs to an older visual bible\")\n    approval = {\"operator\": args.operator, \"at\": now(), \"sha256\": record[\"sha256\"]}\n    record[\"approval\"] = approval\n    state[\"events\"].append({\"at\": now(), \"type\": \"approve-record\", \"key\": record_key,\n                            \"version\": record[\"version\"], \"operator\": args.operator})\n    save_json(state_path(root), state)\n    return {\"key\": record_key, \"approval\": approval}\n\n\ndef command_add_image(args) -> dict:\n    root = args.project_root.resolve()\n    state = read_state(root)\n    safe_id(args.scene_id); safe_id(args.variant_id)\n    approved(state, key(\"design\", args.scene_id, args.variant_id))\n    prompt = latest(state, key(\"prompt\", args.scene_id, args.variant_id))\n    if prompt is None:\n        fail(\"Create a prompt package before importing an image\")\n    if prompt.get(\"input_fingerprint\") != input_fingerprint(state):\n        fail(\"Prompt belongs to older inputs\")\n    design = approved(state, key(\"design\", args.scene_id, args.variant_id))\n    if load_json(root / prompt[\"path\"])[\"design_card_sha256\"] != design[\"sha256\"]:\n        fail(\"Prompt belongs to an older design card\")\n    source = args.file.resolve()\n    if not source.is_file() or source.suffix.lower() not in IMAGE_SUFFIXES or source.stat().st_size == 0:\n        fail(\"Image must be a nonempty PNG, JPEG or WebP file\")\n    image_id = f\"img-{len(state['images']) + 1:04d}\"\n    target = root / \"images\" / args.scene_id / args.variant_id / (image_id + source.suffix.lower())\n    target.parent.mkdir(parents=True, exist_ok=True)\n    shutil.copy2(source, target)\n    row = {\"id\": image_id, \"scene_id\": args.scene_id, \"variant_id\": args.variant_id,\n           \"path\": str(target.relative_to(root)), \"sha256\": digest(target),\n           \"prompt_sha256\": prompt[\"sha256\"], \"imported_at\": now(), \"approval\": None}\n    state[\"images\"].append(row)\n    state[\"events\"].append({\"at\": now(), \"type\": \"add-image\", \"image_id\": image_id,\n                            \"sha256\": row[\"sha256\"]})\n    save_json(state_path(root), state)\n    return row\n\n\ndef command_approve_image(args) -> dict:\n    root = args.project_root.resolve()\n    state = read_state(root)\n    image = next((row for row in state[\"images\"] if row[\"id\"] == args.image_id), None)\n    if image is None or (image[\"scene_id\"], image[\"variant_id\"]) != (args.scene_id, args.variant_id):\n        fail(\"Unknown image for scene/variant\")\n    review = latest(state, key(\"review\", args.scene_id, args.variant_id, args.image_id))\n    if review is None:\n        fail(\"Image review required\")\n    if review.get(\"input_fingerprint\") != input_fingerprint(state):\n        fail(\"Review belongs to older inputs\")\n    report = load_json(root / review[\"path\"])\n    if report[\"verdict\"] != \"pass\" or report[\"image_sha256\"] != image[\"sha256\"]:\n        fail(\"Only a current pass review can be approved\")\n    design = approved(state, key(\"design\", args.scene_id, args.variant_id))\n    prompt = latest(state, key(\"prompt\", args.scene_id, args.variant_id))\n    if image[\"prompt_sha256\"] != prompt[\"sha256\"]:\n        fail(\"Image belongs to an older prompt package\")\n    if prompt.get(\"input_fingerprint\") != input_fingerprint(state):\n        fail(\"Prompt belongs to older inputs\")\n    if load_json(root / prompt[\"path\"])[\"design_card_sha256\"] != design[\"sha256\"]:\n        fail(\"Prompt belongs to an older design card\")\n    image[\"approval\"] = {\"operator\": args.operator, \"at\": now(),\n                         \"sha256\": image[\"sha256\"], \"review_sha256\": review[\"sha256\"]}\n    state[\"events\"].append({\"at\": now(), \"type\": \"approve-image\", \"image_id\": args.image_id,\n                            \"operator\": args.operator})\n    save_json(state_path(root), state)\n    return {\"image_id\": args.image_id, \"approval\": image[\"approval\"]}\n\n\ndef command_refresh(args) -> dict:\n    root = args.project_root.resolve()\n    state = read_state(root)\n    changed = []\n    for label in (\"screenplay\", \"asset_table\", \"scene_log\"):\n        source = getattr(args, label)\n        if source is None:\n            continue\n        source = source.resolve()\n        if not source.is_file():\n            fail(f\"Missing input: {source}\")\n        current = state[\"inputs\"].get(label)\n        new_hash = digest(source)\n        if current and current[\"sha256\"] == new_hash:\n            continue\n        target = root / \"inputs\" / (label + source.suffix.lower())\n        target.parent.mkdir(parents=True, exist_ok=True)\n        shutil.copy2(source, target)\n        state[\"inputs\"][label] = {\"name\": source.name, \"stored_path\": str(target.relative_to(root)),\n                                  \"sha256\": new_hash}\n        changed.append(label)\n    if changed:\n        for rows in state[\"records\"].values():\n            for row in rows:\n                row[\"approval\"] = None\n        for image in state[\"images\"]:\n            image[\"approval\"] = None\n        state[\"events\"].append({\"at\": now(), \"type\": \"refresh\", \"changed_inputs\": changed,\n                                \"policy\": \"conservative approval invalidation\"})\n    save_json(state_path(root), state)\n    return {\"changed_inputs\": changed, \"approvals_invalidated\": bool(changed)}\n\n\ndef command_package(args) -> dict:\n    root = args.project_root.resolve()\n    state = read_state(root)\n    visual = approved(state, \"visual-bible\")\n    design = approved(state, key(\"design\", args.scene_id, args.variant_id))\n    if load_json(root / design[\"path\"])[\"visual_bible_sha256\"] != visual[\"sha256\"]:\n        fail(\"Design belongs to an older visual bible\")\n    prompt = latest(state, key(\"prompt\", args.scene_id, args.variant_id))\n    if (prompt is None or prompt.get(\"input_fingerprint\") != input_fingerprint(state)\n        or load_json(root / prompt[\"path\"])[\"design_card_sha256\"] != design[\"sha256\"]):\n        fail(\"Current prompt package required\")\n    images = [row for row in state[\"images\"] if row[\"scene_id\"] == args.scene_id\n              and row[\"variant_id\"] == args.variant_id and row.get(\"approval\")\n              and row[\"prompt_sha256\"] == prompt[\"sha256\"]]\n    if not images:\n        fail(\"Approved current image required\")\n    for image in images:\n        review = latest(state, key(\"review\", args.scene_id, args.variant_id, image[\"id\"]))\n        if review is None or review[\"sha256\"] != image[\"approval\"][\"review_sha256\"]:\n            fail(\"Image review changed after approval\")\n    output = args.output.resolve()\n    if output.exists():\n        fail(f\"Output already exists: {output}\")\n    output.mkdir(parents=True)\n    copied = {}\n    for label, record in ((\"visual-bible\", visual), (\"design\", design), (\"prompt\", prompt)):\n        source = root / record[\"path\"]\n        target = output / (label + \".json\")\n        shutil.copy2(source, target)\n        copied[label] = {\"path\": target.name, \"sha256\": digest(target),\n                         \"approval\": record.get(\"approval\")}\n    image_rows = []\n    for image in images:\n        review = latest(state, key(\"review\", args.scene_id, args.variant_id, image[\"id\"]))\n        for label, source in ((image[\"id\"], root / image[\"path\"]),\n                              (image[\"id\"] + \"-review\", root / review[\"path\"])):\n            target = output / (label + source.suffix)\n            shutil.copy2(source, target)\n        image_rows.append({\"id\": image[\"id\"], \"path\": image[\"id\"] + (root / image[\"path\"]).suffix,\n                           \"sha256\": image[\"sha256\"], \"approval\": image[\"approval\"],\n                           \"review_path\": image[\"id\"] + \"-review.json\", \"review_sha256\": review[\"sha256\"]})\n    manifest = {\"schema_version\": \"SceneAssetPackV1\", \"plugin_version\": \"0.1.0\",\n                \"project_id\": state[\"project_id\"], \"scene_id\": args.scene_id,\n                \"variant_id\": args.variant_id, \"created_at\": now(),\n                \"inputs\": {name: {\"name\": item[\"name\"], \"sha256\": item[\"sha256\"]}\n                           for name, item in state[\"inputs\"].items()},\n                \"records\": copied, \"images\": image_rows}\n    receipts = Path(__file__).resolve().parents[1] / \"sources.lock.json\"\n    if receipts.is_file():\n        target = output / \"sources.lock.json\"\n        shutil.copy2(receipts, target)\n        manifest[\"source_receipts\"] = {\"path\": target.name, \"sha256\": digest(target)}\n    save_json(output / \"manifest.json\", manifest)\n    return {\"output\": str(output), \"image_count\": len(image_rows)}\n\n\ndef command_status(args) -> dict:\n    root = args.project_root.resolve()\n    state = read_state(root)\n    return {\"project_id\": state[\"project_id\"], \"inputs\": state[\"inputs\"],\n            \"records\": {name: {\"versions\": len(rows), \"latest_approved\": bool(rows[-1].get(\"approval\"))}\n                        for name, rows in state[\"records\"].items()},\n            \"images\": [{\"id\": row[\"id\"], \"scene_id\": row[\"scene_id\"],\n                        \"variant_id\": row[\"variant_id\"], \"approved\": bool(row.get(\"approval\"))}\n                       for row in state[\"images\"]]}\n\n\ndef main() -> None:\n    parser = argparse.ArgumentParser(description=__doc__)\n    commands = parser.add_subparsers(dest=\"command\", required=True)\n    init = commands.add_parser(\"init\")\n    init.add_argument(\"--project-root\", type=Path, required=True)\n    init.add_argument(\"--project-id\", required=True)\n    init.add_argument(\"--screenplay\", type=Path, required=True)\n    init.add_argument(\"--asset-table\", type=Path, required=True)\n    init.add_argument(\"--scene-log\", type=Path)\n    refresh = commands.add_parser(\"refresh\")\n    refresh.add_argument(\"--project-root\", type=Path, required=True)\n    for label in (\"screenplay\", \"asset-table\", \"scene-log\"):\n        refresh.add_argument(\"--\" + label, type=Path)\n    submit = commands.add_parser(\"submit\")\n    submit.add_argument(\"--project-root\", type=Path, required=True)\n    submit.add_argument(\"--kind\", choices=list(KINDS), required=True)\n    submit.add_argument(\"--file\", type=Path, required=True)\n    submit.add_argument(\"--scene-id\")\n    submit.add_argument(\"--variant-id\", default=\"base\")\n    submit.add_argument(\"--image-id\")\n    approve_record = commands.add_parser(\"approve-record\")\n    approve_record.add_argument(\"--project-root\", type=Path, required=True)\n    approve_record.add_argument(\"--kind\", choices=[\"visual-bible\", \"design\"], required=True)\n    approve_record.add_argument(\"--scene-id\")\n    approve_record.add_argument(\"--variant-id\", default=\"base\")\n    approve_record.add_argument(\"--operator\", required=True)\n    add_image = commands.add_parser(\"add-image\")\n    add_image.add_argument(\"--project-root\", type=Path, required=True)\n    add_image.add_argument(\"--scene-id\", required=True)\n    add_image.add_argument(\"--variant-id\", default=\"base\")\n    add_image.add_argument(\"--file\", type=Path, required=True)\n    approve_image = commands.add_parser(\"approve-image\")\n    approve_image.add_argument(\"--project-root\", type=Path, required=True)\n    approve_image.add_argument(\"--scene-id\", required=True)\n    approve_image.add_argument(\"--variant-id\", default=\"base\")\n    approve_image.add_argument(\"--image-id\", required=True)\n    approve_image.add_argument(\"--operator\", required=True)\n    package = commands.add_parser(\"package\")\n    package.add_argument(\"--project-root\", type=Path, required=True)\n    package.add_argument(\"--scene-id\", required=True)\n    package.add_argument(\"--variant-id\", default=\"base\")\n    package.add_argument(\"--output\", type=Path, required=True)\n    status = commands.add_parser(\"status\")\n    status.add_argument(\"--project-root\", type=Path, required=True)\n    args = parser.parse_args()\n    if hasattr(args, \"operator\") and not args.operator.strip():\n        fail(\"Operator cannot be empty\")\n    result = {\"init\": command_init, \"refresh\": command_refresh, \"submit\": command_submit,\n              \"approve-record\": command_approve_record, \"add-image\": command_add_image,\n              \"approve-image\": command_approve_image, \"package\": command_package,\n              \"status\": command_status}[args.command](args)\n    print(json.dumps(result, ensure_ascii=False, indent=2))\n\n\nif __name__ == \"__main__\":\n    main()\n",
+    "references/knowledge/chinese-fantasy-scale.md": "# 可选知识：中式幻想场景的尺度与空间\n\n此规则只在 `ProjectVisualBibleV1` 中已批准“中式幻想/神话式不可能空间”且目标场景适用时加载。它把来源案例中的构图方法改写为场景资产方法，不继承案例人物、平台参数或具体文案。\n\n## 构造画面\n\n1. **先定剧本允许的空间异常**：例如方向、重力、远近或建筑与自然物的关系发生一项可描述的变化。若原文没有此规则，把它写成待批准创作提案，不能伪装成事实。\n2. **确定主空间与尺度锚点**：用建筑、地形或自然现象的清晰轮廓承担主视觉；角色、道具、路径、门窗或重复结构提供尺寸对比。尺度参照必须来自当前场景，不能凭空增加人物。\n3. **让中式特征有构造逻辑**：可从轴线、屋顶曲线、柱网、檐下承托、院落、门阙、廊桥或台阶等线索组织空间，避免只靠“古风”“仙气”等词。涉及具体朝代、地区或宗教器物时另查来源。\n4. **用材料和空气交代纵深**：前景、中景、远景有能被看见的尺度、遮挡、清晰度或光影差；石、木、瓦、水、雾等材料遵从项目风格。留白可用于显示体量，不要求每个角落都填满景物。\n5. **控制竞争主体**：一张场景参考图先确保主体与通行/表演空间可读，再添加少量支撑环境。若回图像普通旅游照、主建筑变形、尺寸关系不可信或新元素抢焦点，先定位差异再局部重写提示词。\n\n静态资产图只描述可核对的空间终态。真正的运镜、云雾/水/布料分层运动与镜头时长进入后续视频能力；不能把 5 秒、16:9 或某生图工具参数当作本插件合同。\n"
+  },
+  "workflows": [],
+  "sources": [
+    {
+      "origin": "local:刺猬星球/03-宏大中式幻想图像与视频/SKILL.md",
+      "revision": "sha256:eda4207aca0d204a9fb2182051465f05a18bf9617ed7db5ab87031e8319e2f8f",
+      "license": "not provided",
+      "adaptation": "独立改写场景尺度与空间组织；不复制 Skill 原文"
+    },
+    {
+      "origin": "local:刺猬星球/03-宏大中式幻想图像与视频/references/visual-language.md",
+      "revision": "sha256:8a417110d55d189e1ad6e5cb12e2acff77cf9c56c3de5607e43e53925f9e8a21",
+      "license": "not provided",
+      "adaptation": "把题材专属视觉语法变成条件加载的场景知识"
+    },
+    {
+      "origin": "local:刺猬星球/03-宏大中式幻想图像与视频/references/still-prompts.md",
+      "revision": "sha256:35a1f7dc18375117745582e115cf03f670e407147cc2d96a1a9da9366cf489d6",
+      "license": "not provided",
+      "adaptation": "独立编写外部静帧提示词顺序；舍弃固定人物和工具参数"
+    },
+    {
+      "origin": "local:刺猬星球/03-宏大中式幻想图像与视频/references/video-motion.md",
+      "revision": "sha256:82b589c1391aaee96aa30633fb15a3a748f025ba1f1f9347299243ca2e63e4ff",
+      "license": "not provided",
+      "adaptation": "仅登记后续视频能力候选，不纳入静帧插件"
+    }
+  ]
+}

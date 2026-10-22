@@ -1,0 +1,29 @@
+{
+  "schema_version": "SourceReceiptsV1",
+  "sources": [
+    {
+      "origin": "local:刺猬星球/03-宏大中式幻想图像与视频/SKILL.md",
+      "revision": "sha256:eda4207aca0d204a9fb2182051465f05a18bf9617ed7db5ab87031e8319e2f8f",
+      "license": "not provided",
+      "adaptation": "独立改写场景尺度与空间组织；不复制 Skill 原文"
+    },
+    {
+      "origin": "local:刺猬星球/03-宏大中式幻想图像与视频/references/visual-language.md",
+      "revision": "sha256:8a417110d55d189e1ad6e5cb12e2acff77cf9c56c3de5607e43e53925f9e8a21",
+      "license": "not provided",
+      "adaptation": "把题材专属视觉语法变成条件加载的场景知识"
+    },
+    {
+      "origin": "local:刺猬星球/03-宏大中式幻想图像与视频/references/still-prompts.md",
+      "revision": "sha256:35a1f7dc18375117745582e115cf03f670e407147cc2d96a1a9da9366cf489d6",
+      "license": "not provided",
+      "adaptation": "独立编写外部静帧提示词顺序；舍弃固定人物和工具参数"
+    },
+    {
+      "origin": "local:刺猬星球/03-宏大中式幻想图像与视频/references/video-motion.md",
+      "revision": "sha256:82b589c1391aaee96aa30633fb15a3a748f025ba1f1f9347299243ca2e63e4ff",
+      "license": "not provided",
+      "adaptation": "仅登记后续视频能力候选，不纳入静帧插件"
+    }
+  ]
+}

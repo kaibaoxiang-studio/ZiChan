@@ -1,0 +1,6 @@
+interface:
+  display_name: 场景静帧提示词
+  short_description: 从已批准场景卡编写外部静帧提示词
+  default_prompt: Use $scene-image-prompt to complete the requested task.
+policy:
+  allow_implicit_invocation: false

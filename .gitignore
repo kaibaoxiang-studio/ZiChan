@@ -5,3 +5,4 @@
 .venv/
 projects/
 *.tmp
+dist/scene-assets-local-marketplace/
