@@ -10,6 +10,26 @@
       "capability_ids": [
         "character-image-prompt"
       ]
+    },
+    {
+      "source_id": "hedgehog-general-image-skill",
+      "source_sha256": "3e8fdab2d0c0b69d121503a2d2833a067a672afca21b51c5e1ac99a1f30860fb",
+      "origin": "SKILL.md",
+      "path": "references/knowledge/character-image-prompt/hedgehog-general-image-skill.md",
+      "rules_sha256": "400ba72e422495249b285204186c358008357556f7905fec58068ed543a1c91e",
+      "capability_ids": [
+        "character-image-prompt"
+      ]
+    },
+    {
+      "source_id": "hedgehog-general-image-prompting",
+      "source_sha256": "d957a45cb24fe2cf1a85858674fc533f15a5f4621355f559a13a93168999c2dd",
+      "origin": "prompting.md",
+      "path": "references/knowledge/character-image-edit/hedgehog-general-image-prompting.md",
+      "rules_sha256": "ec75b45b48fa765a51263e3fad50fd9a21606f43bbaaf959f52145095df15374",
+      "capability_ids": [
+        "character-image-edit"
+      ]
     }
   ]
 }

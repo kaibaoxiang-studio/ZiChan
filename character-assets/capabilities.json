@@ -285,7 +285,8 @@
         "references/expression.md",
         "references/execution-sheet.md",
         "references/interfaces.md",
-        "references/knowledge/character-image-prompt/hedgehog-2d3d.md"
+        "references/knowledge/character-image-prompt/hedgehog-2d3d.md",
+        "references/knowledge/character-image-prompt/hedgehog-general-image-skill.md"
       ],
       "explicit_only": true
     },
@@ -447,7 +448,8 @@
       "knowledge_refs": [
         "knowledge/index.md",
         "references/editing.md",
-        "references/review.md"
+        "references/review.md",
+        "references/knowledge/character-image-edit/hedgehog-general-image-prompting.md"
       ],
       "explicit_only": true
     }

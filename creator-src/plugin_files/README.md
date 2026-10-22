@@ -1,4 +1,4 @@
-# 角色资产插件 v0.1.1
+# 角色资产插件 v0.1.2
 
 独立安装的 Codex 插件。主入口为 `$character-assets`；辅助入口：`$character-evidence`、`$character-design`、`$character-image-prompt`、`$character-image-review`、`$character-image-edit`。它们是可单独调用的 Skills，默认由主入口按当前阶段选择，不要求同时启动多个 Agent。
 
@@ -29,6 +29,8 @@ $character-assets 请用这份标准化剧本和资产表建立角色资产项�
 ```
 
 主入口会按 [工作流](references/workflow.md) 使用 `scripts/character_project.py`。想单独审查已有图，可调用 `$character-image-review` 并给出项目目录和图片。需要局部修图提示词，可调用 `$character-image-edit`。结构化 JSON 格式见 [接口](references/interfaces.md)；知识按 [索引](knowledge/index.md) 加载。
+
+`01-通用图片生成` 的方法已转成角色专用的[提示词骨架](references/prompting.md)与[局部修图骨架](references/editing.md)：逐张说明参考图职责、图内中文原样写出、每轮只修一个错误并重新检查整张回流图。来源及 Apache-2.0 许可见 [第三方说明](THIRD_PARTY_NOTICES.md)。
 
 本地 CLI 可直接查看项目：
 

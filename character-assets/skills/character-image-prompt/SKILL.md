@@ -18,3 +18,5 @@ description: "把已批准设计转成 GPT Image 2.5 分阶段提示词"
 - [references/interfaces.md](../../references/interfaces.md)
 
 Read [hedgehog-2d3d](../../references/knowledge/character-image-prompt/hedgehog-2d3d.md) when this capability needs the supplied knowledge.
+
+Read [hedgehog-general-image-skill](../../references/knowledge/character-image-prompt/hedgehog-general-image-skill.md) when this capability needs the supplied knowledge.

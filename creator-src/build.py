@@ -85,7 +85,8 @@ def blueprint():
             "非人使用已批准替代布局。输出 CharacterPromptPackageV1 与检查点，经 CLI 合同校验后交操作者外部出图。",
             ["knowledge/index.md", "references/prompting.md", "references/expression.md",
              "references/execution-sheet.md", "references/interfaces.md",
-             "references/knowledge/character-image-prompt/hedgehog-2d3d.md"],
+             "references/knowledge/character-image-prompt/hedgehog-2d3d.md",
+             "references/knowledge/character-image-prompt/hedgehog-general-image-skill.md"],
             {**common, "stage": {"type": "string", "enum": ["avatar", "expression", "full_body", "execution"]}},
             ("project_root", "character_id", "stage", "request")),
         capability(
@@ -108,7 +109,8 @@ def blueprint():
             "参考图只借操作者指定的优点。文字标签错字只修对应格，不重画脸；"
             "无头服装格残留头部只修裁切与相邻服装区域。不能承诺像素级保持。"
             "修改图回流后仍走审查与操作者批准；想采纳意外新细节先更新设计卡。",
-            ["knowledge/index.md", "references/editing.md", "references/review.md"],
+            ["knowledge/index.md", "references/editing.md", "references/review.md",
+             "references/knowledge/character-image-edit/hedgehog-general-image-prompting.md"],
             {**common, "image_path": text_field(), "issue": text_field()},
             ("project_root", "image_path", "issue", "request")),
     ]
@@ -129,9 +131,11 @@ def blueprint():
         {"origin": "local:刺猬星球素材/3d角色质感提示词/替换海报角色提示词.txt", "revision": "sha256:ec94b106196958c3d25332d07547192c9aec5d2eb7a6733aab9cece7ca779a79", "adaptation": "参考图职责分离；换装需要变体批准"},
         {"origin": "local:刺猬星球素材/动漫PV角色概念设计/SKILL.md", "revision": "sha256:bf266f8942438273ead0e2d6fe1a26b9988e2dfaecd12b5b15eb48417975ae11", "adaptation": "独立提炼风格与角色细节分离以及回图局部诊断"},
         {"origin": "local:刺猬星球素材/打斗提示词/四视图提示词.txt", "revision": "sha256:b750b10de906df64261ff823baf9f236077711eff4c8798efe68adcd27cef7d2", "adaptation": "对照已有执行参考板合同；只保留差异审查记录"},
+        {"origin": "local:刺猬星球素材/01-通用图片生成/SKILL.md", "revision": "sha256:3e8fdab2d0c0b69d121503a2d2833a067a672afca21b51c5e1ac99a1f30860fb", "license": "Apache-2.0", "adaptation": "改写角色提示词结构与参考图职责；不携带生图 API/CLI"},
+        {"origin": "local:刺猬星球素材/01-通用图片生成/references/prompting.md", "revision": "sha256:d957a45cb24fe2cf1a85858674fc533f15a5f4621355f559a13a93168999c2dd", "license": "Apache-2.0", "adaptation": "改写单项修图与全图复核方法；保留外部出图"},
     ]
     return {"schema_version": "HarnessBlueprintV1",
-            "plugin": {"name": "character-assets", "version": "0.1.1",
+            "plugin": {"name": "character-assets", "version": "0.1.2",
                        "description": "从剧本依据建设可追溯的角色视觉资产包与 GPT Image 2.5 提示词",
                        "author": {"name": "开宝箱工作室"}},
             "goal": "独立运行的角色资产子插件：设计、提示词、回图审查与可复用资产包",

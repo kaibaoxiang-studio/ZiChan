@@ -66,6 +66,18 @@
       "origin": "local:刺猬星球素材/打斗提示词/四视图提示词.txt",
       "revision": "sha256:b750b10de906df64261ff823baf9f236077711eff4c8798efe68adcd27cef7d2",
       "adaptation": "对照已有执行参考板合同；只保留差异审查记录"
+    },
+    {
+      "origin": "local:刺猬星球素材/01-通用图片生成/SKILL.md",
+      "revision": "sha256:3e8fdab2d0c0b69d121503a2d2833a067a672afca21b51c5e1ac99a1f30860fb",
+      "license": "Apache-2.0",
+      "adaptation": "改写角色提示词结构与参考图职责；不携带生图 API/CLI"
+    },
+    {
+      "origin": "local:刺猬星球素材/01-通用图片生成/references/prompting.md",
+      "revision": "sha256:d957a45cb24fe2cf1a85858674fc533f15a5f4621355f559a13a93168999c2dd",
+      "license": "Apache-2.0",
+      "adaptation": "改写单项修图与全图复核方法；保留外部出图"
     }
   ]
 }
