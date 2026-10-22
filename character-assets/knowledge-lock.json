@@ -46,7 +46,7 @@
       "source_sha256": "1fd297cc5722ab09ab2f58fe4692ce34064ca2918b732179569b771727689621",
       "origin": "local:形体体态设计知识库.zip",
       "path": "references/knowledge/character-body-design/body.md",
-      "rules_sha256": "b152eb6953d3a049a71bb509d5ccd4ca351c876f2b3891511c6d000ba368b2b8",
+      "rules_sha256": "16176406e94b1e968c215e0bf32fc30826420cf0cbc581c25711c8719d40404b",
       "capability_ids": [
         "character-body-design"
       ]
@@ -266,7 +266,7 @@
       "source_sha256": "d8e465b2fab48a72f9a2b74c8923d2f4655e225b0e15ff1fc1eaa99e395bceb6",
       "origin": "local:身体比例与三维形体塑造-知识库 (1).zip",
       "path": "references/knowledge/character-body-design/body-proportion-3d.md",
-      "rules_sha256": "babb1cc42ea3b1d45a708a700dad295bdca6053ee99036d704189de4d46cb4fa",
+      "rules_sha256": "5c5579e6cc1d98b447aebedaf8909d65cf1da15e4bfe168bf23ccd61a5f9a5cb",
       "capability_ids": [
         "character-body-design"
       ]

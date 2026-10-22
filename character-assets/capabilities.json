@@ -66,6 +66,7 @@
         "knowledge/index.md",
         "references/workflow.md",
         "references/interfaces.md",
+        "references/model-card-baseline.md",
         "references/evidence.md",
         "references/source-notes.md",
         "references/differentiation-framework.md",
@@ -297,6 +298,7 @@
       "knowledge_refs": [
         "knowledge/index.md",
         "references/prompting.md",
+        "references/model-card-baseline.md",
         "references/expression.md",
         "references/execution-sheet.md",
         "references/interfaces.md",
@@ -389,6 +391,7 @@
       "knowledge_refs": [
         "knowledge/index.md",
         "references/review.md",
+        "references/model-card-baseline.md",
         "references/execution-sheet.md",
         "references/interfaces.md",
         "references/render-texture-standard.md",

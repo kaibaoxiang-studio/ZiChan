@@ -14,6 +14,9 @@
 
 - `feature_focus{core_sentence,primary_anchors[],quiet_features[],imperfection_policy,view_checks}`。锚点写 `part,geometry,basis,visible_views[]`；若不是 2–3 个，写 `anchor_count_rationale`。安静区写 `part,decision`；不必故意让它丑。`imperfection_policy{status:none|existing|operator_approved,detail,basis}` 可明确选择不加新瑕疵。`view_checks` 分 `silhouette` 和 `occlusion`，各写 `status:passed|failed|not_tested,evidence`；未实际看图时保持 `not_tested`。
 - `body_form{proportions,masses,views,action_check}`。比例写躯干/腿、臂段、腿段的**相对关系**；体块写头、胸腔、盆腔及连接；正侧背各写同一骨架的可复现形态；动作写站姿、剧本动作、活动能力判断与检查状态。尚无图像或关键姿态时状态为 `not_tested`。
+- v0.2.3 给**新提交的人形 V2.2 卡**增加 `body_form.proportion_anchors`：`measurement_frame` 写姿态、鞋履和测量端点；`head_body`、`shoulder_hip`、`torso_legs`、`arm_segments`、`leg_segments` 各写 `{mode:numeric|landmark,reference_points:[至少两个明确部位],relation,basis}`。`head_body` 必须给约数或范围的头高对全高比；`torso_legs` 可选第 7 颈椎至臀纹与臀纹至足底，或另一个明确端点的体系，不能混称。其他轴可用数字，或用明确骨点/关节的高低、宽窄、落点关系。`relation` 要逐字包含 `reference_points`，以便设计卡和全身提示词追溯。`visual_details.body.frame_proportions` 呈现前三项关系，`body_form.proportions` 的躯干/腿、臂段、腿段呈现各自关系；全身提示词逐字继承前三项，验收项至少核对头身和腿身。`165cm/48kg` 只记录原文事实，无法由此推算头身比、上段/下段或肩胯比。
 - `route_ref` 和 `route_sha256` 指向路由 JSON。十一项 `specialist_coverage` 中 used 项均要完整提案交接。`submit`、`approve-record` 和后续批准卡读取都会校验外部文件哈希，防止提案被悄悄替换。
 
 若用户只提供头像需求，仍要有身体设计的最小稳定结构供后续全身资产衔接，但不要在头像提示词里硬塞不可见的腿、背面信息。非人角色按形态沿用 V2 路线，不能强制套人体比例。
+
+原来已批准的 V2.2 卡可以读取和打包；新提交 V2.2 卡须补齐上述锚点。旧卡若继续制作新的全身提示词，先把具体比例作为**待审设计选择**交操作者确认并重交设计卡；不从身高体重或“瘦高型”自行编造测量数。新批准的全身提示词必须带入设计卡锚点，否则 CLI 拒绝提交。

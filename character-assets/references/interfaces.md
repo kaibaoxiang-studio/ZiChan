@@ -28,6 +28,8 @@
 
 0.2.2 起新提交的重点人形卡使用 `CharacterDesignCardV2.2`。除六组细节外，新增 `feature_focus`、`body_form`、`route_ref`、`route_sha256`，并覆盖 11 个专项。used 项另需 `proposal_sha256`、`selected_option_id`、`applied_elements[{field,element_index}]`；提案必须是目标角色与专项的 V1.1 原样 JSON，文件放项目 `drafts/specialists/`。路由须是同一角色/变体的 `CharacterSpecialistRouteV1`，invoke/skip 与 used/not_needed 一一对应。提交、批准及后续读取时校验哈希。旧已批准卡仍可读；重新提交重点人形卡用 V2.2。详见[焦点与三维形体交接](feature-focus-and-body-form.md)。
 
+0.2.3 不改卡的 `schema_version`；新提交的人形 V2.2 卡增加 `body_form.proportion_anchors`。其中 `measurement_frame` 写测量姿态与端点，`head_body`、`shoulder_hip`、`torso_legs`、`arm_segments`、`leg_segments` 各为 `{mode:"numeric"|"landmark",reference_points:[至少两个],relation,basis}`。`head_body` 必须是明确的头高与全高数值比；其他项可用数值或具体骨点相对位置。`relation` 必须逐字包含列出的 `reference_points`，并同步进入设计卡身体摘要；全身提示词须继承已批准的头身、肩胯与躯腿关系，验收项须核对头身与躯腿。原有已批准 V2.2 卡仍可读取和打包，但缺这些锚点的卡不得新提交全身提示词；先经操作者确认比例并更新设计卡。示例见[身体比例交接样例](../examples/body-proportion-contract.md)。
+
 ## CharacterPromptPackageV1
 
 必填 `stage`（`avatar|expression|full_body|execution`）、`target_model`（GPT Image 2.5）、`character_id`、`variant_id`、`design_card_sha256`、`anchor_images{}`、`reference_images[]`、`prompts[{id,text}]`、非空 `acceptance_checks[]`。`anchor_images` 在头像阶段是空对象；表情/全身阶段含 `avatar` 的已批准图 SHA；执行阶段再含 `expression` 与 `full_body` 的已批准图 SHA。头像有同设计 2–3 条；表情加 `labels[]`，长度 9 或 16，且每项有中文；单独全身图加 `head_visible:true` 与 `feet_visible:true`；人形执行表加：
@@ -43,7 +45,9 @@
 
 非人执行表在设计卡中批准替代布局，提示词包的 `layout` 必须与设计卡一致。包内设计卡与锚点图片哈希必须匹配当前批准版本，防止误用旧版身份锚点。
 
-头像提示词包必须有 `aspect_ratio`，默认为 `"3:4"`；每条 `prompts[].text` 也要写出该比例。仅当操作者明确要求其他比例时，填写新比例、`aspect_ratio_explicit_user_override:true` 和 `aspect_ratio_basis`（记录具体用户决定）。现有批准的旧包不会因缺新字段而自动失效。
+头像和全身提示词包都必须有 `aspect_ratio`：头像默认 `"3:4"`，全身默认 `"9:16"`。每条 `prompts[].text` 都要写出对应比例；全身 `acceptance_checks[]` 还须核对 9:16。仅当操作者明确要求其他比例时，填写新比例、`aspect_ratio_explicit_user_override:true` 和 `aspect_ratio_basis`（记录具体用户决定）。现有批准的旧包不会因缺新字段而自动失效。
+
+新提交的人形头像、表情与单独全身提示词包还必须有 `reference_attire`，按[模卡规则](model-card-baseline.md)选择：头像/表情为 `face_only`（默认锁骨以上、服装不入画）、`white_tank` 或 `white_sports_tank`；全身为 `white_tank_shorts_barefoot` 或 `white_sports_tank_black_shorts_barefoot`。背心作为头像/表情退路时填写 `reference_attire_basis`；不适用模卡默认方案时用 `approved_exception`，同时填写 `reference_attire_basis` 和 `reference_attire_description`。每条提示词及验收项均须写明对应可见着装。全身图的模卡服装不是剧情换装；执行资产表恢复设计卡中获批准的正式服装、鞋履与饰物。旧已批准包仍保持可读。
 
 ## CharacterImageReviewV1 与 CharacterAssetPackV1
 

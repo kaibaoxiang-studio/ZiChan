@@ -22,7 +22,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 
 SCHEMA = "CharacterProjectV1"
-PLUGIN_VERSION = "0.2.2"
+PLUGIN_VERSION = "0.2.3"
 STAGES = ("avatar", "expression", "full_body", "execution")
 HEAVY_TIERS = {"主角", "重要角色"}
 SUPPORTED_INPUTS = {".json", ".md", ".markdown", ".xlsx"}
@@ -45,6 +45,30 @@ SPECIALIST_DOMAINS = ("character-hair-design", "character-body-design",
                       "character-costume-material-design", "character-costume-accessory-design")
 SPECIALIST_DOMAINS_V22 = ("character-feature-focus", *SPECIALIST_DOMAINS)
 VISIBLE_VIEWS = {"front", "side", "back", "avatar", "full_body"}
+BODY_PROPORTION_POINTS = {
+    "head_body": (("头",), ("足", "脚", "身高", "全高")),
+    "shoulder_hip": (("肩",), ("胯", "髋", "骨盆")),
+    "torso_legs": (("裆", "臀"), ("足", "脚", "踝", "腿")),
+    "arm_segments": (("肘",), ("腕",)),
+    "leg_segments": (("膝",), ("踝", "足", "脚")),
+}
+MODEL_CARD_ATTIRE = {
+    "avatar": {
+        "face_only": ("服装不入画", "锁骨以上"),
+        "white_tank": ("白色纯色背心",),
+        "white_sports_tank": ("白色运动背心",),
+    },
+    "expression": {
+        "face_only": ("服装不入画", "锁骨以上"),
+        "white_tank": ("白色纯色背心",),
+        "white_sports_tank": ("白色运动背心",),
+    },
+    "full_body": {
+        "white_tank_shorts_barefoot": ("白色纯色背心", "短裤", "赤脚"),
+        "white_sports_tank_black_shorts_barefoot":
+            ("白色运动背心", "黑色运动短裤", "赤脚"),
+    },
+}
 SPECIALIST_FIELD_DOMAINS = {
     "character-hair-design": {"hair"}, "character-body-design": {"body"},
     "character-face-design": {"face"},
@@ -199,6 +223,103 @@ def validate_focus_and_form(data):
             require_text(section, field)
     ensure(body["action_check"]["test_status"] in {"passed", "failed", "not_tested"},
            "body_form.action_check.test_status is invalid")
+
+
+def validate_body_proportion_anchors(data):
+    """Gate newly submitted V2.2 human cards; old approvals remain readable."""
+    body = data.get("body_form") or {}
+    anchors = body.get("proportion_anchors")
+    ensure(isinstance(anchors, dict), "body_form.proportion_anchors is required for a new human card")
+    require_text(anchors, "measurement_frame")
+    ensure(len(anchors["measurement_frame"].strip()) >= 12,
+           "proportion_anchors.measurement_frame needs a pose and measurement endpoints")
+    relations = {}
+    for name, point_groups in BODY_PROPORTION_POINTS.items():
+        anchor = anchors.get(name)
+        ensure(isinstance(anchor, dict), f"proportion_anchors.{name} must be an object")
+        ensure(anchor.get("mode") in {"numeric", "landmark"},
+               f"proportion_anchors.{name}.mode must be numeric or landmark")
+        points = anchor.get("reference_points")
+        ensure(isinstance(points, list) and len(points) >= 2 and
+               all(isinstance(point, str) and point.strip() for point in points) and
+               len(set(points)) == len(points),
+               f"proportion_anchors.{name}.reference_points needs distinct body landmarks")
+        combined = " ".join(points)
+        ensure(all(any(term in combined for term in group) for group in point_groups),
+               f"proportion_anchors.{name} needs the named body regions")
+        require_text(anchor, "relation")
+        relation = anchor["relation"].strip()
+        ensure(len(relation) >= 12 and all(point in relation for point in points),
+               f"proportion_anchors.{name}.relation must compare its reference points")
+        if anchor["mode"] == "numeric":
+            ensure(bool(re.search(r"\d+(?:\.\d+)?\s*(?:%|％|[:：]|倍|个头|头身)", relation)),
+                   f"proportion_anchors.{name}.relation needs an explicit ratio")
+        else:
+            ensure(any(word in relation for word in ("高于", "低于", "宽于", "窄于", "齐平",
+                                                  "落在", "位于", "超过", "接近", "短于", "长于")),
+                   f"proportion_anchors.{name}.relation needs a definite landmark comparison")
+        require_text(anchor, "basis")
+        ensure(len(anchor["basis"].strip()) >= 8,
+               f"proportion_anchors.{name}.basis must distinguish fact from design choice")
+        relations[name] = relation
+    ensure(anchors["head_body"]["mode"] == "numeric",
+           "proportion_anchors.head_body needs a proposed or approved head-to-height ratio")
+    details = data["visual_details"]["body"]["frame_proportions"]
+    ensure(all(relations[name] in details for name in ("head_body", "shoulder_hip", "torso_legs")),
+           "visual_details.body.frame_proportions must show head, shoulder/hip and torso/leg anchors")
+    for name in ("torso_legs", "arm_segments", "leg_segments"):
+        ensure(relations[name] in body["proportions"][name],
+               f"body_form.proportions.{name} must show its concrete proportion anchor")
+
+
+def validate_full_body_prompt_proportions(prompt_package, design_card):
+    """Copy approved body anchors into each new full-body prompt and its checks."""
+    validate_body_proportion_anchors(design_card)
+    anchors = design_card["body_form"]["proportion_anchors"]
+    required = ("head_body", "shoulder_hip", "torso_legs")
+    for prompt in prompt_package["prompts"]:
+        ensure(all(anchors[name]["relation"] in prompt["text"] for name in required),
+               f"Full-body prompt {prompt['id']} must carry approved body proportion anchors")
+    checks = "\n".join(prompt_package["acceptance_checks"])
+    ensure(all(anchors[name]["relation"] in checks for name in ("head_body", "torso_legs")),
+           "Full-body acceptance checks must verify head/body and torso/leg anchors")
+
+
+def validate_model_card_attire(prompt_package, design_card):
+    """Check stage attire for new human prompt submissions without changing old approvals."""
+    stage = prompt_package["stage"]
+    if design_card.get("morphology") not in {"human", "humanoid"} or stage not in MODEL_CARD_ATTIRE:
+        return
+    profile = prompt_package.get("reference_attire")
+    allowed = MODEL_CARD_ATTIRE[stage]
+    ensure(profile in allowed or profile == "approved_exception",
+           f"{stage} human model card needs a stage-appropriate reference_attire")
+    if profile == "approved_exception":
+        require_text(prompt_package, "reference_attire_basis")
+        require_text(prompt_package, "reference_attire_description")
+        tokens = (prompt_package["reference_attire_description"],)
+    else:
+        tokens = allowed[profile]
+        if stage in {"avatar", "expression"} and profile != "face_only":
+            require_text(prompt_package, "reference_attire_basis")
+    for prompt in prompt_package["prompts"]:
+        ensure(all(token in prompt["text"] for token in tokens),
+               f"{stage} prompt {prompt['id']} must describe model-card attire {profile}")
+    checks = "\n".join(prompt_package["acceptance_checks"])
+    ensure(all(token in checks for token in tokens),
+           f"{stage} acceptance checks must verify model-card attire {profile}")
+
+
+def validate_expression_attire_transition(prompt_package, avatar_package):
+    """Expression grid inherits the avatar, except a recorded clothed fallback."""
+    previous = avatar_package.get("reference_attire")
+    current = prompt_package.get("reference_attire")
+    if not previous or previous == current:
+        return
+    ensure(previous == "face_only" and current in {"white_tank", "white_sports_tank"}
+           and isinstance(prompt_package.get("reference_attire_basis"), str)
+           and prompt_package["reference_attire_basis"].strip(),
+           "Expression model-card attire must match approved avatar or document a clothed fallback")
 
 
 def checked_handoff_file(root, relative, expected_sha, label):
@@ -597,18 +718,24 @@ def _validate_record(kind, data, state, character_id=None, variant_id=None, stag
             require_text(prompt, "text")
             prompt_ids.append(prompt["id"])
         ensure(len(set(prompt_ids)) == len(prompt_ids), "Prompt IDs must be unique")
-        if stage == "avatar":
-            ensure(2 <= len(data["prompts"]) <= 3, "Avatar requires 2–3 same-design candidates")
+        if stage in {"avatar", "full_body"}:
+            if stage == "avatar":
+                ensure(2 <= len(data["prompts"]) <= 3, "Avatar requires 2–3 same-design candidates")
+            default_ratio = "3:4" if stage == "avatar" else "9:16"
+            stage_label = "Avatar" if stage == "avatar" else "Full-body"
             ratio = data.get("aspect_ratio")
             ensure(isinstance(ratio, str) and re.fullmatch(r"[1-9][0-9]*:[1-9][0-9]*", ratio),
-                   "Avatar prompt package needs aspect_ratio; default is 3:4")
-            if ratio != "3:4":
+                   f"{stage_label} prompt package needs aspect_ratio; default is {default_ratio}")
+            if ratio != default_ratio:
                 require_text(data, "aspect_ratio_basis")
                 ensure(data.get("aspect_ratio_explicit_user_override") is True,
-                       "Avatar ratio may differ from 3:4 only by explicit user override")
+                       f"{stage_label} ratio may differ from {default_ratio} only by explicit user override")
             for prompt in data["prompts"]:
                 ensure(ratio in prompt["text"],
-                       f"Avatar prompt {prompt['id']} must state canvas ratio {ratio}")
+                       f"{stage_label} prompt {prompt['id']} must state canvas ratio {ratio}")
+            if stage == "full_body":
+                ensure(any(ratio in check for check in data["acceptance_checks"]),
+                       "Full-body acceptance checks must verify canvas ratio")
         if stage == "expression":
             require_list(data, "labels")
             ensure(len(data["labels"]) in {9, 16}, "Expression sheet needs 9 or 16 Chinese labels")
@@ -755,6 +882,7 @@ def cmd_submit(args):
                        "Submitted lead/important human design cards require CharacterDesignCardV2.2; existing approvals remain readable")
         _validate_record(args.kind, content, state, character_id, variant_id, args.stage)
         if args.kind == "design-card" and content.get("schema_version") == "CharacterDesignCardV2.2" and content.get("morphology") in {"human", "humanoid"}:
+            validate_body_proportion_anchors(content)
             validate_design_handoffs(content, root)
         if args.kind == "prompt-package":
             ensure(content["design_card_sha256"] == card_record["sha256"],
@@ -763,6 +891,14 @@ def cmd_submit(args):
                    "Prompt package anchor image versions do not match the current approvals")
             card = read_json(root / state["records"][
                 _record_key("design-card", character_id, variant_id)]["path"])
+            validate_model_card_attire(content, card)
+            if args.stage == "expression" and card.get("morphology") in {"human", "humanoid"}:
+                avatar_record = state["records"][_record_key(
+                    "prompt-package", character_id, variant_id, "avatar")]
+                validate_expression_attire_transition(
+                    content, read_json(root / avatar_record["path"]))
+            if args.stage == "full_body" and card.get("schema_version") == "CharacterDesignCardV2.2" and card.get("morphology") in {"human", "humanoid"}:
+                validate_full_body_prompt_proportions(content, card)
             if args.stage == "execution":
                 ensure(content.get("morphology") == card["morphology"],
                        "Execution prompt morphology must match the approved design card")
@@ -804,6 +940,7 @@ def cmd_approve_record(args):
         if args.kind == "design-card":
             card = read_json(root / value["path"])
             if card.get("schema_version") == "CharacterDesignCardV2.2" and card.get("morphology") in {"human", "humanoid"}:
+                validate_body_proportion_anchors(card)
                 validate_design_handoffs(card, root)
         if args.kind == "cast-plan":
             _require_approved(state, "visual-bible")

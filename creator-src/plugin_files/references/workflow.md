@@ -34,7 +34,7 @@ python scripts/character_project.py approve-record --project-root /work/role-pro
 
 ## 3. 提示词与图片回流
 
-每阶段由 `$character-image-prompt` 编写 `CharacterPromptPackageV1`，经 `submit --kind prompt-package --stage ...` 合同检查后可用于外部出图。头像默认 3:4 竖版，只有明确的用户决定可覆盖；详细卡若仍是概括句，先回设计轮补细，不靠提示词现编。按[真实质感规则](render-texture-standard.md)选择皮肤、布料、光线和修复策略。顺序为头像 → 表情与全身并行 → 执行资产表。每阶段图片用 `import-image` 登记，再由 `$character-image-review` 实际看图、保存 `CharacterImageReviewV1`。报告通过后，操作者用 `approve-image` 选定唯一当前版本。只报“通过”而不见图、未经操作者确认，都不能推进。
+每阶段由 `$character-image-prompt` 编写 `CharacterPromptPackageV1`，经 `submit --kind prompt-package --stage ...` 合同检查后可用于外部出图。头像默认 3:4 竖版，全身图默认 9:16 竖版，只有明确的用户决定可覆盖；人形头像、表情和单独全身采用[模卡式基础形体图](model-card-baseline.md)，正式服装在执行资产表恢复。头像与表情优先锁骨以上、服装不入画，生成或审查受阻时整组改用对应白色背心；全身使用指定背心、短裤并赤脚。详细卡若仍是概括句，先回设计轮补细，不靠提示词现编。按[真实质感规则](render-texture-standard.md)选择皮肤、布料、光线和修复策略。顺序为头像 → 表情与全身并行 → 执行资产表。每阶段图片用 `import-image` 登记，再由 `$character-image-review` 实际看图、保存 `CharacterImageReviewV1`。报告通过后，操作者用 `approve-image` 选定唯一当前版本。只报“通过”而不见图、未经操作者确认，都不能推进。
 
 头像与全身图回流审查时，若已有同剧定稿图片，增加并排比较：批准的主锚点、脸型、发结构、体态和皮肤是否在成图里保持区别；无法取得其他角色图片时写明只做单人核验。差异问题先定位设计卡还是出图偏差，修设计卡须重走批准，单纯出图偏差可走局部修图。
 

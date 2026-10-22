@@ -1,15 +1,15 @@
-# 角色资产知识索引 v0.2.2
+# 角色资产知识索引 v0.2.3
 
 先读取当前任务对应的 reference，不要在每次调用中加载整个知识库。任何 reference 的示例都只是方法，剧本事实与操作者已批准的决定优先。
 
 | 情景 | 加载 | 用途 |
 | --- | --- | --- |
 | 项目启动、全员规划 | `references/evidence.md`、`references/character-design.md`、`references/differentiation-framework.md`、`references/knowledge/character-cast-differentiation/ensemble.md` | 建立第 -1 阶段视觉基准、比较组与五轴矩阵；旧 Skill 的占用表方法按需加载 `legacy-visual.md` |
-| 特征主次与三维形体缺口 | `references/feature-focus-and-body-form.md`；按路由分别加载 `character-feature-focus/feature-focus.md`、`character-body-design/body-proportion-3d.md` | 先路由再实际调用、保存提案哈希；检查锚点视角、颅胸盆体块和剧本动作 |
+| 特征主次与三维形体缺口 | `references/feature-focus-and-body-form.md`；按路由分别加载 `character-feature-focus/feature-focus.md`、`character-body-design/body-proportion-3d.md` | 先路由再实际调用、保存提案哈希；检查锚点视角、可核对的头身与骨点比例、颅胸盆体块和剧本动作 |
 | 逐人设计、Grill Me | `references/character-design.md`、`references/costume-and-morphology.md`、`references/specialist-contract.md` | 先定位具体缺口，再调用下表的专项，避免全员强制走完所有岗位 |
 | 新建重点人形设计卡过于概括 | `references/design-detail-standard.md`、`references/knowledge/character-design/anti-stereotype-texture.md` | 六组具象细节、十专项实际成果与 V2.2 卡门槛 |
 | 剧本与三份输入冲突 | `references/evidence.md` | 按原文证据优先列疑点，不暗改事实 |
-| 头像、全身图提示词 | `references/prompting.md` | 从已确认设计卡抽取可见锚点，指定参考图职责 |
+| 头像、表情、全身图提示词 | `references/prompting.md`、`references/model-card-baseline.md` | 从已确认设计卡抽取可见锚点，指定参考图职责和模卡式阶段着装 |
 | 油亮、蜡感、材质空泛或脏糊 | `references/render-texture-standard.md`，再按设计/提示词/审查/修图的对应 `anti-stereotype-texture.md` 快照加载 | 分开设计层与渲染层；按媒介、证据和回图缺陷选词与修复 |
 | 外部出图的通用提示词结构与原样中文 | `references/knowledge/character-image-prompt/hedgehog-general-image-skill.md`、`references/prompting.md` | 区分新图/编辑，控制补充细节，逐张标注参考图职责 |
 | 已批准的 2D→3D 呈现 | `references/knowledge/character-image-prompt/hedgehog-2d3d.md`、`references/prompting.md` | 保留身份与服装，只转换已批准的媒介、材质和光照 |
@@ -43,3 +43,5 @@
 0.2.1 新增《拒绝脸谱化人物设计》来源的 7 份定点快照：`character-design`、`character-cast-differentiation`、`character-skin-design`、`character-costume-material-design`、`character-image-prompt`、`character-image-review`、`character-image-edit`。头像 3:4 规则在 `references/prompting.md` 和 CLI 提示词包合同中，回图按 `references/review.md` 核对。
 
 0.2.2 新增特征聚焦与身体比例/三维体块两份来源，分别落在设计、形体、提示词、回图审查的 5 份定点快照。逐人设计先保存专项路由；used 交接必须有提案文件、SHA、所选方案和字段映射。
+
+0.2.3 加强身体比例从形体专项到设计卡、全身提示词和回图验收的交接；全身图默认 9:16 竖版，提示词包和最终回图均检查比例。头像/表情与单独全身图采用模卡基线，正式服装由执行资产表承接；见 `references/model-card-baseline.md`。比例字段见 `references/feature-focus-and-body-form.md` 与 `examples/body-proportion-contract.md`。不新增知识来源。
