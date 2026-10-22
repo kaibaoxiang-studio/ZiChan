@@ -22,12 +22,27 @@ import xml.etree.ElementTree as ET
 import zipfile
 
 SCHEMA = "CharacterProjectV1"
+PLUGIN_VERSION = "0.2.1"
 STAGES = ("avatar", "expression", "full_body", "execution")
 HEAVY_TIERS = {"主角", "重要角色"}
 SUPPORTED_INPUTS = {".json", ".md", ".markdown", ".xlsx"}
 IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp"}
 RECOGNITION_AXES = ("silhouette", "face_structure", "body_posture",
                     "hair_structure", "costume_color")
+DETAIL_FIELDS = {
+    "face": ("contour", "brow_eyes", "nose_mouth"),
+    "hair": ("hairline_part", "volume_flow", "length_texture_color"),
+    "body": ("frame_proportions", "weight_posture"),
+    "skin": ("tone_variation", "surface_distribution"),
+    "costume": ("silhouette_layers", "neckline", "shoulder_sleeve",
+                "seams_fastening_mobility", "material_drape_wear", "color_placement"),
+    "adornments": ("head_neck", "body_hands"),
+}
+SPECIALIST_DOMAINS = ("character-hair-design", "character-body-design",
+                      "character-face-design", "character-face-signature-design",
+                      "character-skin-design", "character-costume-style-design",
+                      "character-costume-cut-design", "character-costume-color-design",
+                      "character-costume-material-design", "character-costume-accessory-design")
 NS = {"m": "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
       "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
       "p": "http://schemas.openxmlformats.org/package/2006/relationships"}
@@ -80,6 +95,48 @@ def require_list(obj, key):
 
 def require_text(obj, key):
     ensure(isinstance(obj.get(key), str) and obj[key].strip(), f"{key} must be text")
+
+
+def validate_visual_details(data):
+    """Require drawable decisions for newly authored human detail cards.
+
+    This is a structural gate, not a claim that the prose or generated image is good.
+    Previously approved V1/V2 records remain readable and valid.
+    """
+    details = data.get("visual_details")
+    ensure(isinstance(details, dict), "CharacterDesignCardV2.1 needs visual_details")
+    seen_descriptions = set()
+    generic_only = {"结构清楚", "自然垂落", "真实质感", "精致漂亮", "干净利落",
+                    "清秀好看", "自然发型", "普通体态", "无特别设计"}
+    for domain, fields in DETAIL_FIELDS.items():
+        section = details.get(domain)
+        ensure(isinstance(section, dict), f"visual_details.{domain} must be an object")
+        for field in fields:
+            value = section.get(field)
+            ensure(isinstance(value, str) and len(value.strip()) >= 8,
+                   f"visual_details.{domain}.{field} needs a concrete visible description")
+            normalized = re.sub(r"[\s，。；、,.!！:：]+", "", value)
+            ensure(normalized not in seen_descriptions and normalized not in generic_only,
+                   f"visual_details.{domain}.{field} repeats or uses generic wording")
+            seen_descriptions.add(normalized)
+    coverage = data.get("specialist_coverage")
+    ensure(isinstance(coverage, dict), "CharacterDesignCardV2.1 needs specialist_coverage")
+    valid_detail_paths = {f"{domain}.{field}" for domain, fields in DETAIL_FIELDS.items() for field in fields}
+    for specialist in SPECIALIST_DOMAINS:
+        item = coverage.get(specialist)
+        ensure(isinstance(item, dict), f"specialist_coverage.{specialist} must be an object")
+        ensure(item.get("status") in {"used", "not_needed"},
+               f"specialist_coverage.{specialist}.status must be used or not_needed")
+        require_text(item, "decision")
+        if item["status"] == "used":
+            require_text(item, "proposal_ref")
+            applied = item.get("applied_fields")
+            ensure(isinstance(applied, list) and applied and
+                   all(isinstance(path, str) and path in valid_detail_paths for path in applied),
+                   f"specialist_coverage.{specialist}.applied_fields must point to visual_details")
+        else:
+            ensure(item.get("applied_fields") in (None, []),
+                   f"specialist_coverage.{specialist} cannot apply fields when not_needed")
 
 
 def _xlsx_rows(path):
@@ -327,7 +384,8 @@ def _validate_record(kind, data, state, character_id=None, variant_id=None, stag
                 "design-card": "CharacterDesignCardV1",
                 "prompt-package": "CharacterPromptPackageV1"}[kind]
     accepted = {"cast-plan": {"CastPlanV1", "CastPlanV2"},
-                "design-card": {"CharacterDesignCardV1", "CharacterDesignCardV2"}}
+                "design-card": {"CharacterDesignCardV1", "CharacterDesignCardV2",
+                                "CharacterDesignCardV2.1"}}
     ensure(data.get("schema_version") in accepted.get(kind, {expected}),
            f"Expected one of {sorted(accepted.get(kind, {expected}))}")
     require_list(data, "unresolved") if kind != "prompt-package" else None
@@ -373,7 +431,7 @@ def _validate_record(kind, data, state, character_id=None, variant_id=None, stag
             require_text(choice, "field")
             require_text(choice, "value")
             require_text(choice, "rationale")
-        if data["schema_version"] == "CharacterDesignCardV2":
+        if data["schema_version"] in {"CharacterDesignCardV2", "CharacterDesignCardV2.1"}:
             axes = data.get("recognition_axes")
             ensure(isinstance(axes, dict), "CharacterDesignCardV2 needs recognition_axes")
             for axis in RECOGNITION_AXES:
@@ -387,6 +445,8 @@ def _validate_record(kind, data, state, character_id=None, variant_id=None, stag
             if review["closest_character_ids"]:
                 ensure(review["distinct_features"],
                        "Describe visible differences from the closest cast members")
+        if data["schema_version"] == "CharacterDesignCardV2.1" and data["morphology"] in {"human", "humanoid"}:
+            validate_visual_details(data)
     else:
         ensure(data.get("character_id") == character_id and data.get("variant_id") == variant_id,
                "Prompt target does not match character/variant")
@@ -409,6 +469,16 @@ def _validate_record(kind, data, state, character_id=None, variant_id=None, stag
         ensure(len(set(prompt_ids)) == len(prompt_ids), "Prompt IDs must be unique")
         if stage == "avatar":
             ensure(2 <= len(data["prompts"]) <= 3, "Avatar requires 2–3 same-design candidates")
+            ratio = data.get("aspect_ratio")
+            ensure(isinstance(ratio, str) and re.fullmatch(r"[1-9][0-9]*:[1-9][0-9]*", ratio),
+                   "Avatar prompt package needs aspect_ratio; default is 3:4")
+            if ratio != "3:4":
+                require_text(data, "aspect_ratio_basis")
+                ensure(data.get("aspect_ratio_explicit_user_override") is True,
+                       "Avatar ratio may differ from 3:4 only by explicit user override")
+            for prompt in data["prompts"]:
+                ensure(ratio in prompt["text"],
+                       f"Avatar prompt {prompt['id']} must state canvas ratio {ratio}")
         if stage == "expression":
             require_list(data, "labels")
             ensure(len(data["labels"]) in {9, 16}, "Expression sheet needs 9 or 16 Chinese labels")
@@ -548,6 +618,11 @@ def cmd_submit(args):
                     anchors[anchor_stage] = _checked_image(
                         root, state, anchor_stage, character_id, variant_id)["sha256"]
         content = read_json(args.file)
+        if args.kind == "design-card" and content.get("morphology") in {"human", "humanoid"}:
+            roster_item = next((row for row in state["roster"] if row["id"] == character_id), {})
+            if roster_item.get("tier") in HEAVY_TIERS or roster_item.get("priority") == "deep":
+                ensure(content.get("schema_version") == "CharacterDesignCardV2.1",
+                       "Submitted lead/important human design cards require CharacterDesignCardV2.1; existing approvals remain readable")
         _validate_record(args.kind, content, state, character_id, variant_id, args.stage)
         if args.kind == "prompt-package":
             ensure(content["design_card_sha256"] == card_record["sha256"],
@@ -834,7 +909,7 @@ def cmd_package(args):
     image_ids = {x["id"] for x in images}
     record_keys = {"visual-bible", "cast-plan", _record_key("design-card", ident, variant)}
     record_keys.update(_record_key("prompt-package", ident, variant, stage) for stage in STAGES)
-    manifest = {"schema_version": "CharacterAssetPackV1", "plugin_version": "0.1.3",
+    manifest = {"schema_version": "CharacterAssetPackV1", "plugin_version": PLUGIN_VERSION,
                 "project_id": state["project_id"],
                 "character_id": ident, "variant_id": variant, "created_at": now(),
                 "input_sources": state["inputs"],

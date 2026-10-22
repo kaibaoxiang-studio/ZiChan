@@ -14,4 +14,6 @@ description: "针对回图缺陷编写局部修图指令"
 - [knowledge/index.md](../../knowledge/index.md)
 - [references/editing.md](../../references/editing.md)
 - [references/review.md](../../references/review.md)
+- [references/render-texture-standard.md](../../references/render-texture-standard.md)
 - [references/knowledge/character-image-edit/hedgehog-general-image-prompting.md](../../references/knowledge/character-image-edit/hedgehog-general-image-prompting.md)
+- [references/knowledge/character-image-edit/anti-stereotype-texture.md](../../references/knowledge/character-image-edit/anti-stereotype-texture.md)

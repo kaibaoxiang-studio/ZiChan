@@ -1095,6 +1095,951 @@
           "bytes": 29541
         }
       ]
+    },
+    {
+      "id": "anti-stereotype-texture",
+      "archive": "拒绝脸谱化人物设计-知识库.zip",
+      "archive_sha256": "c352eca853c498c43c5ea3b363d1e83ff9eeadee9150899d3edcade04dd5bc5f",
+      "ingested_sha256": "d4d7644dece0d3ee4fcc73c76b59c520b08964a487deffdc110a3b9eae8e69f2",
+      "capability": "character-design",
+      "rules": "knowledge-rules/anti-stereotype-design.md",
+      "members": [
+        {
+          "path": "拒绝脸谱化人物设计/M1-脸谱化是什么/M1-1-什么是脸谱化-落入类型原型.md",
+          "sha256": "df06440a6b06d7bb0e88cd99f982a308d17fead1c5f96102cf9d444977118352",
+          "bytes": 7768
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M1-脸谱化是什么/M1-2-为什么观众会觉得刻板与油腻.md",
+          "sha256": "582b1306e21c1e2137dde51e9c3d88cdf5f6d3a3584039090d82549736aca1e2",
+          "bytes": 6944
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M1-脸谱化是什么/M1-3-脸谱化的反面-反类型设计.md",
+          "sha256": "953e2018182688a5816d7334e0fefd8b2c983f29522821995ddff4361737bcb8",
+          "bytes": 6774
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M2-为什么AI生成容易脸谱化/M2-1-平均脸效应.md",
+          "sha256": "15b9b49f7390e9e041084ecb4379842517d42301bdc3c3e6fe4787fcfc4f9951",
+          "bytes": 6639
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M2-为什么AI生成容易脸谱化/M2-2-训练数据偏见.md",
+          "sha256": "e90e603c7cfe0a952bead714cc4277a2497795b6f6cc8aa44b9601375984efdd",
+          "bytes": 7201
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M2-为什么AI生成容易脸谱化/M2-3-问题出在设计阶段而非模型阶段.md",
+          "sha256": "70bebe7e833b1d331389e9831877c6b78a1a75e555685f3566dff24946739429",
+          "bytes": 6565
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M3-如何从源头规避脸谱化/M3-1-从角色故事出发.md",
+          "sha256": "ffc36d5d7435210df020488a4d0484faa4170bb084acc70d8b2b345e6bb947ac",
+          "bytes": 5701
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M3-如何从源头规避脸谱化/M3-2-用不完美打破原型.md",
+          "sha256": "237bfbc8af77d93cbd16e189ff110e7d0d7c68bf3cc9c10f572809ca0f132e8e",
+          "bytes": 5904
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M3-如何从源头规避脸谱化/M3-3-用具体细节取代抽象类型.md",
+          "sha256": "6242e227533b7b32565c3ac32fb3437a629db4d4bb8ec0c2cf772f5cae5627ce",
+          "bytes": 5678
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M3-如何从源头规避脸谱化/M3-4-性格驱动五官.md",
+          "sha256": "b1ed61554a9987439fa77cf257c7b556d84587d47d9a5da8bbe0b282eccd7286",
+          "bytes": 7086
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M4-油腻问题的本质与规避/M4-1-油腻是什么.md",
+          "sha256": "341d5fcd0afd5bc607a81fe864349ca7ed8ec2a3b272d35d4361464528155398",
+          "bytes": 6287
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M4-油腻问题的本质与规避/M4-2-油腻与脸谱化的关系.md",
+          "sha256": "df197de4cf95315a179a5307a8c9e259b5c459516d88607f1a180fc7aaf2fdcc",
+          "bytes": 5570
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M4-油腻问题的本质与规避/M4-3-如何规避油腻.md",
+          "sha256": "6888e3f5922ceef8541c9ec72b80f57477c422dc11360d9a814e9afad8f202a4",
+          "bytes": 6125
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M5-设计流程改造/M5-1-设计前的角色背景问卷.md",
+          "sha256": "57e00802cc099faa534d866cde17578693811315364c435b60d37fa27b642d90",
+          "bytes": 6564
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M5-设计流程改造/M5-2-如何检查角色是否脸谱化.md",
+          "sha256": "20660ed9b812aec6bdda2c52a4bab991e5d003166b84e0dccf48afd7cd9e2427",
+          "bytes": 6295
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M5-设计流程改造/M5-3-反面教材.md",
+          "sha256": "84b3dd3a2c18227c788d044a079665856a90b91f2a5b459cb4fd85a461679c46",
+          "bytes": 8200
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-0-设计层与渲染层的双层去油总纲.md",
+          "sha256": "a0a682056d12d7d261ed1b171bfe2c21c17d9635d6c226242b63ea0aa38b3e23",
+          "bytes": 7323
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-1-渲染层油腻的成因与提示词去油.md",
+          "sha256": "ab65e0ab15f671f0e023d94c17ef3d82b1ce050981eaa055b8bd154e0ee16eb3",
+          "bytes": 6338
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-2-皮肤与材质的精准描述.md",
+          "sha256": "f59fd7db05c54895716b5e4d8839e0bc32685fc3e0f0037e4f5c7562c3e76dcc",
+          "bytes": 6558
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-3-多轮修改后的噪点脏糊修复.md",
+          "sha256": "1f0cbf817aca12103f5524b3c81a2c590167a19e121c0e82b05d8c3fec5df7af",
+          "bytes": 6147
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-4-保持角色资产图质感的工作流.md",
+          "sha256": "aa03dfcaf8fea13ef7a0d25e42d5dc5ad3abe976cb890fa8972df16948f66bf3",
+          "bytes": 5870
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-5-质感参考方向-服务于角色的三种质感路径.md",
+          "sha256": "8ded0fa37d3da933277753210231b0c4e7cfeeb7be044d584fd74021bbb3d454",
+          "bytes": 6615
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-6-质感词库速查表.md",
+          "sha256": "43fbdb9e465e640b5dcbf38003f5d9335ef20894f07f6de34d0e2f2842a9b54f",
+          "bytes": 5612
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-7-角色资产卡工作模板.md",
+          "sha256": "d742b84cea27be168b916d559998aac83f701bf8fb89747bd43edae39ea23e2f",
+          "bytes": 8665
+        },
+        {
+          "path": "拒绝脸谱化人物设计/README.md",
+          "sha256": "6de8adb0299948d69897f49ec839001e9aa15ebb0e933ceb0c7028cbafc51603",
+          "bytes": 11309
+        }
+      ]
+    },
+    {
+      "id": "anti-stereotype-texture",
+      "archive": "拒绝脸谱化人物设计-知识库.zip",
+      "archive_sha256": "c352eca853c498c43c5ea3b363d1e83ff9eeadee9150899d3edcade04dd5bc5f",
+      "ingested_sha256": "d4d7644dece0d3ee4fcc73c76b59c520b08964a487deffdc110a3b9eae8e69f2",
+      "capability": "character-cast-differentiation",
+      "rules": "knowledge-rules/anti-stereotype-cast.md",
+      "members": [
+        {
+          "path": "拒绝脸谱化人物设计/M1-脸谱化是什么/M1-1-什么是脸谱化-落入类型原型.md",
+          "sha256": "df06440a6b06d7bb0e88cd99f982a308d17fead1c5f96102cf9d444977118352",
+          "bytes": 7768
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M1-脸谱化是什么/M1-2-为什么观众会觉得刻板与油腻.md",
+          "sha256": "582b1306e21c1e2137dde51e9c3d88cdf5f6d3a3584039090d82549736aca1e2",
+          "bytes": 6944
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M1-脸谱化是什么/M1-3-脸谱化的反面-反类型设计.md",
+          "sha256": "953e2018182688a5816d7334e0fefd8b2c983f29522821995ddff4361737bcb8",
+          "bytes": 6774
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M2-为什么AI生成容易脸谱化/M2-1-平均脸效应.md",
+          "sha256": "15b9b49f7390e9e041084ecb4379842517d42301bdc3c3e6fe4787fcfc4f9951",
+          "bytes": 6639
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M2-为什么AI生成容易脸谱化/M2-2-训练数据偏见.md",
+          "sha256": "e90e603c7cfe0a952bead714cc4277a2497795b6f6cc8aa44b9601375984efdd",
+          "bytes": 7201
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M2-为什么AI生成容易脸谱化/M2-3-问题出在设计阶段而非模型阶段.md",
+          "sha256": "70bebe7e833b1d331389e9831877c6b78a1a75e555685f3566dff24946739429",
+          "bytes": 6565
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M3-如何从源头规避脸谱化/M3-1-从角色故事出发.md",
+          "sha256": "ffc36d5d7435210df020488a4d0484faa4170bb084acc70d8b2b345e6bb947ac",
+          "bytes": 5701
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M3-如何从源头规避脸谱化/M3-2-用不完美打破原型.md",
+          "sha256": "237bfbc8af77d93cbd16e189ff110e7d0d7c68bf3cc9c10f572809ca0f132e8e",
+          "bytes": 5904
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M3-如何从源头规避脸谱化/M3-3-用具体细节取代抽象类型.md",
+          "sha256": "6242e227533b7b32565c3ac32fb3437a629db4d4bb8ec0c2cf772f5cae5627ce",
+          "bytes": 5678
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M3-如何从源头规避脸谱化/M3-4-性格驱动五官.md",
+          "sha256": "b1ed61554a9987439fa77cf257c7b556d84587d47d9a5da8bbe0b282eccd7286",
+          "bytes": 7086
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M4-油腻问题的本质与规避/M4-1-油腻是什么.md",
+          "sha256": "341d5fcd0afd5bc607a81fe864349ca7ed8ec2a3b272d35d4361464528155398",
+          "bytes": 6287
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M4-油腻问题的本质与规避/M4-2-油腻与脸谱化的关系.md",
+          "sha256": "df197de4cf95315a179a5307a8c9e259b5c459516d88607f1a180fc7aaf2fdcc",
+          "bytes": 5570
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M4-油腻问题的本质与规避/M4-3-如何规避油腻.md",
+          "sha256": "6888e3f5922ceef8541c9ec72b80f57477c422dc11360d9a814e9afad8f202a4",
+          "bytes": 6125
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M5-设计流程改造/M5-1-设计前的角色背景问卷.md",
+          "sha256": "57e00802cc099faa534d866cde17578693811315364c435b60d37fa27b642d90",
+          "bytes": 6564
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M5-设计流程改造/M5-2-如何检查角色是否脸谱化.md",
+          "sha256": "20660ed9b812aec6bdda2c52a4bab991e5d003166b84e0dccf48afd7cd9e2427",
+          "bytes": 6295
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M5-设计流程改造/M5-3-反面教材.md",
+          "sha256": "84b3dd3a2c18227c788d044a079665856a90b91f2a5b459cb4fd85a461679c46",
+          "bytes": 8200
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-0-设计层与渲染层的双层去油总纲.md",
+          "sha256": "a0a682056d12d7d261ed1b171bfe2c21c17d9635d6c226242b63ea0aa38b3e23",
+          "bytes": 7323
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-1-渲染层油腻的成因与提示词去油.md",
+          "sha256": "ab65e0ab15f671f0e023d94c17ef3d82b1ce050981eaa055b8bd154e0ee16eb3",
+          "bytes": 6338
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-2-皮肤与材质的精准描述.md",
+          "sha256": "f59fd7db05c54895716b5e4d8839e0bc32685fc3e0f0037e4f5c7562c3e76dcc",
+          "bytes": 6558
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-3-多轮修改后的噪点脏糊修复.md",
+          "sha256": "1f0cbf817aca12103f5524b3c81a2c590167a19e121c0e82b05d8c3fec5df7af",
+          "bytes": 6147
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-4-保持角色资产图质感的工作流.md",
+          "sha256": "aa03dfcaf8fea13ef7a0d25e42d5dc5ad3abe976cb890fa8972df16948f66bf3",
+          "bytes": 5870
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-5-质感参考方向-服务于角色的三种质感路径.md",
+          "sha256": "8ded0fa37d3da933277753210231b0c4e7cfeeb7be044d584fd74021bbb3d454",
+          "bytes": 6615
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-6-质感词库速查表.md",
+          "sha256": "43fbdb9e465e640b5dcbf38003f5d9335ef20894f07f6de34d0e2f2842a9b54f",
+          "bytes": 5612
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-7-角色资产卡工作模板.md",
+          "sha256": "d742b84cea27be168b916d559998aac83f701bf8fb89747bd43edae39ea23e2f",
+          "bytes": 8665
+        },
+        {
+          "path": "拒绝脸谱化人物设计/README.md",
+          "sha256": "6de8adb0299948d69897f49ec839001e9aa15ebb0e933ceb0c7028cbafc51603",
+          "bytes": 11309
+        }
+      ]
+    },
+    {
+      "id": "anti-stereotype-texture",
+      "archive": "拒绝脸谱化人物设计-知识库.zip",
+      "archive_sha256": "c352eca853c498c43c5ea3b363d1e83ff9eeadee9150899d3edcade04dd5bc5f",
+      "ingested_sha256": "d4d7644dece0d3ee4fcc73c76b59c520b08964a487deffdc110a3b9eae8e69f2",
+      "capability": "character-skin-design",
+      "rules": "knowledge-rules/anti-stereotype-skin.md",
+      "members": [
+        {
+          "path": "拒绝脸谱化人物设计/M1-脸谱化是什么/M1-1-什么是脸谱化-落入类型原型.md",
+          "sha256": "df06440a6b06d7bb0e88cd99f982a308d17fead1c5f96102cf9d444977118352",
+          "bytes": 7768
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M1-脸谱化是什么/M1-2-为什么观众会觉得刻板与油腻.md",
+          "sha256": "582b1306e21c1e2137dde51e9c3d88cdf5f6d3a3584039090d82549736aca1e2",
+          "bytes": 6944
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M1-脸谱化是什么/M1-3-脸谱化的反面-反类型设计.md",
+          "sha256": "953e2018182688a5816d7334e0fefd8b2c983f29522821995ddff4361737bcb8",
+          "bytes": 6774
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M2-为什么AI生成容易脸谱化/M2-1-平均脸效应.md",
+          "sha256": "15b9b49f7390e9e041084ecb4379842517d42301bdc3c3e6fe4787fcfc4f9951",
+          "bytes": 6639
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M2-为什么AI生成容易脸谱化/M2-2-训练数据偏见.md",
+          "sha256": "e90e603c7cfe0a952bead714cc4277a2497795b6f6cc8aa44b9601375984efdd",
+          "bytes": 7201
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M2-为什么AI生成容易脸谱化/M2-3-问题出在设计阶段而非模型阶段.md",
+          "sha256": "70bebe7e833b1d331389e9831877c6b78a1a75e555685f3566dff24946739429",
+          "bytes": 6565
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M3-如何从源头规避脸谱化/M3-1-从角色故事出发.md",
+          "sha256": "ffc36d5d7435210df020488a4d0484faa4170bb084acc70d8b2b345e6bb947ac",
+          "bytes": 5701
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M3-如何从源头规避脸谱化/M3-2-用不完美打破原型.md",
+          "sha256": "237bfbc8af77d93cbd16e189ff110e7d0d7c68bf3cc9c10f572809ca0f132e8e",
+          "bytes": 5904
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M3-如何从源头规避脸谱化/M3-3-用具体细节取代抽象类型.md",
+          "sha256": "6242e227533b7b32565c3ac32fb3437a629db4d4bb8ec0c2cf772f5cae5627ce",
+          "bytes": 5678
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M3-如何从源头规避脸谱化/M3-4-性格驱动五官.md",
+          "sha256": "b1ed61554a9987439fa77cf257c7b556d84587d47d9a5da8bbe0b282eccd7286",
+          "bytes": 7086
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M4-油腻问题的本质与规避/M4-1-油腻是什么.md",
+          "sha256": "341d5fcd0afd5bc607a81fe864349ca7ed8ec2a3b272d35d4361464528155398",
+          "bytes": 6287
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M4-油腻问题的本质与规避/M4-2-油腻与脸谱化的关系.md",
+          "sha256": "df197de4cf95315a179a5307a8c9e259b5c459516d88607f1a180fc7aaf2fdcc",
+          "bytes": 5570
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M4-油腻问题的本质与规避/M4-3-如何规避油腻.md",
+          "sha256": "6888e3f5922ceef8541c9ec72b80f57477c422dc11360d9a814e9afad8f202a4",
+          "bytes": 6125
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M5-设计流程改造/M5-1-设计前的角色背景问卷.md",
+          "sha256": "57e00802cc099faa534d866cde17578693811315364c435b60d37fa27b642d90",
+          "bytes": 6564
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M5-设计流程改造/M5-2-如何检查角色是否脸谱化.md",
+          "sha256": "20660ed9b812aec6bdda2c52a4bab991e5d003166b84e0dccf48afd7cd9e2427",
+          "bytes": 6295
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M5-设计流程改造/M5-3-反面教材.md",
+          "sha256": "84b3dd3a2c18227c788d044a079665856a90b91f2a5b459cb4fd85a461679c46",
+          "bytes": 8200
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-0-设计层与渲染层的双层去油总纲.md",
+          "sha256": "a0a682056d12d7d261ed1b171bfe2c21c17d9635d6c226242b63ea0aa38b3e23",
+          "bytes": 7323
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-1-渲染层油腻的成因与提示词去油.md",
+          "sha256": "ab65e0ab15f671f0e023d94c17ef3d82b1ce050981eaa055b8bd154e0ee16eb3",
+          "bytes": 6338
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-2-皮肤与材质的精准描述.md",
+          "sha256": "f59fd7db05c54895716b5e4d8839e0bc32685fc3e0f0037e4f5c7562c3e76dcc",
+          "bytes": 6558
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-3-多轮修改后的噪点脏糊修复.md",
+          "sha256": "1f0cbf817aca12103f5524b3c81a2c590167a19e121c0e82b05d8c3fec5df7af",
+          "bytes": 6147
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-4-保持角色资产图质感的工作流.md",
+          "sha256": "aa03dfcaf8fea13ef7a0d25e42d5dc5ad3abe976cb890fa8972df16948f66bf3",
+          "bytes": 5870
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-5-质感参考方向-服务于角色的三种质感路径.md",
+          "sha256": "8ded0fa37d3da933277753210231b0c4e7cfeeb7be044d584fd74021bbb3d454",
+          "bytes": 6615
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-6-质感词库速查表.md",
+          "sha256": "43fbdb9e465e640b5dcbf38003f5d9335ef20894f07f6de34d0e2f2842a9b54f",
+          "bytes": 5612
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-7-角色资产卡工作模板.md",
+          "sha256": "d742b84cea27be168b916d559998aac83f701bf8fb89747bd43edae39ea23e2f",
+          "bytes": 8665
+        },
+        {
+          "path": "拒绝脸谱化人物设计/README.md",
+          "sha256": "6de8adb0299948d69897f49ec839001e9aa15ebb0e933ceb0c7028cbafc51603",
+          "bytes": 11309
+        }
+      ]
+    },
+    {
+      "id": "anti-stereotype-texture",
+      "archive": "拒绝脸谱化人物设计-知识库.zip",
+      "archive_sha256": "c352eca853c498c43c5ea3b363d1e83ff9eeadee9150899d3edcade04dd5bc5f",
+      "ingested_sha256": "d4d7644dece0d3ee4fcc73c76b59c520b08964a487deffdc110a3b9eae8e69f2",
+      "capability": "character-costume-material-design",
+      "rules": "knowledge-rules/anti-stereotype-material.md",
+      "members": [
+        {
+          "path": "拒绝脸谱化人物设计/M1-脸谱化是什么/M1-1-什么是脸谱化-落入类型原型.md",
+          "sha256": "df06440a6b06d7bb0e88cd99f982a308d17fead1c5f96102cf9d444977118352",
+          "bytes": 7768
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M1-脸谱化是什么/M1-2-为什么观众会觉得刻板与油腻.md",
+          "sha256": "582b1306e21c1e2137dde51e9c3d88cdf5f6d3a3584039090d82549736aca1e2",
+          "bytes": 6944
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M1-脸谱化是什么/M1-3-脸谱化的反面-反类型设计.md",
+          "sha256": "953e2018182688a5816d7334e0fefd8b2c983f29522821995ddff4361737bcb8",
+          "bytes": 6774
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M2-为什么AI生成容易脸谱化/M2-1-平均脸效应.md",
+          "sha256": "15b9b49f7390e9e041084ecb4379842517d42301bdc3c3e6fe4787fcfc4f9951",
+          "bytes": 6639
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M2-为什么AI生成容易脸谱化/M2-2-训练数据偏见.md",
+          "sha256": "e90e603c7cfe0a952bead714cc4277a2497795b6f6cc8aa44b9601375984efdd",
+          "bytes": 7201
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M2-为什么AI生成容易脸谱化/M2-3-问题出在设计阶段而非模型阶段.md",
+          "sha256": "70bebe7e833b1d331389e9831877c6b78a1a75e555685f3566dff24946739429",
+          "bytes": 6565
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M3-如何从源头规避脸谱化/M3-1-从角色故事出发.md",
+          "sha256": "ffc36d5d7435210df020488a4d0484faa4170bb084acc70d8b2b345e6bb947ac",
+          "bytes": 5701
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M3-如何从源头规避脸谱化/M3-2-用不完美打破原型.md",
+          "sha256": "237bfbc8af77d93cbd16e189ff110e7d0d7c68bf3cc9c10f572809ca0f132e8e",
+          "bytes": 5904
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M3-如何从源头规避脸谱化/M3-3-用具体细节取代抽象类型.md",
+          "sha256": "6242e227533b7b32565c3ac32fb3437a629db4d4bb8ec0c2cf772f5cae5627ce",
+          "bytes": 5678
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M3-如何从源头规避脸谱化/M3-4-性格驱动五官.md",
+          "sha256": "b1ed61554a9987439fa77cf257c7b556d84587d47d9a5da8bbe0b282eccd7286",
+          "bytes": 7086
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M4-油腻问题的本质与规避/M4-1-油腻是什么.md",
+          "sha256": "341d5fcd0afd5bc607a81fe864349ca7ed8ec2a3b272d35d4361464528155398",
+          "bytes": 6287
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M4-油腻问题的本质与规避/M4-2-油腻与脸谱化的关系.md",
+          "sha256": "df197de4cf95315a179a5307a8c9e259b5c459516d88607f1a180fc7aaf2fdcc",
+          "bytes": 5570
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M4-油腻问题的本质与规避/M4-3-如何规避油腻.md",
+          "sha256": "6888e3f5922ceef8541c9ec72b80f57477c422dc11360d9a814e9afad8f202a4",
+          "bytes": 6125
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M5-设计流程改造/M5-1-设计前的角色背景问卷.md",
+          "sha256": "57e00802cc099faa534d866cde17578693811315364c435b60d37fa27b642d90",
+          "bytes": 6564
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M5-设计流程改造/M5-2-如何检查角色是否脸谱化.md",
+          "sha256": "20660ed9b812aec6bdda2c52a4bab991e5d003166b84e0dccf48afd7cd9e2427",
+          "bytes": 6295
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M5-设计流程改造/M5-3-反面教材.md",
+          "sha256": "84b3dd3a2c18227c788d044a079665856a90b91f2a5b459cb4fd85a461679c46",
+          "bytes": 8200
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-0-设计层与渲染层的双层去油总纲.md",
+          "sha256": "a0a682056d12d7d261ed1b171bfe2c21c17d9635d6c226242b63ea0aa38b3e23",
+          "bytes": 7323
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-1-渲染层油腻的成因与提示词去油.md",
+          "sha256": "ab65e0ab15f671f0e023d94c17ef3d82b1ce050981eaa055b8bd154e0ee16eb3",
+          "bytes": 6338
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-2-皮肤与材质的精准描述.md",
+          "sha256": "f59fd7db05c54895716b5e4d8839e0bc32685fc3e0f0037e4f5c7562c3e76dcc",
+          "bytes": 6558
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-3-多轮修改后的噪点脏糊修复.md",
+          "sha256": "1f0cbf817aca12103f5524b3c81a2c590167a19e121c0e82b05d8c3fec5df7af",
+          "bytes": 6147
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-4-保持角色资产图质感的工作流.md",
+          "sha256": "aa03dfcaf8fea13ef7a0d25e42d5dc5ad3abe976cb890fa8972df16948f66bf3",
+          "bytes": 5870
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-5-质感参考方向-服务于角色的三种质感路径.md",
+          "sha256": "8ded0fa37d3da933277753210231b0c4e7cfeeb7be044d584fd74021bbb3d454",
+          "bytes": 6615
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-6-质感词库速查表.md",
+          "sha256": "43fbdb9e465e640b5dcbf38003f5d9335ef20894f07f6de34d0e2f2842a9b54f",
+          "bytes": 5612
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-7-角色资产卡工作模板.md",
+          "sha256": "d742b84cea27be168b916d559998aac83f701bf8fb89747bd43edae39ea23e2f",
+          "bytes": 8665
+        },
+        {
+          "path": "拒绝脸谱化人物设计/README.md",
+          "sha256": "6de8adb0299948d69897f49ec839001e9aa15ebb0e933ceb0c7028cbafc51603",
+          "bytes": 11309
+        }
+      ]
+    },
+    {
+      "id": "anti-stereotype-texture",
+      "archive": "拒绝脸谱化人物设计-知识库.zip",
+      "archive_sha256": "c352eca853c498c43c5ea3b363d1e83ff9eeadee9150899d3edcade04dd5bc5f",
+      "ingested_sha256": "d4d7644dece0d3ee4fcc73c76b59c520b08964a487deffdc110a3b9eae8e69f2",
+      "capability": "character-image-prompt",
+      "rules": "knowledge-rules/anti-stereotype-prompt.md",
+      "members": [
+        {
+          "path": "拒绝脸谱化人物设计/M1-脸谱化是什么/M1-1-什么是脸谱化-落入类型原型.md",
+          "sha256": "df06440a6b06d7bb0e88cd99f982a308d17fead1c5f96102cf9d444977118352",
+          "bytes": 7768
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M1-脸谱化是什么/M1-2-为什么观众会觉得刻板与油腻.md",
+          "sha256": "582b1306e21c1e2137dde51e9c3d88cdf5f6d3a3584039090d82549736aca1e2",
+          "bytes": 6944
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M1-脸谱化是什么/M1-3-脸谱化的反面-反类型设计.md",
+          "sha256": "953e2018182688a5816d7334e0fefd8b2c983f29522821995ddff4361737bcb8",
+          "bytes": 6774
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M2-为什么AI生成容易脸谱化/M2-1-平均脸效应.md",
+          "sha256": "15b9b49f7390e9e041084ecb4379842517d42301bdc3c3e6fe4787fcfc4f9951",
+          "bytes": 6639
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M2-为什么AI生成容易脸谱化/M2-2-训练数据偏见.md",
+          "sha256": "e90e603c7cfe0a952bead714cc4277a2497795b6f6cc8aa44b9601375984efdd",
+          "bytes": 7201
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M2-为什么AI生成容易脸谱化/M2-3-问题出在设计阶段而非模型阶段.md",
+          "sha256": "70bebe7e833b1d331389e9831877c6b78a1a75e555685f3566dff24946739429",
+          "bytes": 6565
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M3-如何从源头规避脸谱化/M3-1-从角色故事出发.md",
+          "sha256": "ffc36d5d7435210df020488a4d0484faa4170bb084acc70d8b2b345e6bb947ac",
+          "bytes": 5701
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M3-如何从源头规避脸谱化/M3-2-用不完美打破原型.md",
+          "sha256": "237bfbc8af77d93cbd16e189ff110e7d0d7c68bf3cc9c10f572809ca0f132e8e",
+          "bytes": 5904
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M3-如何从源头规避脸谱化/M3-3-用具体细节取代抽象类型.md",
+          "sha256": "6242e227533b7b32565c3ac32fb3437a629db4d4bb8ec0c2cf772f5cae5627ce",
+          "bytes": 5678
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M3-如何从源头规避脸谱化/M3-4-性格驱动五官.md",
+          "sha256": "b1ed61554a9987439fa77cf257c7b556d84587d47d9a5da8bbe0b282eccd7286",
+          "bytes": 7086
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M4-油腻问题的本质与规避/M4-1-油腻是什么.md",
+          "sha256": "341d5fcd0afd5bc607a81fe864349ca7ed8ec2a3b272d35d4361464528155398",
+          "bytes": 6287
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M4-油腻问题的本质与规避/M4-2-油腻与脸谱化的关系.md",
+          "sha256": "df197de4cf95315a179a5307a8c9e259b5c459516d88607f1a180fc7aaf2fdcc",
+          "bytes": 5570
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M4-油腻问题的本质与规避/M4-3-如何规避油腻.md",
+          "sha256": "6888e3f5922ceef8541c9ec72b80f57477c422dc11360d9a814e9afad8f202a4",
+          "bytes": 6125
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M5-设计流程改造/M5-1-设计前的角色背景问卷.md",
+          "sha256": "57e00802cc099faa534d866cde17578693811315364c435b60d37fa27b642d90",
+          "bytes": 6564
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M5-设计流程改造/M5-2-如何检查角色是否脸谱化.md",
+          "sha256": "20660ed9b812aec6bdda2c52a4bab991e5d003166b84e0dccf48afd7cd9e2427",
+          "bytes": 6295
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M5-设计流程改造/M5-3-反面教材.md",
+          "sha256": "84b3dd3a2c18227c788d044a079665856a90b91f2a5b459cb4fd85a461679c46",
+          "bytes": 8200
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-0-设计层与渲染层的双层去油总纲.md",
+          "sha256": "a0a682056d12d7d261ed1b171bfe2c21c17d9635d6c226242b63ea0aa38b3e23",
+          "bytes": 7323
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-1-渲染层油腻的成因与提示词去油.md",
+          "sha256": "ab65e0ab15f671f0e023d94c17ef3d82b1ce050981eaa055b8bd154e0ee16eb3",
+          "bytes": 6338
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-2-皮肤与材质的精准描述.md",
+          "sha256": "f59fd7db05c54895716b5e4d8839e0bc32685fc3e0f0037e4f5c7562c3e76dcc",
+          "bytes": 6558
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-3-多轮修改后的噪点脏糊修复.md",
+          "sha256": "1f0cbf817aca12103f5524b3c81a2c590167a19e121c0e82b05d8c3fec5df7af",
+          "bytes": 6147
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-4-保持角色资产图质感的工作流.md",
+          "sha256": "aa03dfcaf8fea13ef7a0d25e42d5dc5ad3abe976cb890fa8972df16948f66bf3",
+          "bytes": 5870
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-5-质感参考方向-服务于角色的三种质感路径.md",
+          "sha256": "8ded0fa37d3da933277753210231b0c4e7cfeeb7be044d584fd74021bbb3d454",
+          "bytes": 6615
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-6-质感词库速查表.md",
+          "sha256": "43fbdb9e465e640b5dcbf38003f5d9335ef20894f07f6de34d0e2f2842a9b54f",
+          "bytes": 5612
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-7-角色资产卡工作模板.md",
+          "sha256": "d742b84cea27be168b916d559998aac83f701bf8fb89747bd43edae39ea23e2f",
+          "bytes": 8665
+        },
+        {
+          "path": "拒绝脸谱化人物设计/README.md",
+          "sha256": "6de8adb0299948d69897f49ec839001e9aa15ebb0e933ceb0c7028cbafc51603",
+          "bytes": 11309
+        }
+      ]
+    },
+    {
+      "id": "anti-stereotype-texture",
+      "archive": "拒绝脸谱化人物设计-知识库.zip",
+      "archive_sha256": "c352eca853c498c43c5ea3b363d1e83ff9eeadee9150899d3edcade04dd5bc5f",
+      "ingested_sha256": "d4d7644dece0d3ee4fcc73c76b59c520b08964a487deffdc110a3b9eae8e69f2",
+      "capability": "character-image-review",
+      "rules": "knowledge-rules/anti-stereotype-review.md",
+      "members": [
+        {
+          "path": "拒绝脸谱化人物设计/M1-脸谱化是什么/M1-1-什么是脸谱化-落入类型原型.md",
+          "sha256": "df06440a6b06d7bb0e88cd99f982a308d17fead1c5f96102cf9d444977118352",
+          "bytes": 7768
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M1-脸谱化是什么/M1-2-为什么观众会觉得刻板与油腻.md",
+          "sha256": "582b1306e21c1e2137dde51e9c3d88cdf5f6d3a3584039090d82549736aca1e2",
+          "bytes": 6944
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M1-脸谱化是什么/M1-3-脸谱化的反面-反类型设计.md",
+          "sha256": "953e2018182688a5816d7334e0fefd8b2c983f29522821995ddff4361737bcb8",
+          "bytes": 6774
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M2-为什么AI生成容易脸谱化/M2-1-平均脸效应.md",
+          "sha256": "15b9b49f7390e9e041084ecb4379842517d42301bdc3c3e6fe4787fcfc4f9951",
+          "bytes": 6639
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M2-为什么AI生成容易脸谱化/M2-2-训练数据偏见.md",
+          "sha256": "e90e603c7cfe0a952bead714cc4277a2497795b6f6cc8aa44b9601375984efdd",
+          "bytes": 7201
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M2-为什么AI生成容易脸谱化/M2-3-问题出在设计阶段而非模型阶段.md",
+          "sha256": "70bebe7e833b1d331389e9831877c6b78a1a75e555685f3566dff24946739429",
+          "bytes": 6565
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M3-如何从源头规避脸谱化/M3-1-从角色故事出发.md",
+          "sha256": "ffc36d5d7435210df020488a4d0484faa4170bb084acc70d8b2b345e6bb947ac",
+          "bytes": 5701
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M3-如何从源头规避脸谱化/M3-2-用不完美打破原型.md",
+          "sha256": "237bfbc8af77d93cbd16e189ff110e7d0d7c68bf3cc9c10f572809ca0f132e8e",
+          "bytes": 5904
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M3-如何从源头规避脸谱化/M3-3-用具体细节取代抽象类型.md",
+          "sha256": "6242e227533b7b32565c3ac32fb3437a629db4d4bb8ec0c2cf772f5cae5627ce",
+          "bytes": 5678
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M3-如何从源头规避脸谱化/M3-4-性格驱动五官.md",
+          "sha256": "b1ed61554a9987439fa77cf257c7b556d84587d47d9a5da8bbe0b282eccd7286",
+          "bytes": 7086
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M4-油腻问题的本质与规避/M4-1-油腻是什么.md",
+          "sha256": "341d5fcd0afd5bc607a81fe864349ca7ed8ec2a3b272d35d4361464528155398",
+          "bytes": 6287
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M4-油腻问题的本质与规避/M4-2-油腻与脸谱化的关系.md",
+          "sha256": "df197de4cf95315a179a5307a8c9e259b5c459516d88607f1a180fc7aaf2fdcc",
+          "bytes": 5570
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M4-油腻问题的本质与规避/M4-3-如何规避油腻.md",
+          "sha256": "6888e3f5922ceef8541c9ec72b80f57477c422dc11360d9a814e9afad8f202a4",
+          "bytes": 6125
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M5-设计流程改造/M5-1-设计前的角色背景问卷.md",
+          "sha256": "57e00802cc099faa534d866cde17578693811315364c435b60d37fa27b642d90",
+          "bytes": 6564
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M5-设计流程改造/M5-2-如何检查角色是否脸谱化.md",
+          "sha256": "20660ed9b812aec6bdda2c52a4bab991e5d003166b84e0dccf48afd7cd9e2427",
+          "bytes": 6295
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M5-设计流程改造/M5-3-反面教材.md",
+          "sha256": "84b3dd3a2c18227c788d044a079665856a90b91f2a5b459cb4fd85a461679c46",
+          "bytes": 8200
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-0-设计层与渲染层的双层去油总纲.md",
+          "sha256": "a0a682056d12d7d261ed1b171bfe2c21c17d9635d6c226242b63ea0aa38b3e23",
+          "bytes": 7323
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-1-渲染层油腻的成因与提示词去油.md",
+          "sha256": "ab65e0ab15f671f0e023d94c17ef3d82b1ce050981eaa055b8bd154e0ee16eb3",
+          "bytes": 6338
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-2-皮肤与材质的精准描述.md",
+          "sha256": "f59fd7db05c54895716b5e4d8839e0bc32685fc3e0f0037e4f5c7562c3e76dcc",
+          "bytes": 6558
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-3-多轮修改后的噪点脏糊修复.md",
+          "sha256": "1f0cbf817aca12103f5524b3c81a2c590167a19e121c0e82b05d8c3fec5df7af",
+          "bytes": 6147
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-4-保持角色资产图质感的工作流.md",
+          "sha256": "aa03dfcaf8fea13ef7a0d25e42d5dc5ad3abe976cb890fa8972df16948f66bf3",
+          "bytes": 5870
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-5-质感参考方向-服务于角色的三种质感路径.md",
+          "sha256": "8ded0fa37d3da933277753210231b0c4e7cfeeb7be044d584fd74021bbb3d454",
+          "bytes": 6615
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-6-质感词库速查表.md",
+          "sha256": "43fbdb9e465e640b5dcbf38003f5d9335ef20894f07f6de34d0e2f2842a9b54f",
+          "bytes": 5612
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-7-角色资产卡工作模板.md",
+          "sha256": "d742b84cea27be168b916d559998aac83f701bf8fb89747bd43edae39ea23e2f",
+          "bytes": 8665
+        },
+        {
+          "path": "拒绝脸谱化人物设计/README.md",
+          "sha256": "6de8adb0299948d69897f49ec839001e9aa15ebb0e933ceb0c7028cbafc51603",
+          "bytes": 11309
+        }
+      ]
+    },
+    {
+      "id": "anti-stereotype-texture",
+      "archive": "拒绝脸谱化人物设计-知识库.zip",
+      "archive_sha256": "c352eca853c498c43c5ea3b363d1e83ff9eeadee9150899d3edcade04dd5bc5f",
+      "ingested_sha256": "d4d7644dece0d3ee4fcc73c76b59c520b08964a487deffdc110a3b9eae8e69f2",
+      "capability": "character-image-edit",
+      "rules": "knowledge-rules/anti-stereotype-edit.md",
+      "members": [
+        {
+          "path": "拒绝脸谱化人物设计/M1-脸谱化是什么/M1-1-什么是脸谱化-落入类型原型.md",
+          "sha256": "df06440a6b06d7bb0e88cd99f982a308d17fead1c5f96102cf9d444977118352",
+          "bytes": 7768
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M1-脸谱化是什么/M1-2-为什么观众会觉得刻板与油腻.md",
+          "sha256": "582b1306e21c1e2137dde51e9c3d88cdf5f6d3a3584039090d82549736aca1e2",
+          "bytes": 6944
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M1-脸谱化是什么/M1-3-脸谱化的反面-反类型设计.md",
+          "sha256": "953e2018182688a5816d7334e0fefd8b2c983f29522821995ddff4361737bcb8",
+          "bytes": 6774
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M2-为什么AI生成容易脸谱化/M2-1-平均脸效应.md",
+          "sha256": "15b9b49f7390e9e041084ecb4379842517d42301bdc3c3e6fe4787fcfc4f9951",
+          "bytes": 6639
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M2-为什么AI生成容易脸谱化/M2-2-训练数据偏见.md",
+          "sha256": "e90e603c7cfe0a952bead714cc4277a2497795b6f6cc8aa44b9601375984efdd",
+          "bytes": 7201
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M2-为什么AI生成容易脸谱化/M2-3-问题出在设计阶段而非模型阶段.md",
+          "sha256": "70bebe7e833b1d331389e9831877c6b78a1a75e555685f3566dff24946739429",
+          "bytes": 6565
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M3-如何从源头规避脸谱化/M3-1-从角色故事出发.md",
+          "sha256": "ffc36d5d7435210df020488a4d0484faa4170bb084acc70d8b2b345e6bb947ac",
+          "bytes": 5701
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M3-如何从源头规避脸谱化/M3-2-用不完美打破原型.md",
+          "sha256": "237bfbc8af77d93cbd16e189ff110e7d0d7c68bf3cc9c10f572809ca0f132e8e",
+          "bytes": 5904
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M3-如何从源头规避脸谱化/M3-3-用具体细节取代抽象类型.md",
+          "sha256": "6242e227533b7b32565c3ac32fb3437a629db4d4bb8ec0c2cf772f5cae5627ce",
+          "bytes": 5678
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M3-如何从源头规避脸谱化/M3-4-性格驱动五官.md",
+          "sha256": "b1ed61554a9987439fa77cf257c7b556d84587d47d9a5da8bbe0b282eccd7286",
+          "bytes": 7086
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M4-油腻问题的本质与规避/M4-1-油腻是什么.md",
+          "sha256": "341d5fcd0afd5bc607a81fe864349ca7ed8ec2a3b272d35d4361464528155398",
+          "bytes": 6287
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M4-油腻问题的本质与规避/M4-2-油腻与脸谱化的关系.md",
+          "sha256": "df197de4cf95315a179a5307a8c9e259b5c459516d88607f1a180fc7aaf2fdcc",
+          "bytes": 5570
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M4-油腻问题的本质与规避/M4-3-如何规避油腻.md",
+          "sha256": "6888e3f5922ceef8541c9ec72b80f57477c422dc11360d9a814e9afad8f202a4",
+          "bytes": 6125
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M5-设计流程改造/M5-1-设计前的角色背景问卷.md",
+          "sha256": "57e00802cc099faa534d866cde17578693811315364c435b60d37fa27b642d90",
+          "bytes": 6564
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M5-设计流程改造/M5-2-如何检查角色是否脸谱化.md",
+          "sha256": "20660ed9b812aec6bdda2c52a4bab991e5d003166b84e0dccf48afd7cd9e2427",
+          "bytes": 6295
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M5-设计流程改造/M5-3-反面教材.md",
+          "sha256": "84b3dd3a2c18227c788d044a079665856a90b91f2a5b459cb4fd85a461679c46",
+          "bytes": 8200
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-0-设计层与渲染层的双层去油总纲.md",
+          "sha256": "a0a682056d12d7d261ed1b171bfe2c21c17d9635d6c226242b63ea0aa38b3e23",
+          "bytes": 7323
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-1-渲染层油腻的成因与提示词去油.md",
+          "sha256": "ab65e0ab15f671f0e023d94c17ef3d82b1ce050981eaa055b8bd154e0ee16eb3",
+          "bytes": 6338
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-2-皮肤与材质的精准描述.md",
+          "sha256": "f59fd7db05c54895716b5e4d8839e0bc32685fc3e0f0037e4f5c7562c3e76dcc",
+          "bytes": 6558
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-3-多轮修改后的噪点脏糊修复.md",
+          "sha256": "1f0cbf817aca12103f5524b3c81a2c590167a19e121c0e82b05d8c3fec5df7af",
+          "bytes": 6147
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-4-保持角色资产图质感的工作流.md",
+          "sha256": "aa03dfcaf8fea13ef7a0d25e42d5dc5ad3abe976cb890fa8972df16948f66bf3",
+          "bytes": 5870
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-5-质感参考方向-服务于角色的三种质感路径.md",
+          "sha256": "8ded0fa37d3da933277753210231b0c4e7cfeeb7be044d584fd74021bbb3d454",
+          "bytes": 6615
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-6-质感词库速查表.md",
+          "sha256": "43fbdb9e465e640b5dcbf38003f5d9335ef20894f07f6de34d0e2f2842a9b54f",
+          "bytes": 5612
+        },
+        {
+          "path": "拒绝脸谱化人物设计/M6-渲染质感与去油实操/M6-7-角色资产卡工作模板.md",
+          "sha256": "d742b84cea27be168b916d559998aac83f701bf8fb89747bd43edae39ea23e2f",
+          "bytes": 8665
+        },
+        {
+          "path": "拒绝脸谱化人物设计/README.md",
+          "sha256": "6de8adb0299948d69897f49ec839001e9aa15ebb0e933ceb0c7028cbafc51603",
+          "bytes": 11309
+        }
+      ]
     }
   ]
 }

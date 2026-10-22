@@ -69,7 +69,9 @@
         "references/evidence.md",
         "references/source-notes.md",
         "references/differentiation-framework.md",
-        "references/specialist-contract.md"
+        "references/specialist-contract.md",
+        "references/design-detail-standard.md",
+        "references/render-texture-standard.md"
       ],
       "explicit_only": true
     },
@@ -210,7 +212,9 @@
         "references/costume-and-morphology.md",
         "references/interfaces.md",
         "references/differentiation-framework.md",
-        "references/specialist-contract.md"
+        "references/specialist-contract.md",
+        "references/design-detail-standard.md",
+        "references/knowledge/character-design/anti-stereotype-texture.md"
       ],
       "explicit_only": true
     },
@@ -293,8 +297,11 @@
         "references/expression.md",
         "references/execution-sheet.md",
         "references/interfaces.md",
+        "references/design-detail-standard.md",
+        "references/render-texture-standard.md",
         "references/knowledge/character-image-prompt/hedgehog-2d3d.md",
-        "references/knowledge/character-image-prompt/hedgehog-general-image-skill.md"
+        "references/knowledge/character-image-prompt/hedgehog-general-image-skill.md",
+        "references/knowledge/character-image-prompt/anti-stereotype-texture.md"
       ],
       "explicit_only": true
     },
@@ -379,7 +386,9 @@
         "knowledge/index.md",
         "references/review.md",
         "references/execution-sheet.md",
-        "references/interfaces.md"
+        "references/interfaces.md",
+        "references/render-texture-standard.md",
+        "references/knowledge/character-image-review/anti-stereotype-texture.md"
       ],
       "explicit_only": true
     },
@@ -459,7 +468,9 @@
         "knowledge/index.md",
         "references/editing.md",
         "references/review.md",
-        "references/knowledge/character-image-edit/hedgehog-general-image-prompting.md"
+        "references/render-texture-standard.md",
+        "references/knowledge/character-image-edit/hedgehog-general-image-prompting.md",
+        "references/knowledge/character-image-edit/anti-stereotype-texture.md"
       ],
       "explicit_only": true
     },
@@ -541,7 +552,8 @@
         "references/differentiation-framework.md",
         "references/specialist-contract.md",
         "references/knowledge/character-cast-differentiation/ensemble.md",
-        "references/knowledge/character-cast-differentiation/legacy-visual.md"
+        "references/knowledge/character-cast-differentiation/legacy-visual.md",
+        "references/knowledge/character-cast-differentiation/anti-stereotype-texture.md"
       ],
       "explicit_only": true
     },
@@ -612,6 +624,7 @@
         "knowledge/index.md",
         "references/specialist-contract.md",
         "references/differentiation-framework.md",
+        "references/design-detail-standard.md",
         "references/knowledge/character-hair-design/hair.md"
       ],
       "explicit_only": true
@@ -683,6 +696,7 @@
         "knowledge/index.md",
         "references/specialist-contract.md",
         "references/differentiation-framework.md",
+        "references/design-detail-standard.md",
         "references/knowledge/character-body-design/body.md"
       ],
       "explicit_only": true
@@ -754,6 +768,7 @@
         "knowledge/index.md",
         "references/specialist-contract.md",
         "references/differentiation-framework.md",
+        "references/design-detail-standard.md",
         "references/knowledge/character-face-design/face.md"
       ],
       "explicit_only": true
@@ -825,6 +840,7 @@
         "knowledge/index.md",
         "references/specialist-contract.md",
         "references/differentiation-framework.md",
+        "references/design-detail-standard.md",
         "references/knowledge/character-face-signature-design/face-memory.md"
       ],
       "explicit_only": true
@@ -896,7 +912,10 @@
         "knowledge/index.md",
         "references/specialist-contract.md",
         "references/differentiation-framework.md",
-        "references/knowledge/character-skin-design/skin.md"
+        "references/design-detail-standard.md",
+        "references/knowledge/character-skin-design/skin.md",
+        "references/render-texture-standard.md",
+        "references/knowledge/character-skin-design/anti-stereotype-texture.md"
       ],
       "explicit_only": true
     },
@@ -967,6 +986,7 @@
         "knowledge/index.md",
         "references/specialist-contract.md",
         "references/differentiation-framework.md",
+        "references/design-detail-standard.md",
         "references/knowledge/character-costume-style-design/costume-style.md"
       ],
       "explicit_only": true
@@ -1038,6 +1058,7 @@
         "knowledge/index.md",
         "references/specialist-contract.md",
         "references/differentiation-framework.md",
+        "references/design-detail-standard.md",
         "references/knowledge/character-costume-cut-design/costume-cut.md"
       ],
       "explicit_only": true
@@ -1109,6 +1130,7 @@
         "knowledge/index.md",
         "references/specialist-contract.md",
         "references/differentiation-framework.md",
+        "references/design-detail-standard.md",
         "references/knowledge/character-costume-color-design/costume-color.md"
       ],
       "explicit_only": true
@@ -1180,7 +1202,10 @@
         "knowledge/index.md",
         "references/specialist-contract.md",
         "references/differentiation-framework.md",
-        "references/knowledge/character-costume-material-design/costume-material.md"
+        "references/design-detail-standard.md",
+        "references/knowledge/character-costume-material-design/costume-material.md",
+        "references/render-texture-standard.md",
+        "references/knowledge/character-costume-material-design/anti-stereotype-texture.md"
       ],
       "explicit_only": true
     },
@@ -1251,6 +1276,7 @@
         "knowledge/index.md",
         "references/specialist-contract.md",
         "references/differentiation-framework.md",
+        "references/design-detail-standard.md",
         "references/knowledge/character-costume-accessory-design/costume-accessory.md"
       ],
       "explicit_only": true

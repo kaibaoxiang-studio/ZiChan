@@ -43,7 +43,7 @@ def project_plan(root):
         if not card_record.get("approval") or card_record.get("stale"):
             continue
         card = read_json(root / card_record["path"])
-        if card.get("schema_version") != "CharacterDesignCardV2":
+        if card.get("schema_version") not in {"CharacterDesignCardV2", "CharacterDesignCardV2.1"}:
             continue
         row = by_id.get(parts[1])
         if row is not None and isinstance(card.get("recognition_axes"), dict):

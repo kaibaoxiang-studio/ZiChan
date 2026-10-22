@@ -1,4 +1,4 @@
-# 角色资产知识索引 v0.2
+# 角色资产知识索引 v0.2.1
 
 先读取当前任务对应的 reference，不要在每次调用中加载整个知识库。任何 reference 的示例都只是方法，剧本事实与操作者已批准的决定优先。
 
@@ -6,8 +6,10 @@
 | --- | --- | --- |
 | 项目启动、全员规划 | `references/evidence.md`、`references/character-design.md`、`references/differentiation-framework.md`、`references/knowledge/character-cast-differentiation/ensemble.md` | 建立第 -1 阶段视觉基准、比较组与五轴矩阵；旧 Skill 的占用表方法按需加载 `legacy-visual.md` |
 | 逐人设计、Grill Me | `references/character-design.md`、`references/costume-and-morphology.md`、`references/specialist-contract.md` | 先定位具体缺口，再调用下表的专项，避免全员强制走完所有岗位 |
+| 新建重点人形设计卡过于概括 | `references/design-detail-standard.md`、`references/knowledge/character-design/anti-stereotype-texture.md` | 六组具象细节、十专项实际成果与 V2.1 卡门槛 |
 | 剧本与三份输入冲突 | `references/evidence.md` | 按原文证据优先列疑点，不暗改事实 |
 | 头像、全身图提示词 | `references/prompting.md` | 从已确认设计卡抽取可见锚点，指定参考图职责 |
+| 油亮、蜡感、材质空泛或脏糊 | `references/render-texture-standard.md`，再按设计/提示词/审查/修图的对应 `anti-stereotype-texture.md` 快照加载 | 分开设计层与渲染层；按媒介、证据和回图缺陷选词与修复 |
 | 外部出图的通用提示词结构与原样中文 | `references/knowledge/character-image-prompt/hedgehog-general-image-skill.md`、`references/prompting.md` | 区分新图/编辑，控制补充细节，逐张标注参考图职责 |
 | 已批准的 2D→3D 呈现 | `references/knowledge/character-image-prompt/hedgehog-2d3d.md`、`references/prompting.md` | 保留身份与服装，只转换已批准的媒介、材质和光照 |
 | 表情资产 | `references/expression.md`、`references/prompting.md` | 根据剧情选 9 或 16 个表情并生成图内中文标签 |
@@ -35,3 +37,5 @@
 | 衣身、腰、手与随身穿戴饰品 | `$character-costume-accessory-design` → `references/knowledge/character-costume-accessory-design/costume-accessory.md` |
 
 群像差异化总控是横向审查，不代替以上专项。每个技能只加载本轮相关知识快照；同一件越过锁骨的饰品由主控指定唯一主责。
+
+0.2.1 新增《拒绝脸谱化人物设计》来源的 7 份定点快照：`character-design`、`character-cast-differentiation`、`character-skin-design`、`character-costume-material-design`、`character-image-prompt`、`character-image-review`、`character-image-edit`。头像 3:4 规则在 `references/prompting.md` 和 CLI 提示词包合同中，回图按 `references/review.md` 核对。

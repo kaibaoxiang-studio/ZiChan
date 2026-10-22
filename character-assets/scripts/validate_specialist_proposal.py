@@ -18,8 +18,8 @@ def require_list(data, key):
 
 
 def validate(data):
-    if not isinstance(data, dict) or data.get("schema_version") != "CharacterSpecialistProposalV1":
-        raise ValueError("Expected CharacterSpecialistProposalV1")
+    if not isinstance(data, dict) or data.get("schema_version") not in {"CharacterSpecialistProposalV1", "CharacterSpecialistProposalV1.1"}:
+        raise ValueError("Expected CharacterSpecialistProposalV1 or V1.1")
     for key in ("specialist", "character_id", "scope"):
         require_text(data, key)
     for key in ("facts", "options", "unresolved"):
@@ -50,6 +50,15 @@ def validate(data):
             raise ValueError("Each option must be an object")
         for key in ("id", "visible_design", "rationale", "comparison_difference", "production_check"):
             require_text(option, key)
+        if data["schema_version"] == "CharacterSpecialistProposalV1.1":
+            elements = option.get("design_elements")
+            if not isinstance(elements, list) or len(elements) < 2:
+                raise ValueError("V1.1 options need at least two concrete design_elements")
+            for element in elements:
+                if not isinstance(element, dict):
+                    raise ValueError("Each design element must be an object")
+                for key in ("part", "visible_feature", "placement_or_structure", "basis"):
+                    require_text(element, key)
         ids.append(option["id"])
     if len(set(ids)) != len(ids):
         raise ValueError("Option IDs must be unique")

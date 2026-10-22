@@ -138,6 +138,41 @@
       "origin": "local:novel-characters-visual.zip",
       "revision": "sha256:134a1bb8476d8c99338c6c36bac27746f9a2bd9907dfb2dd919a0ad33f224d6c",
       "adaptation": "用户课程方法精炼为 character-cast-differentiation 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"
+    },
+    {
+      "origin": "local:拒绝脸谱化人物设计-知识库.zip",
+      "revision": "sha256:c352eca853c498c43c5ea3b363d1e83ff9eeadee9150899d3edcade04dd5bc5f",
+      "adaptation": "用户课程方法精炼为 character-design 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"
+    },
+    {
+      "origin": "local:拒绝脸谱化人物设计-知识库.zip",
+      "revision": "sha256:c352eca853c498c43c5ea3b363d1e83ff9eeadee9150899d3edcade04dd5bc5f",
+      "adaptation": "用户课程方法精炼为 character-cast-differentiation 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"
+    },
+    {
+      "origin": "local:拒绝脸谱化人物设计-知识库.zip",
+      "revision": "sha256:c352eca853c498c43c5ea3b363d1e83ff9eeadee9150899d3edcade04dd5bc5f",
+      "adaptation": "用户课程方法精炼为 character-skin-design 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"
+    },
+    {
+      "origin": "local:拒绝脸谱化人物设计-知识库.zip",
+      "revision": "sha256:c352eca853c498c43c5ea3b363d1e83ff9eeadee9150899d3edcade04dd5bc5f",
+      "adaptation": "用户课程方法精炼为 character-costume-material-design 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"
+    },
+    {
+      "origin": "local:拒绝脸谱化人物设计-知识库.zip",
+      "revision": "sha256:c352eca853c498c43c5ea3b363d1e83ff9eeadee9150899d3edcade04dd5bc5f",
+      "adaptation": "用户课程方法精炼为 character-image-prompt 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"
+    },
+    {
+      "origin": "local:拒绝脸谱化人物设计-知识库.zip",
+      "revision": "sha256:c352eca853c498c43c5ea3b363d1e83ff9eeadee9150899d3edcade04dd5bc5f",
+      "adaptation": "用户课程方法精炼为 character-image-review 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"
+    },
+    {
+      "origin": "local:拒绝脸谱化人物设计-知识库.zip",
+      "revision": "sha256:c352eca853c498c43c5ea3b363d1e83ff9eeadee9150899d3edcade04dd5bc5f",
+      "adaptation": "用户课程方法精炼为 character-image-edit 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"
     }
   ]
 }

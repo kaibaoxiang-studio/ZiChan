@@ -150,6 +150,76 @@
       "capability_ids": [
         "character-cast-differentiation"
       ]
+    },
+    {
+      "source_id": "anti-stereotype-texture",
+      "source_sha256": "d4d7644dece0d3ee4fcc73c76b59c520b08964a487deffdc110a3b9eae8e69f2",
+      "origin": "local:拒绝脸谱化人物设计-知识库.zip",
+      "path": "references/knowledge/character-design/anti-stereotype-texture.md",
+      "rules_sha256": "2723dafe6d995679adab41d889a83728aa90e11d2a0d7597b07c513e7d6f3051",
+      "capability_ids": [
+        "character-design"
+      ]
+    },
+    {
+      "source_id": "anti-stereotype-texture",
+      "source_sha256": "d4d7644dece0d3ee4fcc73c76b59c520b08964a487deffdc110a3b9eae8e69f2",
+      "origin": "local:拒绝脸谱化人物设计-知识库.zip",
+      "path": "references/knowledge/character-cast-differentiation/anti-stereotype-texture.md",
+      "rules_sha256": "92f4f6e1663bee902ffbde90bb8a17cc037099e22fa6652d3f97e4e5bf781d57",
+      "capability_ids": [
+        "character-cast-differentiation"
+      ]
+    },
+    {
+      "source_id": "anti-stereotype-texture",
+      "source_sha256": "d4d7644dece0d3ee4fcc73c76b59c520b08964a487deffdc110a3b9eae8e69f2",
+      "origin": "local:拒绝脸谱化人物设计-知识库.zip",
+      "path": "references/knowledge/character-skin-design/anti-stereotype-texture.md",
+      "rules_sha256": "f885d50cd23d6b23045b327349d939857afaa8c078efd21102ff3e6e32772462",
+      "capability_ids": [
+        "character-skin-design"
+      ]
+    },
+    {
+      "source_id": "anti-stereotype-texture",
+      "source_sha256": "d4d7644dece0d3ee4fcc73c76b59c520b08964a487deffdc110a3b9eae8e69f2",
+      "origin": "local:拒绝脸谱化人物设计-知识库.zip",
+      "path": "references/knowledge/character-costume-material-design/anti-stereotype-texture.md",
+      "rules_sha256": "f750def7b44468846508d3c925da9c56bc21c669d5b6ce436ff387008ae0f511",
+      "capability_ids": [
+        "character-costume-material-design"
+      ]
+    },
+    {
+      "source_id": "anti-stereotype-texture",
+      "source_sha256": "d4d7644dece0d3ee4fcc73c76b59c520b08964a487deffdc110a3b9eae8e69f2",
+      "origin": "local:拒绝脸谱化人物设计-知识库.zip",
+      "path": "references/knowledge/character-image-prompt/anti-stereotype-texture.md",
+      "rules_sha256": "555392fb4016facbaffb29f9cdc8e2e868dd4e4f5e6fbff796d29d9addc408f6",
+      "capability_ids": [
+        "character-image-prompt"
+      ]
+    },
+    {
+      "source_id": "anti-stereotype-texture",
+      "source_sha256": "d4d7644dece0d3ee4fcc73c76b59c520b08964a487deffdc110a3b9eae8e69f2",
+      "origin": "local:拒绝脸谱化人物设计-知识库.zip",
+      "path": "references/knowledge/character-image-review/anti-stereotype-texture.md",
+      "rules_sha256": "0218b2b60268d697bde0ab845c7596c8193b94e1442a7f0dc2baea30a6882a4a",
+      "capability_ids": [
+        "character-image-review"
+      ]
+    },
+    {
+      "source_id": "anti-stereotype-texture",
+      "source_sha256": "d4d7644dece0d3ee4fcc73c76b59c520b08964a487deffdc110a3b9eae8e69f2",
+      "origin": "local:拒绝脸谱化人物设计-知识库.zip",
+      "path": "references/knowledge/character-image-edit/anti-stereotype-texture.md",
+      "rules_sha256": "b92c6e3d932895f335a4c2e4b02e0b39f73ab68245cccaffb481bad878f26a29",
+      "capability_ids": [
+        "character-image-edit"
+      ]
     }
   ]
 }

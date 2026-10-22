@@ -74,14 +74,17 @@ def blueprint():
             "先定位用户项目和当前阶段；没有项目时用内置 scripts/character_project.py 导入标准剧本与资产表，场记可选。"
             "从角色清单做第 -1 阶段视觉基准和全员轻规划；用群像差异化总控建立比较组与五轴矩阵，"
             "对发型、体型、五官、皮肤和服饰按缺口调用专项，而非让所有角色强制走十轮。"
+            "提交重点人形卡必须写清脸、发、体态、皮肤、服饰和饰件的可画细节，列十专项的采纳结果或不启用理由。"
             "主角与重要角色分轮 Grill Me，普通角色分层处理；已批准角色不因新方法自动重做。"
             "每轮只推进一个已授权且依赖已批准的阶段；及时提交结构化 JSON 并通过 CLI 记录批准、图片、审查和来源。"
             "本插件只写 GPT Image 2.5 提示词，不调用生图工具。用户回图后必须实际查看图片，"
             "通过审查与操作者确认后才进入下一阶段。新细节先提议，获批后修改设计卡。"
+            "头像默认 3:4 竖版，只有操作者明确要求才更改。"
             "仅在四阶段均通过时打包。运行中报告实际文件路径、未解决疑点与下一步；不虚报成图质量。",
             ["knowledge/index.md", "references/workflow.md", "references/interfaces.md",
              "references/evidence.md", "references/source-notes.md",
-             "references/differentiation-framework.md", "references/specialist-contract.md"], common, ("request",)),
+             "references/differentiation-framework.md", "references/specialist-contract.md",
+             "references/design-detail-standard.md", "references/render-texture-standard.md"], common, ("request",)),
         capability(
             "character-evidence", "核对剧本事实、资产表与场记来源并列冲突",
             "# 角色证据核对\n\n" + refs + "\n\n"
@@ -102,26 +105,32 @@ def blueprint():
             " 2–3 个具体方向；记录已确定、待选和已委托事项，不能把单一画风选择扩大成外貌定稿。"
             "默认检查发型、体型、五官是否落入全员美型模板；按实际缺口加载对应专项知识，"
             "近邻角色并排比较，保留普通相貌和真实皮肤的可能。"
+            "按具象标准把十专项的已采用结果或不启用理由写入设计稿；提交重点人形卡用 CharacterDesignCardV2.1。"
             "设计卡区分原文事实、推导、参考图提取优点与已批准选择；仅明显换装、年龄或严重外观变化建变体。"
             "非人角色按形态改执行参考板。提交 JSON 草案；未解决项清空后请操作者批准。",
             ["knowledge/index.md", "references/character-design.md",
              "references/costume-and-morphology.md", "references/interfaces.md",
-             "references/differentiation-framework.md", "references/specialist-contract.md"],
+             "references/differentiation-framework.md", "references/specialist-contract.md",
+             "references/design-detail-standard.md",
+             "references/knowledge/character-design/anti-stereotype-texture.md"],
             common, ("project_root", "request")),
         capability(
             "character-image-prompt", "把已批准设计转成 GPT Image 2.5 分阶段提示词",
             "# 图像提示词\n\n" + refs + "\n\n"
             "读取 [出图规则](../../references/prompting.md) 与当前阶段规则。"
+            "先检查已批准卡是否具象，空泛则回设计轮补细；按真实质感规则选择适量可见肌理和材料词。"
             "只使用已批准设计卡及当前选定图片，标注每张参考图的身份/服装/风格职责。"
             "背景也是设计维度：无明确批准时仅用无场景、无纹理的中性底色作核对背景；"
             "不得自行加入地点、建筑、地貌、天气或借光线描述暗示剧情场景。"
-            "头像产 2–3 条同设计候选；表情按剧情选 9/16 格且图内写中文标签；"
+            "头像默认 3:4 竖版且每条提示词写明比例，只有操作者明确指定才覆盖；产 2–3 条同设计候选；表情按剧情选 9/16 格且图内写中文标签；"
             "全身图头到脚完整；人形执行表按上正脸/45°半侧脸、下无头放大正面服装/完整背面四格。"
             "非人使用已批准替代布局。输出 CharacterPromptPackageV1 与检查点，经 CLI 合同校验后交操作者外部出图。",
             ["knowledge/index.md", "references/prompting.md", "references/expression.md",
              "references/execution-sheet.md", "references/interfaces.md",
+             "references/design-detail-standard.md", "references/render-texture-standard.md",
              "references/knowledge/character-image-prompt/hedgehog-2d3d.md",
-             "references/knowledge/character-image-prompt/hedgehog-general-image-skill.md"],
+             "references/knowledge/character-image-prompt/hedgehog-general-image-skill.md",
+             "references/knowledge/character-image-prompt/anti-stereotype-texture.md"],
             {**common, "stage": {"type": "string", "enum": ["avatar", "expression", "full_body", "execution"]}},
             ("project_root", "character_id", "stage", "request")),
         capability(
@@ -129,11 +138,13 @@ def blueprint():
             "# 回图审查\n\n" + refs + "\n\n"
             "必须实际打开目标图片、已定稿头像及设计卡，读取 [审查规则](../../references/review.md)。"
             "分别检查原文事实、身份不变量、体型/服装/配饰、格位、中文标签、裁切与背景依据。"
+            "头像查默认 3:4；分辨设计卡空泛与回图失真，查看油光、自然肌理、材质层次与伪影。"
             "人形执行表左下有嘴唇/头发残留就是错误；右上约 45°，右下完整背面。"
             "写 CharacterImageReviewV1，列阻断、待修与可采纳提案；无法看清即 uncertain。"
             "提交报告后由操作者明确选图批准，技能不能替代批准。",
             ["knowledge/index.md", "references/review.md", "references/execution-sheet.md",
-             "references/interfaces.md"],
+             "references/interfaces.md", "references/render-texture-standard.md",
+             "references/knowledge/character-image-review/anti-stereotype-texture.md"],
             {**common, "image_path": text_field(), "stage": {"type": "string", "enum": list(("avatar", "expression", "full_body", "execution"))}},
             ("project_root", "image_path", "stage", "request")),
         capability(
@@ -145,7 +156,9 @@ def blueprint():
             "无头服装格残留头部只修裁切与相邻服装区域。不能承诺像素级保持。"
             "修改图回流后仍走审查与操作者批准；想采纳意外新细节先更新设计卡。",
             ["knowledge/index.md", "references/editing.md", "references/review.md",
-             "references/knowledge/character-image-edit/hedgehog-general-image-prompting.md"],
+             "references/render-texture-standard.md",
+             "references/knowledge/character-image-edit/hedgehog-general-image-prompting.md",
+             "references/knowledge/character-image-edit/anti-stereotype-texture.md"],
             {**common, "image_path": text_field(), "issue": text_field()},
             ("project_root", "image_path", "issue", "request")),
     ]
@@ -156,25 +169,31 @@ def blueprint():
         "从真实同框及功能近邻建立比较组，生成角色 × 识别轴矩阵；指出重复的结构组合和全员美型偏差。"
         "按文本阶段或已收到的图片明确证据等级；需要回图判断时实际打开图片。"
         "不能因差异化硬造疤痕、怪发或极端体型，不自动改已批准卡。"
+        "把类型标签翻译成可画结构，分别报告设计空泛与回图渲染趋同。"
         "给主控具体修订点与应启用的专项，问题经操作者选择后才写入正式设计卡。",
         ["knowledge/index.md", "references/differentiation-framework.md",
          "references/specialist-contract.md",
          "references/knowledge/character-cast-differentiation/ensemble.md",
-         "references/knowledge/character-cast-differentiation/legacy-visual.md"],
+         "references/knowledge/character-cast-differentiation/legacy-visual.md",
+         "references/knowledge/character-cast-differentiation/anti-stereotype-texture.md"],
         {**common, "cast_plan_path": text_field(), "comparison_group": {"type": "array", "items": text_field()}},
         ("project_root", "request")))
     for ident, description, source_id, method in SPECIALISTS:
+        extra_refs = (["references/render-texture-standard.md",
+                       f"references/knowledge/{ident}/anti-stereotype-texture.md"]
+                      if ident in {"character-skin-design", "character-costume-material-design"} else [])
         capabilities.append(capability(
             ident, description,
             "# " + description + "\n\n读取 [专项交接](../../references/specialist-contract.md)、"
             "[群像差异化框架](../../references/differentiation-framework.md) 与本专项知识快照。"
             + method + "读取已批准视觉基准、当前设计卡与比较组；输出有依据的 2–3 个可见方案，"
+            "每方案列至少两个部位、形状、位置/连接和依据明确的设计元素，供设计卡实际采纳；"
             "明确原文事实、创作提案、制作核对点及与近邻的差异。"
             "新特征只能作为待选方案，不能代替操作者批准。"
-            "提交 CharacterSpecialistProposalV1 JSON 与短 Markdown，运行 scripts/validate_specialist_proposal.py；不调用生图。",
+            "提交 CharacterSpecialistProposalV1.1 JSON 与短 Markdown，运行 scripts/validate_specialist_proposal.py；不调用生图。",
             ["knowledge/index.md", "references/specialist-contract.md",
-             "references/differentiation-framework.md",
-             f"references/knowledge/{ident}/{source_id}.md"],
+             "references/differentiation-framework.md", "references/design-detail-standard.md",
+             f"references/knowledge/{ident}/{source_id}.md", *extra_refs],
             common, ("project_root", "character_id", "request")))
     files = {path.relative_to(CONTENT).as_posix(): path.read_text(encoding="utf-8")
              for path in CONTENT.rglob("*") if path.is_file() and
@@ -218,13 +237,15 @@ def blueprint():
                  " 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"}
                 for item in adoption["sources"]]
     return {"schema_version": "HarnessBlueprintV1",
-            "plugin": {"name": "character-assets", "version": "0.2.0",
+            "plugin": {"name": "character-assets", "version": "0.2.1",
                        "description": "从剧本依据建设可追溯的角色视觉资产包与 GPT Image 2.5 提示词",
                        "author": {"name": "开宝箱工作室"}},
             "goal": "独立运行的角色资产子插件：设计、提示词、回图审查与可复用资产包",
             "acceptance_criteria": ["三份输入和顶层快照契约可接入", "阶段批准和图片回流可恢复",
                                     "错误/冲突阻断发布", "知识按情景加载且来源可追溯",
-                                    "群像比较组识别发型、体型和面孔模板化", "专项只按缺口启用且不改已批准卡"],
+                                    "群像比较组识别发型、体型和面孔模板化", "专项只按缺口启用且不改已批准卡",
+                                    "新重点人形卡交具象六组与十专项覆盖", "头像默认 3:4 且仅明确用户要求可覆盖",
+                                    "去油与噪点修复区分设计和渲染证据"],
             "open_questions": [], "capabilities": capabilities, "files": files,
             "workflows": [], "sources": sources}
 

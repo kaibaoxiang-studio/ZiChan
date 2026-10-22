@@ -275,6 +275,22 @@
         "references/knowledge/character-cast-differentiation/legacy-visual.md"
       ],
       "adaptation": "独立撰写聚焦规则，不复制课程或旧 Skill 原文；成员哈希见 creator-src/knowledge-adoption.json"
+    },
+    {
+      "id": "anti-stereotype-texture",
+      "title": "拒绝脸谱化人物设计-知识库.zip",
+      "sha256": "c352eca853c498c43c5ea3b363d1e83ff9eeadee9150899d3edcade04dd5bc5f",
+      "adopted_in": [
+        "references/design-detail-standard.md",
+        "references/render-texture-standard.md",
+        "references/knowledge/character-design/anti-stereotype-texture.md",
+        "references/knowledge/character-cast-differentiation/anti-stereotype-texture.md",
+        "references/knowledge/character-skin-design/anti-stereotype-texture.md",
+        "references/knowledge/character-costume-material-design/anti-stereotype-texture.md",
+        "references/knowledge/character-image-prompt/anti-stereotype-texture.md",
+        "references/knowledge/character-image-review/anti-stereotype-texture.md",
+        "references/knowledge/character-image-edit/anti-stereotype-texture.md"
+      ]
     }
   ]
 }
