@@ -9,9 +9,21 @@
 ## 角色插件 v0.2.2
 
 - 新增[特征聚焦专项](character-assets/skills/character-feature-focus/SKILL.md)，以少量主锚点和安静区建立辨识度；自然不对称按依据选择，不自动制造伤痕或痣。
-- 形体专项补足相对肢体比例、颅胸盆体块、正侧背与剧本动作检查。。
+- 形体专项补足相对肢体比例、颅胸盆体块、正侧背与剧本动作检查。
 - 总控在逐人设计前保存 11 项专项路由。新重点人形卡采用 `CharacterDesignCardV2.2`；已用专项必须交真实提案文件、哈希、被选方案及字段映射。提交、批准和后续读取都会校验交接。旧批准卡继续可读。
 - 两份新知识库精炼为 5 份按情景加载的快照；原始 ZIP 留在本地私有源库。完整设计与验证见[增量架构](creator-src/architecture-v0.2.2.md)和[角色插件说明](character-assets/README.md)。
+
+### 流程与交接图
+
+以下三图按角色资产插件 v0.2.2 的代码和规则制作，可在本地打开交互式 HTML。阅读顺序建议从整体到细节：
+
+| 图 | 回答的问题 |
+| --- | --- |
+| [工作流图](docs/diagrams/character-assets-v0.2.2/workflow.html) | 从来源导入、逐人设计和人工批准，到四阶段成图与资产包，整体怎样推进？ |
+| [交互时序图](docs/diagrams/character-assets-v0.2.2/sequence.html) | 操作者、角色主控、专项、项目 CLI、外部生图与回图审查如何交接？ |
+| [资产数据流图](docs/diagrams/character-assets-v0.2.2/dataflow.html) | 剧本、资产表、提案、设计卡、提示词、回流图片与审查记录如何进入最终资产包？ |
+
+三图的可维护定义文件位于同一目录，分别为 [工作流](docs/diagrams/character-assets-v0.2.2/workflow.json)、[时序](docs/diagrams/character-assets-v0.2.2/sequence.json)和[数据流](docs/diagrams/character-assets-v0.2.2/dataflow.json)。图中的外部生图属于操作者使用的工具，角色插件自身只编写提示词并接收回图。
 
 ## 目录
 

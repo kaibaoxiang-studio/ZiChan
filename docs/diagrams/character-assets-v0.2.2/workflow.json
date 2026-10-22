@@ -1,0 +1,380 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "角色资产插件 · 制作工作流",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "output": "docs/diagrams/character-assets-v0.2.2/workflow.html",
+    "repository": {
+      "url": "https://github.com/kaibaoxiang-studio/ZiChan.git",
+      "revision": "f319855f16eb2fc0ba3d54c3a9f90f8ec7eb6ba7",
+      "provider": "github"
+    }
+  },
+  "lanes": [
+    {
+      "id": "operator",
+      "label": "操作者与审批"
+    },
+    {
+      "id": "design",
+      "label": "主控与专项设计"
+    },
+    {
+      "id": "cli",
+      "label": "本地项目 CLI"
+    },
+    {
+      "id": "external",
+      "label": "外部出图"
+    }
+  ],
+  "phases": [
+    {
+      "id": "intake",
+      "label": "建立依据",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "design_phase",
+      "label": "逐人设计与确认",
+      "fromCol": 2,
+      "toCol": 3
+    },
+    {
+      "id": "asset_phase",
+      "label": "成图与发布",
+      "fromCol": 4,
+      "toCol": 5
+    }
+  ],
+  "nodes": [
+    {
+      "id": "source",
+      "lane": "operator",
+      "col": 0,
+      "type": "external",
+      "label": "提供来源",
+      "sources": [
+        {
+          "path": "character-assets/references/workflow.md",
+          "line": 7,
+          "end_line": 14
+        }
+      ],
+      "sublabel": "剧本＋资产表；场记可选"
+    },
+    {
+      "id": "init",
+      "lane": "cli",
+      "col": 0,
+      "type": "backend",
+      "label": "建立项目",
+      "sources": [
+        {
+          "path": "character-assets/scripts/character_project.py",
+          "line": 645,
+          "end_line": 711
+        }
+      ],
+      "sublabel": "复制原件并记 SHA"
+    },
+    {
+      "id": "bible",
+      "lane": "design",
+      "col": 1,
+      "type": "backend",
+      "label": "视觉基准",
+      "sources": [
+        {
+          "path": "character-assets/references/workflow.md",
+          "line": 18,
+          "end_line": 20
+        }
+      ],
+      "sublabel": "原文与世界规则"
+    },
+    {
+      "id": "bible_ok",
+      "lane": "operator",
+      "col": 1,
+      "type": "security",
+      "label": "确认基准",
+      "sources": [
+        {
+          "path": "character-assets/references/workflow.md",
+          "line": 20,
+          "end_line": 30
+        }
+      ],
+      "sublabel": "批准后再规划"
+    },
+    {
+      "id": "cast",
+      "lane": "design",
+      "col": 2,
+      "type": "backend",
+      "label": "群像轻规划",
+      "sources": [
+        {
+          "path": "character-assets/references/workflow.md",
+          "line": 20,
+          "end_line": 22
+        }
+      ],
+      "sublabel": "近邻比较与五轴"
+    },
+    {
+      "id": "cast_ok",
+      "lane": "operator",
+      "col": 2,
+      "type": "security",
+      "label": "确认规划",
+      "sources": [
+        {
+          "path": "character-assets/references/workflow.md",
+          "line": 20,
+          "end_line": 30
+        }
+      ],
+      "sublabel": "角色覆盖完整"
+    },
+    {
+      "id": "route",
+      "lane": "design",
+      "col": 3,
+      "type": "messagebus",
+      "label": "路由并调用专项",
+      "sources": [
+        {
+          "path": "character-assets/references/feature-focus-and-body-form.md",
+          "line": 5,
+          "end_line": 9
+        }
+      ],
+      "sublabel": "只调用有缺口的岗位"
+    },
+    {
+      "id": "card",
+      "lane": "cli",
+      "col": 3,
+      "type": "backend",
+      "label": "校验设计卡",
+      "sources": [
+        {
+          "path": "character-assets/scripts/character_project.py",
+          "line": 727,
+          "end_line": 758
+        }
+      ],
+      "sublabel": "V2.2＋提案哈希"
+    },
+    {
+      "id": "card_ok",
+      "lane": "operator",
+      "col": 3,
+      "type": "security",
+      "label": "批准设计卡",
+      "sources": [
+        {
+          "path": "character-assets/scripts/character_project.py",
+          "line": 793,
+          "end_line": 817
+        }
+      ],
+      "sublabel": "未决项须清空"
+    },
+    {
+      "id": "prompt",
+      "lane": "design",
+      "col": 4,
+      "type": "backend",
+      "label": "分阶段提示词",
+      "sources": [
+        {
+          "path": "character-assets/references/workflow.md",
+          "line": 35,
+          "end_line": 39
+        }
+      ],
+      "sublabel": "头像→表情/全身→执行"
+    },
+    {
+      "id": "generate",
+      "lane": "external",
+      "col": 4,
+      "type": "cloud",
+      "label": "外部生成并回传",
+      "sources": [
+        {
+          "path": "character-assets/references/workflow.md",
+          "line": 37,
+          "end_line": 45
+        }
+      ],
+      "sublabel": "插件只交文字"
+    },
+    {
+      "id": "review",
+      "lane": "design",
+      "col": 5,
+      "type": "backend",
+      "label": "审查回图",
+      "sources": [
+        {
+          "path": "character-assets/references/workflow.md",
+          "line": 37,
+          "end_line": 48
+        }
+      ],
+      "sublabel": "实际看图；问题可修订"
+    },
+    {
+      "id": "image_ok",
+      "lane": "operator",
+      "col": 5,
+      "type": "security",
+      "label": "确认选图",
+      "sources": [
+        {
+          "path": "character-assets/scripts/character_project.py",
+          "line": 903,
+          "end_line": 930
+        }
+      ],
+      "sublabel": "四阶段各选一版"
+    },
+    {
+      "id": "pack",
+      "lane": "cli",
+      "col": 5,
+      "type": "database",
+      "label": "角色资产包",
+      "sources": [
+        {
+          "path": "character-assets/scripts/character_project.py",
+          "line": 992,
+          "end_line": 1058
+        }
+      ],
+      "sublabel": "批准记录与图像汇总"
+    }
+  ],
+  "mainPath": [
+    "source",
+    "init",
+    "bible",
+    "bible_ok",
+    "cast",
+    "cast_ok",
+    "route",
+    "card",
+    "card_ok",
+    "prompt",
+    "generate",
+    "review",
+    "image_ok",
+    "pack"
+  ],
+  "edges": [
+    {
+      "id": "source_to_init",
+      "from": "source",
+      "to": "init",
+      "variant": "default"
+    },
+    {
+      "id": "init_to_bible",
+      "from": "init",
+      "to": "bible",
+      "variant": "default"
+    },
+    {
+      "id": "bible_to_bible_ok",
+      "from": "bible",
+      "to": "bible_ok",
+      "variant": "security"
+    },
+    {
+      "id": "bible_ok_to_cast",
+      "from": "bible_ok",
+      "to": "cast",
+      "variant": "default"
+    },
+    {
+      "id": "cast_to_cast_ok",
+      "from": "cast",
+      "to": "cast_ok",
+      "variant": "security"
+    },
+    {
+      "id": "cast_ok_to_route",
+      "from": "cast_ok",
+      "to": "route",
+      "variant": "emphasis"
+    },
+    {
+      "id": "route_to_card",
+      "from": "route",
+      "to": "card",
+      "variant": "emphasis"
+    },
+    {
+      "id": "card_to_card_ok",
+      "from": "card",
+      "to": "card_ok",
+      "variant": "security"
+    },
+    {
+      "id": "card_ok_to_prompt",
+      "from": "card_ok",
+      "to": "prompt",
+      "variant": "emphasis"
+    },
+    {
+      "id": "prompt_to_generate",
+      "from": "prompt",
+      "to": "generate",
+      "variant": "default"
+    },
+    {
+      "id": "generate_to_review",
+      "from": "generate",
+      "to": "review",
+      "variant": "default"
+    },
+    {
+      "id": "review_to_image_ok",
+      "from": "review",
+      "to": "image_ok",
+      "variant": "security",
+      "label": "报告通过后"
+    },
+    {
+      "id": "image_ok_to_pack",
+      "from": "image_ok",
+      "to": "pack",
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "设计门槛",
+      "items": [
+        "路由与提案保存在项目内；used 项必须指向真实提案、哈希及被选方案。",
+        "CLI 只核合同与来源，审美判断由操作者确认。"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "成图门槛",
+      "items": [
+        "头像默认 3:4；成图由外部工具完成。",
+        "回图先审查，再由操作者批准；四阶段齐备才打包。"
+      ]
+    }
+  ]
+}
