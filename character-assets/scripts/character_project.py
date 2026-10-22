@@ -810,7 +810,7 @@ def cmd_package(args):
     image_ids = {x["id"] for x in images}
     record_keys = {"visual-bible", "cast-plan", _record_key("design-card", ident, variant)}
     record_keys.update(_record_key("prompt-package", ident, variant, stage) for stage in STAGES)
-    manifest = {"schema_version": "CharacterAssetPackV1", "plugin_version": "0.1.2",
+    manifest = {"schema_version": "CharacterAssetPackV1", "plugin_version": "0.1.3",
                 "project_id": state["project_id"],
                 "character_id": ident, "variant_id": variant, "created_at": now(),
                 "input_sources": state["inputs"],

@@ -80,6 +80,8 @@ def blueprint():
             "# 图像提示词\n\n" + refs + "\n\n"
             "读取 [出图规则](../../references/prompting.md) 与当前阶段规则。"
             "只使用已批准设计卡及当前选定图片，标注每张参考图的身份/服装/风格职责。"
+            "背景也是设计维度：无明确批准时仅用无场景、无纹理的中性底色作核对背景；"
+            "不得自行加入地点、建筑、地貌、天气或借光线描述暗示剧情场景。"
             "头像产 2–3 条同设计候选；表情按剧情选 9/16 格且图内写中文标签；"
             "全身图头到脚完整；人形执行表按上正脸/45°半侧脸、下无头放大正面服装/完整背面四格。"
             "非人使用已批准替代布局。输出 CharacterPromptPackageV1 与检查点，经 CLI 合同校验后交操作者外部出图。",
@@ -93,7 +95,7 @@ def blueprint():
             "character-image-review", "审查回流图片的剧本事实、身份与版式并产报告",
             "# 回图审查\n\n" + refs + "\n\n"
             "必须实际打开目标图片、已定稿头像及设计卡，读取 [审查规则](../../references/review.md)。"
-            "分别检查原文事实、身份不变量、体型/服装/配饰、格位、中文标签和裁切。"
+            "分别检查原文事实、身份不变量、体型/服装/配饰、格位、中文标签、裁切与背景依据。"
             "人形执行表左下有嘴唇/头发残留就是错误；右上约 45°，右下完整背面。"
             "写 CharacterImageReviewV1，列阻断、待修与可采纳提案；无法看清即 uncertain。"
             "提交报告后由操作者明确选图批准，技能不能替代批准。",
@@ -135,7 +137,7 @@ def blueprint():
         {"origin": "local:刺猬星球素材/01-通用图片生成/references/prompting.md", "revision": "sha256:d957a45cb24fe2cf1a85858674fc533f15a5f4621355f559a13a93168999c2dd", "license": "Apache-2.0", "adaptation": "改写单项修图与全图复核方法；保留外部出图"},
     ]
     return {"schema_version": "HarnessBlueprintV1",
-            "plugin": {"name": "character-assets", "version": "0.1.2",
+            "plugin": {"name": "character-assets", "version": "0.1.3",
                        "description": "从剧本依据建设可追溯的角色视觉资产包与 GPT Image 2.5 提示词",
                        "author": {"name": "开宝箱工作室"}},
             "goal": "独立运行的角色资产子插件：设计、提示词、回图审查与可复用资产包",

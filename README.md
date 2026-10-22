@@ -20,4 +20,4 @@
 
 ## 本地优先与团队交接
 
-本机角色插件已安装 v0.1.2，结构与输入输出契约已检查。操作者可按 [角色手动验收样例](character-assets/examples/manual-acceptance.md)和[场景手动验收样例](scene-assets/examples/manual-acceptance.md)跑一部作品；图片质量由操作者逐阶段检验。团队从私有 `kaibaoxiang-studio/ZiChan` 下载插件目录或 `dist/` 的安装包。新增素材的采纳与后续路由见[刺猬星球素材拆解](research/刺猬星球素材拆解-2026-10-22.md)。
+本机角色插件已安装 v0.1.3，结构与输入输出契约已检查。角色资产图的场景背景须有明确批准依据；未批准时使用无场景、无纹理的中性背景。操作者可按 [角色手动验收样例](character-assets/examples/manual-acceptance.md)和[场景手动验收样例](scene-assets/examples/manual-acceptance.md)跑一部作品；图片质量由操作者逐阶段检验。团队从私有 `kaibaoxiang-studio/ZiChan` 下载插件目录或 `dist/` 的安装包。新增素材的采纳与后续路由见[刺猬星球素材拆解](research/刺猬星球素材拆解-2026-10-22.md)。

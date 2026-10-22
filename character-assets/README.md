@@ -1,4 +1,4 @@
-# 角色资产插件 v0.1.2
+# 角色资产插件 v0.1.3
 
 独立安装的 Codex 插件。主入口为 `$character-assets`；辅助入口：`$character-evidence`、`$character-design`、`$character-image-prompt`、`$character-image-review`、`$character-image-edit`。它们是可单独调用的 Skills，默认由主入口按当前阶段选择，不要求同时启动多个 Agent。
 
