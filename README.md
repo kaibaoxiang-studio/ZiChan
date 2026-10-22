@@ -120,6 +120,7 @@ flowchart LR
 
 - `character-assets/`：可直接安装的独立插件，包含 Skills、知识快照、Python Harness 和本地项目 CLI。
 - `prop-assets/`：道具资产独立插件，包含主技能、四个专项技能和精炼参考，无生图 API 或 Harness 依赖。
+- [`sence-prompts/`](sence-prompts/SKILL.md)：独立场景提示词 Skill v1.0.0，支持静态场景设计、光影氛围、反打与其他角度，以及局部修改；不自动调用场景出图服务。
 - `creator-src/`：角色插件的 Harness Creator 蓝图生成器与自编业务资源；角色插件后续更新先改这里，再审查同步到插件。道具插件直接维护 `prop-assets/`。
 - `scene-assets/`：场景资产独立插件，提供条件加载的中式幻想尺度知识与回图审查。
 - `scene-creator-src/`：场景插件的蓝图、可维护业务规则及本地项目 CLI 源码。
