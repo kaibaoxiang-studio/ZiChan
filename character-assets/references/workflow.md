@@ -17,7 +17,7 @@ python scripts/character_project.py status --project-root /work/role-project
 
 ## 2. 项目与角色决策
 
-从三份输入形成 `ProjectVisualBibleV1`，人工确认；再由 `$character-cast-differentiation` 建比较组与五轴矩阵，形成覆盖资产表角色 ID 的 `CastPlanV2`，人工确认。新提交的重点人形角色按分轮 Grill Me 生成含[具象细节与专项覆盖](design-detail-standard.md)的 `CharacterDesignCardV2.2`，人工确认。旧项目的 V1/V2/V2.1 批准记录继续有效；重点人形卡若重新提交则使用 V2.2。草案可以列 `unresolved`，但不能批准。使用 `submit` 保存 JSON，再用 `approve-record --operator 操作者姓名` 确认。设计卡变更会让该角色的后续提示词与图片失效，历史文件保留。
+从三份输入形成 `ProjectVisualBibleV1`，人工确认；再由 `$character-cast-differentiation` 建比较组与五轴矩阵，形成覆盖资产表角色 ID 的 `CastPlanV2`，人工确认。新提交的重点人形角色按分轮 Grill Me 生成含[具象细节与专项覆盖](design-detail-standard.md)的 `CharacterDesignCardV2.4`，人工确认。旧项目的 V1/V2/V2.1 批准记录继续有效；新项目重点人形卡重新提交时使用 V2.4。草案可以列 `unresolved`，但不能批准。使用 `submit` 保存 JSON，再用 `approve-record --operator 操作者姓名` 确认。设计卡变更会让该角色的后续提示词与图片失效，历史文件保留。
 
 在轻规划草案提交前及每张重点角色设计卡定稿前，按 [差异化框架](differentiation-framework.md) 检查最相近角色。先按[焦点与三维形体交接](feature-focus-and-body-form.md)写逐人专项路由，再对有缺口的专项实际调用并保存提案；特征焦点与体块动作均纳入路由。used 项必须有提案原文件、哈希、被选方案和采纳字段映射；专项提案先并入当前审阅轮，不为每个维度单开确认。可用 `python scripts/cast_diff_audit.py --cast-plan /draft/cast-plan.json --output /draft/cast-audit.json` 找出同字段和缺轴候选；人仍需审查近义撞型与全员美型。已有已批准角色不会因插件升级自动被改写。
 
@@ -34,7 +34,7 @@ python scripts/character_project.py approve-record --project-root /work/role-pro
 
 ## 3. 提示词与图片回流
 
-每阶段由 `$character-image-prompt` 编写 `CharacterPromptPackageV1`，经 `submit --kind prompt-package --stage ...` 合同检查后可用于外部出图。头像默认 3:4 竖版，全身图默认 9:16 竖版，只有明确的用户决定可覆盖；人形头像、表情和单独全身采用[模卡式基础形体图](model-card-baseline.md)，正式服装在执行资产表恢复。头像与表情优先锁骨以上、服装不入画，生成或审查受阻时整组改用对应白色背心；全身使用指定背心、短裤并赤脚。详细卡若仍是概括句，先回设计轮补细，不靠提示词现编。按[真实质感规则](render-texture-standard.md)选择皮肤、布料、光线和修复策略。顺序为头像 → 表情与全身并行 → 执行资产表。每阶段图片用 `import-image` 登记，再由 `$character-image-review` 实际看图、保存 `CharacterImageReviewV1`。报告通过后，操作者用 `approve-image` 选定唯一当前版本。只报“通过”而不见图、未经操作者确认，都不能推进。
+每阶段由 `$character-image-prompt` 编写 `CharacterPromptPackageV1`，经 `submit --kind prompt-package --stage ...` 合同检查后可用于外部出图。头像默认 3:4 竖版，全身图默认 9:16 竖版，只有明确的用户决定可覆盖；人形头像、表情和单独全身采用[模卡式基础形体图](model-card-baseline.md)，正式服装在执行资产表恢复。头像以脸为主体，可取完整头部、双肩及上胸；服装不入画用 `face_only`，上胸入画直接用对应白色背心。表情继承头像取景和着装，从 `face_only` 切换背心时记录原因并重审整表；全身使用指定背心、短裤并赤脚。详细卡若仍是概括句，先回设计轮补细，不靠提示词现编。按[真实质感规则](render-texture-standard.md)选择皮肤、布料、光线和修复策略。新项目顺序为头像 → 九宫格表情 → 全身模卡 → 每状态服饰设计图 → 对应执行资产图；单张和批量均由[需求路由与整合](routing-and-integration.md)规划。每阶段图片用 `import-image` 登记，再由 `$character-image-review` 实际看图、保存 `CharacterImageReviewV1`。报告通过后，操作者用 `approve-image` 选定唯一当前版本。只报“通过”而不见图、未经操作者确认，都不能推进。
 
 头像与全身图回流审查时，若已有同剧定稿图片，增加并排比较：批准的主锚点、脸型、发结构、体态和皮肤是否在成图里保持区别；无法取得其他角色图片时写明只做单人核验。差异问题先定位设计卡还是出图偏差，修设计卡须重走批准，单纯出图偏差可走局部修图。
 
@@ -45,7 +45,7 @@ python scripts/character_project.py submit-review --project-root /work/role-proj
 python scripts/character_project.py approve-image --project-root /work/role-project --image-id avatar-HASH --operator OPERATOR
 ```
 
-`$character-image-edit` 读取缺陷报告，输出目标明确的局部修图提示词；修改图重新导入、审查、确认。表情和全身均定稿后，才提交执行资产表提示词。最终 `package --character-id ... --output NEW_DIRECTORY` 汇总四阶段定稿图片、设计与提示词、审查和版本记录。输出目录必须是新目录，避免覆盖旧包。
+`$character-image-edit` 读取缺陷报告，输出目标明确的局部修图提示词；修改图重新导入、审查、确认。表情和全身均定稿后，每个资产表状态分别提交服饰设计图；该状态服饰图定稿后才提交其执行资产图提示词。最终 `package --character-id ... --variant-id STATE_ID --output NEW_DIRECTORY` 汇总五阶段定稿图片、设计与提示词、审查和版本记录。输出目录必须是新目录，避免覆盖旧包。
 
 ## 4. 剧本侧改版
 

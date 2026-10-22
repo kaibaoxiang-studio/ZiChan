@@ -34,7 +34,7 @@ def validate_plugin(root):
     try:
         manifest=read_json(root/'.codex-plugin/plugin.json')
         require_name(manifest['name'])
-        if not re.fullmatch(r'\d+\.\d+\.\d+(?:-[a-zA-Z0-9.-]+)?',manifest['version']):
+        if not re.fullmatch(r'\d+\.\d+\.\d+(?:\.\d+)?(?:-[a-zA-Z0-9.-]+)?',manifest['version']):
             raise ValueError('Plugin version must be semantic version')
         if manifest.get('skills')!='./skills/': raise ValueError('Plugin skills must use ./skills/')
         for field in ('description','author'):

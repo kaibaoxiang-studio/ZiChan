@@ -1,8 +1,10 @@
-# 角色资产插件 v0.2.3
+# 角色资产插件 v0.2.4.1
 
-独立安装的 Codex 插件。主入口为 `$character-assets`；原有的证据、角色设计、提示词、回图审查和局部修图能力继续保留。0.2.0 新增 **群像差异化总控**与 **11 个专项设计 Skill**，共 18 项能力。它们可单独调用，主入口按实际缺口选用，不要求每个角色走完所有专项。
+独立安装的 Codex 插件。主入口为 `$character-assets`；原有的证据、角色设计、提示词、回图审查和局部修图能力继续保留。v0.2.4.1 具备 **群像差异化总控**与 **13 个专项设计 Skill**，共 20 项能力。它们可单独调用，主入口按实际缺口选用，不要求每个角色走完所有专项。
 
-**0.2.3 小版本更新**：身体专项先定测量口径，再给头身数值和肩胯、明确端点的上段/下段、肘腕、膝踝关系；新提交人形卡要保存五组比例锚点。全身提示词必须继承已批准的头身、肩胯和躯腿关系，验收项核对头身与躯腿。全身图默认 **9:16 竖版**，提示词、验收项和最终回图都须核对；只有用户明确指定才可覆盖。人形头像和表情采用模卡式锁骨以上取景、服装不入画，若生成或审查受阻则整组改用对应白色背心；单独全身图按男女设定采用背心、短裤、赤脚，正式服装留在执行资产表。身高、体重和“修长但可信”不能代替比例。旧批准卡仍可读；旧 V2.2 卡要继续新做全身图时，先补比例方案并经操作者批准。见[身体比例交接样例](examples/body-proportion-contract.md)和[模卡规则](references/model-card-baseline.md)。
+**0.2.4.1 小版本更新**：新项目依次产出头像、九宫格表情、全身模卡、每状态服饰设计图和执行资产图。前三张图是角色共享的身份基准，服饰与执行逐状态制作；`plan` 可列单角色或全员批量任务，每张图仍独立审查和批准。图片文件名包含资产名、状态、阶段和短 SHA。新增环境与科技外貌、面部装饰与妆容两项按需专项；新重点人形卡使用 `CharacterDesignCardV2.4`。头像以脸为主体，可见完整头部、双肩和上胸；上胸入画可直接用中性白色背心，不强制裁到锁骨以上。九宫格沿用头像取景及着装。旧项目继续四阶段。详见[需求路由与整合](references/routing-and-integration.md)、[服饰图阶段](references/costume-design-stage.md)、[参考图职责](examples/reference-images.md)。
+
+**0.2.3 小版本更新（历史）**：身体专项先定测量口径，再给头身数值和肩胯、明确端点的上段/下段、肘腕、膝踝关系；新提交人形卡要保存五组比例锚点。全身提示词必须继承已批准的头身、肩胯和躯腿关系，验收项核对头身与躯腿。全身图默认 **9:16 竖版**，提示词、验收项和最终回图都须核对；只有用户明确指定才可覆盖。该版头像采用锁骨以上、服装不入画的取景；当前版已放宽为头肩至上胸近景。单独全身图按男女设定采用背心、短裤、赤脚，正式服装留在执行资产表。身高、体重和“修长但可信”不能代替比例。旧批准卡仍可读；旧 V2.2 卡要继续新做全身图时，先补比例方案并经操作者批准。见[身体比例交接样例](examples/body-proportion-contract.md)和[当前模卡规则](references/model-card-baseline.md)。
 
 **0.2.2 小版本更新**：新增特征聚焦专项，设计卡要求明确主锚点与安静区；形体专项补充相对比例、颅胸盆体块、正侧背与剧本动作核对。主控先交逐人专项路由，used 项必须提供真实提案文件、SHA、所选方案和采纳字段映射，提交与批准均验证。新重点人形卡使用 `CharacterDesignCardV2.2`；已批准旧卡继续可读。两份新课程转成 5 份按情景加载的规则快照。详见[焦点与三维形体交接](references/feature-focus-and-body-form.md)。
 
@@ -13,7 +15,8 @@
 | `$character-cast-differentiation` | 建同框/近邻比较组，检查五轴矩阵、撞脸与全员美型倾向 |
 | `$character-feature-focus` | 少量主锚点、安静区、可见视角与自然不对称 |
 | `$character-hair-design`、`$character-body-design`、`$character-face-design` | 发型块面、形体体态、五官骨相的具体差异 |
-| `$character-face-signature-design`、`$character-skin-design` | 面部记忆点与锁骨以上饰品、真实皮肤肌理 |
+| `$character-face-signature-design`、`$character-face-decoration-design`、`$character-skin-design` | 面部记忆点、妆容状态与真实皮肤肌理 |
+| `$character-world-appearance-design` | 环境暴露、资源与技术影响的可见结果 |
 | `$character-costume-style-design`、`$character-costume-cut-design` | 服饰款式与剪裁结构各自负责的设计问题 |
 | `$character-costume-color-design`、`$character-costume-material-design`、`$character-costume-accessory-design` | 配色、材质、衣身/腰/手饰品 |
 
@@ -21,9 +24,9 @@
 
 ## 输入与产物
 
-标准化剧本和资产表必需，场记表可选。支持 JSON、Markdown、Excel，优先使用 JSON；也可用顶层 `AssetProjectSnapshotV1` 初始化。文件可以作为聊天附件提供，也可以给绝对路径。项目工作目录保留原件副本、SHA、设计卡、提示词、回流图片、审查与审批。最终 `CharacterAssetPackV1` 只包含对应角色变体的已定稿材料。
+标准化剧本和资产表必需，场记表可选。支持 JSON、Markdown、Excel，优先使用 JSON；也可用顶层 `AssetProjectSnapshotV1` 初始化。文件可以作为聊天附件提供，也可以给绝对路径。项目工作目录保留原件副本、SHA、设计卡、提示词、回流图片、审查与审批。新项目最终 `CharacterAssetPackV2` 包含该状态已定稿的五阶段材料；旧项目的 `CharacterAssetPackV1` 仍可读取与打包。
 
-新项目建议使用 `CastPlanV2` 与 `CharacterDesignCardV2.2`，记录五轴识别特征、近邻比较和六组具象细节。旧项目的 V1/V2/V2.1 记录继续可读，已批准角色不因升级自动重设计。`scripts/cast_diff_audit.py` 能列出文本字段重复与待补轴；实际撞脸、真实度和皮肤质感仍需看回流图并排判断。
+新项目建议使用 `CastPlanV2` 与 `CharacterDesignCardV2.4`，记录五轴识别特征、近邻比较和六组具象细节。旧项目的 V1/V2/V2.1 记录继续可读，已批准角色不因升级自动重设计。`scripts/cast_diff_audit.py` 能列出文本字段重复与待补轴；实际撞脸、真实度和皮肤质感仍需看回流图并排判断。
 
 插件**只写 GPT Image 2.5 提示词**。操作者在外部工具生成图片，回传并逐阶段确认。人形执行资产表上左正脸、上右约 45° 半侧脸；下左是从颈肩以下到鞋的放大无头正面服装主体，下右是从头到鞋的完整背面。非人按设计卡批准的版式适配。
 
@@ -49,7 +52,7 @@ $character-assets 请用这份标准化剧本和资产表建立角色资产项�
 
 主入口会按 [工作流](references/workflow.md) 使用 `scripts/character_project.py`。想单独审查已有图，可调用 `$character-image-review` 并给出项目目录和图片。需要局部修图提示词，可调用 `$character-image-edit`。结构化 JSON 格式见 [接口](references/interfaces.md)；知识按 [索引](knowledge/index.md) 加载。
 
-11 个专项的输入/输出见 [专项交接](references/specialist-contract.md)，群像审查方法见 [差异化框架](references/differentiation-framework.md)。可对草案运行：
+13 个专项的输入/输出见 [专项交接](references/specialist-contract.md)，群像审查方法见 [差异化框架](references/differentiation-framework.md)。可对草案运行：
 
 ```sh
 python3 scripts/cast_diff_audit.py --cast-plan /absolute/cast-plan.json --output /absolute/cast-audit.json
@@ -61,8 +64,10 @@ python3 scripts/cast_diff_audit.py --cast-plan /absolute/cast-plan.json --output
 
 ```sh
 python3 scripts/character_project.py status --project-root /absolute/project/directory
+python3 scripts/character_project.py plan --project-root /absolute/project/directory --character-id CHR-001
+python3 scripts/character_project.py plan --project-root /absolute/project/directory
 ```
 
 手动测试材料见 [样例剧本、资产表与验收清单](examples/manual-acceptance.md)；[V2 群像样例](examples/sample-cast-plan-v2.json)可用于差异化审查。
 
-原始课程、用户提供的 14 份知识库 ZIP、旧 Skill ZIP、外部 RAR、剧本和具体人物参考图都不在插件内；本包只有独立改写的规则与来源收据。课程对相貌、体型、颜色和人格的固定映射不作为事实使用。相机型号不会保证实际光学效果，外部去噪与线稿重建须看回图复核。图片审查依赖实际回流图片，结构验证不等同于视觉验收。
+原始课程、用户提供的知识库 ZIP、旧 Skill ZIP、外部 RAR、剧本和具体人物参考图都不在插件内；本包只有独立改写的规则与来源收据。课程对相貌、体型、颜色和人格的固定映射不作为事实使用。相机型号不会保证实际光学效果，外部去噪与线稿重建须看回图复核。图片审查依赖实际回流图片，结构验证不等同于视觉验收。

@@ -23,6 +23,40 @@
           "request": {
             "type": "string",
             "minLength": 1
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "single",
+              "batch"
+            ]
+          },
+          "character_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "variant_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "target_stages": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "avatar",
+                "expression",
+                "full_body",
+                "costume_design",
+                "execution"
+              ]
+            }
           }
         },
         "required": [
@@ -66,6 +100,8 @@
         "knowledge/index.md",
         "references/workflow.md",
         "references/interfaces.md",
+        "references/routing-and-integration.md",
+        "references/costume-design-stage.md",
         "references/model-card-baseline.md",
         "references/evidence.md",
         "references/source-notes.md",
@@ -217,6 +253,9 @@
         "references/specialist-contract.md",
         "references/design-detail-standard.md",
         "references/feature-focus-and-body-form.md",
+        "references/routing-and-integration.md",
+        "references/knowledge/character-world-appearance-design/world-appearance.md",
+        "references/knowledge/character-face-decoration-design/face-decoration.md",
         "references/knowledge/character-design/feature-focus-design.md",
         "references/knowledge/character-design/anti-stereotype-texture.md"
       ],
@@ -251,6 +290,7 @@
               "avatar",
               "expression",
               "full_body",
+              "costume_design",
               "execution"
             ]
           }
@@ -301,6 +341,7 @@
         "references/model-card-baseline.md",
         "references/expression.md",
         "references/execution-sheet.md",
+        "references/costume-design-stage.md",
         "references/interfaces.md",
         "references/design-detail-standard.md",
         "references/render-texture-standard.md",
@@ -344,6 +385,7 @@
               "avatar",
               "expression",
               "full_body",
+              "costume_design",
               "execution"
             ]
           }
@@ -395,6 +437,7 @@
         "references/execution-sheet.md",
         "references/interfaces.md",
         "references/render-texture-standard.md",
+        "references/costume-design-stage.md",
         "references/knowledge/character-image-review/feature-focus-review.md",
         "references/knowledge/character-image-review/anti-stereotype-texture.md"
       ],
@@ -562,6 +605,78 @@
         "references/knowledge/character-cast-differentiation/ensemble.md",
         "references/knowledge/character-cast-differentiation/legacy-visual.md",
         "references/knowledge/character-cast-differentiation/anti-stereotype-texture.md"
+      ],
+      "explicit_only": true
+    },
+    {
+      "id": "character-world-appearance-design",
+      "skill_name": "character-world-appearance-design",
+      "description": "环境与技术外貌设计：世界压力、资源与可达技术",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "project_root": {
+            "type": "string",
+            "minLength": 1
+          },
+          "character_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "variant_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "request": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "project_root",
+          "character_id",
+          "request"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "artifact_path": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "status",
+          "artifact_path",
+          "summary",
+          "questions"
+        ],
+        "additionalProperties": false
+      },
+      "execution": {
+        "kind": "agent",
+        "access": "workspace-write",
+        "network": false
+      },
+      "knowledge_refs": [
+        "knowledge/index.md",
+        "references/specialist-contract.md",
+        "references/differentiation-framework.md",
+        "references/design-detail-standard.md",
+        "references/knowledge/character-world-appearance-design/world-appearance.md"
       ],
       "explicit_only": true
     },
@@ -924,6 +1039,78 @@
         "references/differentiation-framework.md",
         "references/design-detail-standard.md",
         "references/knowledge/character-face-signature-design/face-memory.md"
+      ],
+      "explicit_only": true
+    },
+    {
+      "id": "character-face-decoration-design",
+      "skill_name": "character-face-decoration-design",
+      "description": "面部装饰与妆容设计：稳定、施加与临时状态",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "project_root": {
+            "type": "string",
+            "minLength": 1
+          },
+          "character_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "variant_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "request": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "project_root",
+          "character_id",
+          "request"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "artifact_path": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "status",
+          "artifact_path",
+          "summary",
+          "questions"
+        ],
+        "additionalProperties": false
+      },
+      "execution": {
+        "kind": "agent",
+        "access": "workspace-write",
+        "network": false
+      },
+      "knowledge_refs": [
+        "knowledge/index.md",
+        "references/specialist-contract.md",
+        "references/differentiation-framework.md",
+        "references/design-detail-standard.md",
+        "references/knowledge/character-face-decoration-design/face-decoration.md"
       ],
       "explicit_only": true
     },

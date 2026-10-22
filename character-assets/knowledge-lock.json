@@ -270,6 +270,26 @@
       "capability_ids": [
         "character-body-design"
       ]
+    },
+    {
+      "source_id": "world-appearance",
+      "source_sha256": "13bd2996eb7f8c6e0f7f100e32bb63c7bdb3e70b17e5adb9ddf494bdb5d720b0",
+      "origin": "local:人种环境与科技外貌设计-知识库.zip",
+      "path": "references/knowledge/character-world-appearance-design/world-appearance.md",
+      "rules_sha256": "dbeecf675a0fe0fbdaf1812613a541bc6059efe24457725a9232b5aff363f11e",
+      "capability_ids": [
+        "character-world-appearance-design"
+      ]
+    },
+    {
+      "source_id": "face-decoration",
+      "source_sha256": "385fbd7715365f1d6f51c49725b00e1433b4694f676ea45719e7416d85f107ac",
+      "origin": "local:面部装饰与妆容设计知识库.zip",
+      "path": "references/knowledge/character-face-decoration-design/face-decoration.md",
+      "rules_sha256": "3fc90db8d09b976f8519a27b9da7d169f4336978e6daf75ebd2b527b0fc4b937",
+      "capability_ids": [
+        "character-face-decoration-design"
+      ]
     }
   ]
 }

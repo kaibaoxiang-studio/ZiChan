@@ -198,6 +198,16 @@
       "origin": "local:身体比例与三维形体塑造-知识库 (1).zip",
       "revision": "sha256:22ce30a52ee7caf1f51e258a8fa6fb0ea5c7e74ce9e95b1e60fb446f18f9bbaf",
       "adaptation": "用户课程方法精炼为 character-body-design 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"
+    },
+    {
+      "origin": "local:人种环境与科技外貌设计-知识库.zip",
+      "revision": "sha256:10b9f3ca4f0c0208f604e4d96406120a1c11288e9b41d76e16b8ff2710cc4c48",
+      "adaptation": "用户课程方法精炼为 character-world-appearance-design 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"
+    },
+    {
+      "origin": "local:面部装饰与妆容设计知识库.zip",
+      "revision": "sha256:a31967bcbd94e527da59d9201dfc0ed4cdd8ec8710ce2669b91cb585b3279ec2",
+      "adaptation": "用户课程方法精炼为 character-face-decoration-design 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"
     }
   ]
 }

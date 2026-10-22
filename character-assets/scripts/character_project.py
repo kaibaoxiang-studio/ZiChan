@@ -22,8 +22,10 @@ import xml.etree.ElementTree as ET
 import zipfile
 
 SCHEMA = "CharacterProjectV1"
-PLUGIN_VERSION = "0.2.3"
-STAGES = ("avatar", "expression", "full_body", "execution")
+PLUGIN_VERSION = "0.2.4.1"
+IDENTITY_STAGES = ("avatar", "expression", "full_body")
+STAGES = (*IDENTITY_STAGES, "costume_design", "execution")
+LEGACY_STAGES = (*IDENTITY_STAGES, "execution")
 HEAVY_TIERS = {"主角", "重要角色"}
 SUPPORTED_INPUTS = {".json", ".md", ".markdown", ".xlsx"}
 IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp"}
@@ -44,6 +46,8 @@ SPECIALIST_DOMAINS = ("character-hair-design", "character-body-design",
                       "character-costume-cut-design", "character-costume-color-design",
                       "character-costume-material-design", "character-costume-accessory-design")
 SPECIALIST_DOMAINS_V22 = ("character-feature-focus", *SPECIALIST_DOMAINS)
+SPECIALIST_DOMAINS_V24 = ("character-world-appearance-design", *SPECIALIST_DOMAINS_V22,
+                          "character-face-decoration-design")
 VISIBLE_VIEWS = {"front", "side", "back", "avatar", "full_body"}
 BODY_PROPORTION_POINTS = {
     "head_body": (("头",), ("足", "脚", "身高", "全高")),
@@ -54,12 +58,12 @@ BODY_PROPORTION_POINTS = {
 }
 MODEL_CARD_ATTIRE = {
     "avatar": {
-        "face_only": ("服装不入画", "锁骨以上"),
+        "face_only": ("服装不入画",),
         "white_tank": ("白色纯色背心",),
         "white_sports_tank": ("白色运动背心",),
     },
     "expression": {
-        "face_only": ("服装不入画", "锁骨以上"),
+        "face_only": ("服装不入画",),
         "white_tank": ("白色纯色背心",),
         "white_sports_tank": ("白色运动背心",),
     },
@@ -70,6 +74,8 @@ MODEL_CARD_ATTIRE = {
     },
 }
 SPECIALIST_FIELD_DOMAINS = {
+    "character-world-appearance-design": {"face", "hair", "body", "skin", "costume", "adornments"},
+    "character-face-decoration-design": {"face", "skin", "adornments"},
     "character-hair-design": {"hair"}, "character-body-design": {"body"},
     "character-face-design": {"face"},
     "character-face-signature-design": {"face", "hair", "adornments"},
@@ -126,6 +132,34 @@ def safe_id(value):
     return value
 
 
+def safe_asset_label(value):
+    """Keep the readable asset name while preventing path or control-character injection."""
+    label = re.sub(r'[\\/:*?"<>|\x00-\x1f]+', "_", str(value or ""))
+    label = re.sub(r"\s+", "_", label).strip(" ._")[:60]
+    return label or "未命名资产"
+
+
+def pipeline_stages(state):
+    return STAGES if state.get("pipeline_version", 1) >= 2 else LEGACY_STAGES
+
+
+def variant_name(state, character_id, variant_id):
+    row = next((x for x in state["roster"] if x["id"] == character_id), None)
+    ensure(row is not None, f"Unknown character ID: {character_id}")
+    if variant_id == "base":
+        return "基础形象"
+    variant = next((x for x in row.get("states", []) if x.get("id") == variant_id), None)
+    return (variant.get("name") or variant_id) if variant else variant_id
+
+
+def require_known_variant(state, character_id, variant_id):
+    variant_name(state, character_id, variant_id)
+    if variant_id != "base":
+        row = next(x for x in state["roster"] if x["id"] == character_id)
+        ensure(any(x.get("id") == variant_id for x in row.get("states", [])),
+               f"Variant {variant_id} is absent from asset-table states")
+
+
 def require_list(obj, key):
     ensure(isinstance(obj.get(key), list), f"{key} must be a list")
 
@@ -159,7 +193,9 @@ def validate_visual_details(data):
     coverage = data.get("specialist_coverage")
     ensure(isinstance(coverage, dict), "CharacterDesignCardV2.1 needs specialist_coverage")
     valid_detail_paths = {f"{domain}.{field}" for domain, fields in DETAIL_FIELDS.items() for field in fields}
-    domains = SPECIALIST_DOMAINS_V22 if data["schema_version"] == "CharacterDesignCardV2.2" else SPECIALIST_DOMAINS
+    domains = (SPECIALIST_DOMAINS_V24 if data["schema_version"] == "CharacterDesignCardV2.4"
+               else SPECIALIST_DOMAINS_V22 if data["schema_version"] == "CharacterDesignCardV2.2"
+               else SPECIALIST_DOMAINS)
     for specialist in domains:
         item = coverage.get(specialist)
         ensure(isinstance(item, dict), f"specialist_coverage.{specialist} must be an object")
@@ -300,8 +336,6 @@ def validate_model_card_attire(prompt_package, design_card):
         tokens = (prompt_package["reference_attire_description"],)
     else:
         tokens = allowed[profile]
-        if stage in {"avatar", "expression"} and profile != "face_only":
-            require_text(prompt_package, "reference_attire_basis")
     for prompt in prompt_package["prompts"]:
         ensure(all(token in prompt["text"] for token in tokens),
                f"{stage} prompt {prompt['id']} must describe model-card attire {profile}")
@@ -341,10 +375,12 @@ def validate_design_handoffs(data, root):
            route.get("character_id") == data["character_id"] and
            route.get("variant_id") == data["variant_id"], "Design route target mismatch")
     entries = route.get("specialists")
-    ensure(isinstance(entries, dict) and set(entries) == set(SPECIALIST_DOMAINS_V22),
-           "Design route must cover eleven specialists")
+    domains = (SPECIALIST_DOMAINS_V24 if data["schema_version"] == "CharacterDesignCardV2.4"
+               else SPECIALIST_DOMAINS_V22)
+    ensure(isinstance(entries, dict) and set(entries) == set(domains),
+           f"Design route must cover {len(domains)} specialists")
     details = data["visual_details"]
-    for specialist in SPECIALIST_DOMAINS_V22:
+    for specialist in domains:
         entry = entries[specialist]
         ensure(isinstance(entry, dict) and entry.get("decision") in {"invoke", "skip"},
                f"Invalid route decision: {specialist}")
@@ -382,6 +418,33 @@ def validate_design_handoffs(data, root):
                    f"Applied field outside specialist scope: {specialist}/{mapping['field']}")
             ensure(isinstance(details[domain][field], str) and details[domain][field].strip(),
                    f"Applied field empty: {mapping['field']}")
+
+
+def validate_world_and_face(data):
+    world = data.get("world_influences")
+    ensure(isinstance(world, dict), "V2.4 needs world_influences")
+    for key in ("environment", "technology", "resources_and_access"):
+        require_text(world, key)
+    effects = world.get("appearance_effects")
+    ensure(isinstance(effects, list), "world_influences.appearance_effects must be a list")
+    for effect in effects:
+        ensure(isinstance(effect, dict), "World appearance effect must be an object")
+        for key in ("feature", "mechanism", "basis", "evidence_status"):
+            require_text(effect, key)
+        ensure(effect["evidence_status"] in {"script_fact", "approved_choice"},
+               "World appearance effects must be script facts or approved choices")
+    surface = data.get("facial_surface")
+    ensure(isinstance(surface, dict), "V2.4 needs facial_surface")
+    for group in ("stable_marks", "applied_decoration", "temporary_effects"):
+        items = surface.get(group)
+        ensure(isinstance(items, list), f"facial_surface.{group} must be a list")
+        for item in items:
+            ensure(isinstance(item, dict), f"facial_surface.{group} items must be objects")
+            for key in ("feature", "placement", "visible_form", "narrative_basis", "continuity", "evidence_status"):
+                require_text(item, key)
+            ensure(item["evidence_status"] in {"script_fact", "approved_choice"},
+                   f"facial_surface.{group} must be script facts or approved choices")
+    require_text(surface, "absence_or_focus_decision")
 
 
 def _xlsx_rows(path):
@@ -562,7 +625,7 @@ def _checked_record(root, state, key):
            f"Approval refers to another record version: {key}")
     if key.startswith("design-card:"):
         card = read_json(root / value["path"])
-        if card.get("schema_version") == "CharacterDesignCardV2.2" and card.get("morphology") in {"human", "humanoid"}:
+        if card.get("schema_version") in {"CharacterDesignCardV2.2", "CharacterDesignCardV2.4"} and card.get("morphology") in {"human", "humanoid"}:
             validate_design_handoffs(card, root)
     return value
 
@@ -602,8 +665,9 @@ def _invalidate(state, character_id=None, variant_id=None, start="visual-bible")
         "cast-plan": {"cast-plan", "design-card", *STAGES},
         "design-card": {"design-card", *STAGES},
         "avatar": set(STAGES),
-        "expression": {"expression", "execution"},
-        "full_body": {"full_body", "execution"},
+        "expression": {"expression", "full_body", "costume_design", "execution"},
+        "full_body": {"full_body", "costume_design", "execution"},
+        "costume_design": {"costume_design", "execution"},
         "execution": {"execution"},
     }
     affected = downstream[start]
@@ -634,7 +698,7 @@ def _validate_record(kind, data, state, character_id=None, variant_id=None, stag
                 "prompt-package": "CharacterPromptPackageV1"}[kind]
     accepted = {"cast-plan": {"CastPlanV1", "CastPlanV2"},
                 "design-card": {"CharacterDesignCardV1", "CharacterDesignCardV2",
-                                "CharacterDesignCardV2.1", "CharacterDesignCardV2.2"}}
+                "CharacterDesignCardV2.1", "CharacterDesignCardV2.2", "CharacterDesignCardV2.4"}}
     ensure(data.get("schema_version") in accepted.get(kind, {expected}),
            f"Expected one of {sorted(accepted.get(kind, {expected}))}")
     require_list(data, "unresolved") if kind != "prompt-package" else None
@@ -680,7 +744,7 @@ def _validate_record(kind, data, state, character_id=None, variant_id=None, stag
             require_text(choice, "field")
             require_text(choice, "value")
             require_text(choice, "rationale")
-        if data["schema_version"] in {"CharacterDesignCardV2", "CharacterDesignCardV2.1", "CharacterDesignCardV2.2"}:
+        if data["schema_version"] in {"CharacterDesignCardV2", "CharacterDesignCardV2.1", "CharacterDesignCardV2.2", "CharacterDesignCardV2.4"}:
             axes = data.get("recognition_axes")
             ensure(isinstance(axes, dict), "CharacterDesignCardV2 needs recognition_axes")
             for axis in RECOGNITION_AXES:
@@ -694,10 +758,12 @@ def _validate_record(kind, data, state, character_id=None, variant_id=None, stag
             if review["closest_character_ids"]:
                 ensure(review["distinct_features"],
                        "Describe visible differences from the closest cast members")
-        if data["schema_version"] in {"CharacterDesignCardV2.1", "CharacterDesignCardV2.2"} and data["morphology"] in {"human", "humanoid"}:
+        if data["schema_version"] in {"CharacterDesignCardV2.1", "CharacterDesignCardV2.2", "CharacterDesignCardV2.4"} and data["morphology"] in {"human", "humanoid"}:
             validate_visual_details(data)
-        if data["schema_version"] == "CharacterDesignCardV2.2" and data["morphology"] in {"human", "humanoid"}:
+        if data["schema_version"] in {"CharacterDesignCardV2.2", "CharacterDesignCardV2.4"} and data["morphology"] in {"human", "humanoid"}:
             validate_focus_and_form(data)
+        if data["schema_version"] == "CharacterDesignCardV2.4":
+            validate_world_and_face(data)
     else:
         ensure(data.get("character_id") == character_id and data.get("variant_id") == variant_id,
                "Prompt target does not match character/variant")
@@ -739,6 +805,11 @@ def _validate_record(kind, data, state, character_id=None, variant_id=None, stag
         if stage == "expression":
             require_list(data, "labels")
             ensure(len(data["labels"]) in {9, 16}, "Expression sheet needs 9 or 16 Chinese labels")
+            if state.get("pipeline_version", 1) >= 2 and len(data["labels"]) != 9:
+                ensure(data.get("grid_explicit_user_override") is True and
+                       isinstance(data.get("grid_override_basis"), str) and
+                       data["grid_override_basis"].strip(),
+                       "V0.2.4.1 expression stage defaults to nine-grid; sixteen needs explicit user choice")
             ensure(all(isinstance(x, str) and x.strip() for x in data["labels"]),
                    "Expression labels cannot be empty")
             ensure(all(re.search(r"[\u3400-\u9fff]", x) for x in data["labels"]),
@@ -746,6 +817,13 @@ def _validate_record(kind, data, state, character_id=None, variant_id=None, stag
         if stage == "full_body":
             ensure(data.get("head_visible") is True, "Standalone full-body image includes head")
             ensure(data.get("feet_visible") is True, "Standalone full-body image includes feet")
+        if stage == "costume_design":
+            ensure(state.get("pipeline_version", 1) >= 2, "Costume design stage is only in V0.2.4.1 projects")
+            require_text(data, "variant_name")
+            ensure(data["variant_name"] == variant_name(state, character_id, variant_id),
+                   "Costume design must name its exact asset-table variant")
+            ensure(any("服饰" in x or "服装" in x for x in data["acceptance_checks"]),
+                   "Costume design checks must cover visible garment structure")
         if stage == "execution" and data.get("morphology") == "human":
             layout = data.get("layout") or {}
             ensure(layout.get("top_left") == "front_face" and
@@ -815,7 +893,8 @@ def cmd_init(args):
     for kind, value in data.items():
         if not (isinstance(value, dict) and kind == "asset_table" and "characters" in value):
             write_json(root / "inputs" / f"rev-001/{kind}.normalized.json", value)
-    state = {"schema_version": SCHEMA, "project_id": args.project_id, "created_at": now(),
+    state = {"schema_version": SCHEMA, "pipeline_version": 2,
+             "project_id": args.project_id, "created_at": now(),
              "revision": 1, "inputs": inputs, "roster": roster, "records": {},
              "images": [], "reviews": {}, "references": [], "pending_impact": None,
              "decisions": []}
@@ -842,6 +921,7 @@ def cmd_status(args):
     root = Path(args.project_root).expanduser().resolve()
     state = read_json(root / "project.json")
     return {"project_id": state["project_id"], "revision": state["revision"],
+            "pipeline_version": state.get("pipeline_version", 1),
             "inputs": state["inputs"], "roster": state["roster"],
             "records": {key: {"approved": bool(v.get("approval")), "stale": v.get("stale", False)}
                         for key, v in state["records"].items()},
@@ -851,11 +931,82 @@ def cmd_status(args):
             "pending_impact": state["pending_impact"]}
 
 
+def cmd_plan(args):
+    """Read-only single or batch queue; each image remains separately reviewed and approved."""
+    root = Path(args.project_root).expanduser().resolve()
+    state = read_json(root / "project.json")
+    modern = state.get("pipeline_version", 1) >= 2
+    requested = ([args.character_id] if isinstance(args.character_id, str)
+                 else list(args.character_id or []))
+    ensure(len(requested) == len(set(requested)), "Duplicate character IDs in plan request")
+    roster = [x for x in state["roster"] if not requested or x["id"] in requested]
+    ensure(roster, "No matching character in roster")
+    ensure(len(roster) == len(requested) if requested else True,
+           "Some requested character IDs are absent")
+    if args.variant_id:
+        ensure(any(args.variant_id == "base" or
+                   any(v.get("id") == args.variant_id for v in row.get("states", []))
+                   for row in roster), "Requested variant is absent from selected roster")
+    tasks = []
+    for person in roster:
+        variants = [x["id"] for x in person.get("states", []) if x.get("id")]
+        variants = variants or ["base"]
+        targets = ([(stage, "base") for stage in IDENTITY_STAGES] +
+                   [(stage, variant) for variant in variants for stage in ("costume_design", "execution")]
+                   if modern else [(stage, variant) for variant in variants for stage in LEGACY_STAGES])
+        for stage, variant in targets:
+            if args.stage and stage != args.stage:
+                continue
+            if args.variant_id and variant != args.variant_id and stage not in IDENTITY_STAGES:
+                continue
+            blockers = []
+            if state.get("pending_impact"):
+                blockers.append("Unresolved upstream impact")
+            card_variant = variant
+            for key in ("visual-bible", "cast-plan", _record_key("design-card", person["id"], card_variant)):
+                try:
+                    _checked_record(root, state, key)
+                except (ValueError, KeyError) as exc:
+                    blockers.append(str(exc))
+            predecessors = ({"avatar": (), "expression": ("avatar",),
+                             "full_body": ("avatar", "expression"),
+                             "costume_design": IDENTITY_STAGES,
+                             "execution": (*IDENTITY_STAGES, "costume_design")}[stage]
+                            if modern else {"avatar": (), "expression": ("avatar",),
+                                            "full_body": ("avatar",),
+                                            "execution": IDENTITY_STAGES}[stage])
+            for prior in predecessors:
+                anchor_variant = "base" if modern and prior in IDENTITY_STAGES else variant
+                try:
+                    _checked_image(root, state, prior, person["id"], anchor_variant)
+                except (ValueError, KeyError) as exc:
+                    blockers.append(str(exc))
+            try:
+                _checked_image(root, state, stage, person["id"], variant)
+                status = "blocked" if blockers else "approved"
+            except (ValueError, KeyError):
+                status = "blocked" if blockers else "ready"
+            tasks.append({"asset_name": person["name"], "character_id": person["id"],
+                          "variant_id": variant, "variant_name": variant_name(state, person["id"], variant),
+                          "stage": stage, "status": status, "blockers": blockers})
+    return {"mode": "single" if len(requested) == 1 else "batch",
+            "pipeline_version": 2 if modern else 1,
+            "tasks": tasks}
+
+
 def cmd_submit(args):
     with locked_project(args.project_root) as (root, state):
         ensure(not state["pending_impact"], "Resolve upstream impact before new design decisions")
         character_id = args.character_id
         variant_id = args.variant_id or "base"
+        modern = state.get("pipeline_version", 1) >= 2
+        if args.kind in {"design-card", "prompt-package"}:
+            if modern:
+                require_known_variant(state, character_id, variant_id)
+        if args.kind == "prompt-package":
+            ensure(args.stage in pipeline_stages(state), "Stage is not available in this project pipeline")
+            if modern and args.stage in IDENTITY_STAGES:
+                ensure(variant_id == "base", "V0.2.4.1 identity stages belong to the base character, not each costume variant")
         key = _record_key(args.kind, character_id, variant_id, args.stage)
         if character_id:
             ensure(character_id in {row["id"] for row in state["roster"]},
@@ -868,20 +1019,31 @@ def cmd_submit(args):
             card_key = _record_key("design-card", character_id, variant_id)
             card_record = _checked_record(root, state, card_key)
             anchors = {}
-            if args.stage in {"expression", "full_body", "execution"}:
-                anchors["avatar"] = _checked_image(root, state, "avatar", character_id, variant_id)["sha256"]
-            if args.stage == "execution":
-                for anchor_stage in ("expression", "full_body"):
+            if modern:
+                predecessors = {"avatar": (), "expression": ("avatar",),
+                                "full_body": ("avatar", "expression"),
+                                "costume_design": IDENTITY_STAGES,
+                                "execution": (*IDENTITY_STAGES, "costume_design")}[args.stage]
+                for anchor_stage in predecessors:
+                    anchor_variant = "base" if anchor_stage in IDENTITY_STAGES else variant_id
                     anchors[anchor_stage] = _checked_image(
-                        root, state, anchor_stage, character_id, variant_id)["sha256"]
+                        root, state, anchor_stage, character_id, anchor_variant)["sha256"]
+            else:
+                if args.stage in {"expression", "full_body", "execution"}:
+                    anchors["avatar"] = _checked_image(root, state, "avatar", character_id, variant_id)["sha256"]
+                if args.stage == "execution":
+                    for anchor_stage in ("expression", "full_body"):
+                        anchors[anchor_stage] = _checked_image(
+                            root, state, anchor_stage, character_id, variant_id)["sha256"]
         content = read_json(args.file)
         if args.kind == "design-card" and content.get("morphology") in {"human", "humanoid"}:
             roster_item = next((row for row in state["roster"] if row["id"] == character_id), {})
             if roster_item.get("tier") in HEAVY_TIERS or roster_item.get("priority") == "deep":
-                ensure(content.get("schema_version") == "CharacterDesignCardV2.2",
-                       "Submitted lead/important human design cards require CharacterDesignCardV2.2; existing approvals remain readable")
+                required_schema = "CharacterDesignCardV2.4" if modern else "CharacterDesignCardV2.2"
+                ensure(content.get("schema_version") == required_schema,
+                       f"Submitted lead/important human design cards require {required_schema}; existing approvals remain readable")
         _validate_record(args.kind, content, state, character_id, variant_id, args.stage)
-        if args.kind == "design-card" and content.get("schema_version") == "CharacterDesignCardV2.2" and content.get("morphology") in {"human", "humanoid"}:
+        if args.kind == "design-card" and content.get("schema_version") in {"CharacterDesignCardV2.2", "CharacterDesignCardV2.4"} and content.get("morphology") in {"human", "humanoid"}:
             validate_body_proportion_anchors(content)
             validate_design_handoffs(content, root)
         if args.kind == "prompt-package":
@@ -894,10 +1056,10 @@ def cmd_submit(args):
             validate_model_card_attire(content, card)
             if args.stage == "expression" and card.get("morphology") in {"human", "humanoid"}:
                 avatar_record = state["records"][_record_key(
-                    "prompt-package", character_id, variant_id, "avatar")]
+                    "prompt-package", character_id, "base" if modern else variant_id, "avatar")]
                 validate_expression_attire_transition(
                     content, read_json(root / avatar_record["path"]))
-            if args.stage == "full_body" and card.get("schema_version") == "CharacterDesignCardV2.2" and card.get("morphology") in {"human", "humanoid"}:
+            if args.stage == "full_body" and card.get("schema_version") in {"CharacterDesignCardV2.2", "CharacterDesignCardV2.4"} and card.get("morphology") in {"human", "humanoid"}:
                 validate_full_body_prompt_proportions(content, card)
             if args.stage == "execution":
                 ensure(content.get("morphology") == card["morphology"],
@@ -914,7 +1076,11 @@ def cmd_submit(args):
             return {"key": key, "status": "unchanged", "sha256": incoming}
         if prior:
             level = args.stage if args.kind == "prompt-package" else args.kind
-            _invalidate(state, character_id, variant_id if character_id else None, level)
+            scope_variant = (None if modern and variant_id == "base" and
+                             (args.kind == "design-card" or
+                              args.kind == "prompt-package" and args.stage in IDENTITY_STAGES)
+                             else variant_id if character_id else None)
+            _invalidate(state, character_id, scope_variant, level)
         path = root / "records" / key.replace(":", "/") / f"{incoming[:12]}.json"
         write_json(path, content)
         state["records"][key] = {"path": str(path.relative_to(root)), "sha256": incoming,
@@ -939,7 +1105,7 @@ def cmd_approve_record(args):
                "Resolve pending design decisions before approval")
         if args.kind == "design-card":
             card = read_json(root / value["path"])
-            if card.get("schema_version") == "CharacterDesignCardV2.2" and card.get("morphology") in {"human", "humanoid"}:
+            if card.get("schema_version") in {"CharacterDesignCardV2.2", "CharacterDesignCardV2.4"} and card.get("morphology") in {"human", "humanoid"}:
                 validate_body_proportion_anchors(card)
                 validate_design_handoffs(card, root)
         if args.kind == "cast-plan":
@@ -985,8 +1151,16 @@ def cmd_import_image(args):
         key = _record_key("prompt-package", args.character_id, variant_id, args.stage)
         _require_approved(state, key)
         sha = digest(source)
-        ident = f"{args.stage}-{sha[:16]}"
-        target = root / "images" / args.character_id / variant_id / args.stage / f"{sha}{source.suffix.lower()}"
+        ident = (f"{args.character_id}-{variant_id}-{args.stage}-{sha[:16]}"
+                 if state.get("pipeline_version", 1) >= 2 else f"{args.stage}-{sha[:16]}")
+        roster_item = next((x for x in state["roster"] if x["id"] == args.character_id), None)
+        ensure(roster_item is not None, "Unknown character ID")
+        asset_name = safe_asset_label(roster_item["name"])
+        state_name = safe_asset_label(variant_name(state, args.character_id, variant_id))
+        stage_name = {"avatar": "头像", "expression": "九宫格表情", "full_body": "全身模卡",
+                      "costume_design": "服饰设计", "execution": "执行资产"}[args.stage]
+        filename = f"{asset_name}_{state_name}_{stage_name}_{sha[:12]}{source.suffix.lower()}"
+        target = root / "images" / args.character_id / variant_id / args.stage / filename
         target.parent.mkdir(parents=True, exist_ok=True)
         if not target.exists():
             shutil.copy2(source, target)
@@ -996,7 +1170,9 @@ def cmd_import_image(args):
         if existing:
             return existing
         row = {"id": ident, "stage": args.stage, "character_id": args.character_id,
-               "variant_id": variant_id, "path": str(target.relative_to(root)),
+               "variant_id": variant_id, "asset_name": roster_item["name"],
+               "variant_name": variant_name(state, args.character_id, variant_id),
+               "path": str(target.relative_to(root)),
                "sha256": sha, "prompt_sha256": state["records"][key]["sha256"],
                "imported_at": now(), "approval": None, "stale": False}
         state["images"].append(row)
@@ -1054,10 +1230,15 @@ def cmd_approve_image(args):
                     and x["character_id"] == image["character_id"] and
                     x["variant_id"] == image["variant_id"] and x.get("approval")]
         if previous:
-            if image["stage"] == "avatar":
+            modern = state.get("pipeline_version", 1) >= 2
+            if modern and image["stage"] in IDENTITY_STAGES:
+                following = {"avatar": "expression", "expression": "full_body",
+                             "full_body": "costume_design"}[image["stage"]]
+                _invalidate(state, image["character_id"], None, following)
+            elif image["stage"] == "avatar":
                 _invalidate(state, image["character_id"], image["variant_id"], "expression")
                 _invalidate(state, image["character_id"], image["variant_id"], "full_body")
-            else:
+            elif image["stage"] != "execution":
                 _invalidate(state, image["character_id"], image["variant_id"], "execution")
             for old in previous:
                 old["approval"] = None
@@ -1132,17 +1313,21 @@ def cmd_package(args):
     ensure(not state["pending_impact"], "Unresolved upstream impact")
     ident = args.character_id
     variant = args.variant_id or "base"
+    variant_name(state, ident, variant)
+    modern = state.get("pipeline_version", 1) >= 2
     for kind, source in state["inputs"].items():
         ensure(digest(root / source["path"]) == source["sha256"],
                f"Imported {kind} file changed after intake")
     _checked_record(root, state, "visual-bible")
     _checked_record(root, state, "cast-plan")
-    _checked_record(root, state, _record_key("design-card", ident, variant))
-    records = [state["records"][_record_key("design-card", ident, variant)]]
+    card_variants = ["base", variant] if modern and variant != "base" else [variant]
+    records = [_checked_record(root, state, _record_key("design-card", ident, v))
+               for v in card_variants]
     images = []
-    for stage in STAGES:
-        records.append(_checked_record(root, state, _record_key("prompt-package", ident, variant, stage)))
-        images.append(_checked_image(root, state, stage, ident, variant))
+    for stage in pipeline_stages(state):
+        stage_variant = "base" if modern and stage in IDENTITY_STAGES else variant
+        records.append(_checked_record(root, state, _record_key("prompt-package", ident, stage_variant, stage)))
+        images.append(_checked_image(root, state, stage, ident, stage_variant))
     out = Path(args.output).expanduser().resolve()
     ensure(not out.exists(), f"Output already exists: {out}")
     out.mkdir(parents=True)
@@ -1180,17 +1365,24 @@ def cmd_package(args):
         shutil.copy2(source, target)
         copied.append({"path": str(target.relative_to(out)), "sha256": digest(target)})
     image_ids = {x["id"] for x in images}
-    record_keys = {"visual-bible", "cast-plan", _record_key("design-card", ident, variant)}
-    record_keys.update(_record_key("prompt-package", ident, variant, stage) for stage in STAGES)
-    manifest = {"schema_version": "CharacterAssetPackV1", "plugin_version": PLUGIN_VERSION,
+    record_keys = {"visual-bible", "cast-plan"}
+    record_keys.update(_record_key("design-card", ident, v) for v in card_variants)
+    record_keys.update(_record_key("prompt-package", ident,
+                                   "base" if modern and stage in IDENTITY_STAGES else variant, stage)
+                       for stage in pipeline_stages(state))
+    manifest = {"schema_version": "CharacterAssetPackV2" if modern else "CharacterAssetPackV1",
+                "plugin_version": PLUGIN_VERSION,
                 "project_id": state["project_id"],
-                "character_id": ident, "variant_id": variant, "created_at": now(),
+                "character_id": ident, "asset_name": next(x["name"] for x in state["roster"] if x["id"] == ident),
+                "variant_id": variant, "variant_name": variant_name(state, ident, variant),
+                "created_at": now(),
                 "input_sources": state["inputs"],
                 "approved_images": {x["stage"]: {"path": x["path"], "sha256": x["sha256"],
                                                   "approval": x["approval"],
                                                   "purpose": {"avatar": "身份锚点",
                                                               "expression": "剧情表情参考",
-                                                              "full_body": "完整全身造型",
+                                                              "full_body": "完整全身身份模卡",
+                                                              "costume_design": "当前变体服饰设计",
                                                               "execution": "制作执行参考板"}[x["stage"]]}
                                     for x in images},
                 "record_approvals": {key: state["records"][key]["approval"]
@@ -1215,6 +1407,11 @@ def build_parser():
     init.add_argument("--snapshot", help="Approved AssetProjectSnapshotV1 from the parent plugin")
     status = sub.add_parser("status")
     status.add_argument("--project-root", required=True)
+    plan = sub.add_parser("plan", help="Read-only stage queue for one character or the full roster")
+    plan.add_argument("--project-root", required=True)
+    plan.add_argument("--character-id", action="append", help="Repeat to plan a selected batch; omit for all")
+    plan.add_argument("--variant-id")
+    plan.add_argument("--stage", choices=STAGES)
     submit = sub.add_parser("submit", help="Register a structured design/prompt draft")
     submit.add_argument("--project-root", required=True)
     submit.add_argument("--kind", choices=("visual-bible", "cast-plan", "design-card", "prompt-package"), required=True)
@@ -1268,7 +1465,7 @@ def build_parser():
 
 def main():
     args = build_parser().parse_args()
-    actions = {"init": cmd_init, "status": cmd_status, "submit": cmd_submit,
+    actions = {"init": cmd_init, "status": cmd_status, "plan": cmd_plan, "submit": cmd_submit,
                "approve-record": cmd_approve_record, "import-reference": cmd_import_reference,
                "import-image": cmd_import_image, "submit-review": cmd_submit_review,
                "approve-image": cmd_approve_image, "refresh": cmd_refresh,
