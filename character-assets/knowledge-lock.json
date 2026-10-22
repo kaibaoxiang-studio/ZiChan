@@ -1,0 +1,15 @@
+{
+  "schema_version": "KnowledgeSnapshotsV1",
+  "snapshots": [
+    {
+      "source_id": "hedgehog-2d3d",
+      "source_sha256": "6faa60a3f7b37e46d2ae4401d2f83729887deba031c2619bb87d3d3ea210b7fa",
+      "origin": "2d转3d提示词.txt",
+      "path": "references/knowledge/character-image-prompt/hedgehog-2d3d.md",
+      "rules_sha256": "3a9b93560028963f1f4ae3e2773e0c327cc76e1a6b580e617a9c4ac70d13509e",
+      "capability_ids": [
+        "character-image-prompt"
+      ]
+    }
+  ]
+}

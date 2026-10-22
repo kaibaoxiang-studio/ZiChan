@@ -8,6 +8,7 @@
 | 逐人设计、Grill Me | `references/character-design.md`、`references/costume-and-morphology.md` | 将世界规则转成可见设计，处理服装、非人和极端体型 |
 | 剧本与三份输入冲突 | `references/evidence.md` | 按原文证据优先列疑点，不暗改事实 |
 | 头像、全身图提示词 | `references/prompting.md` | 从已确认设计卡抽取可见锚点，指定参考图职责 |
+| 已批准的 2D→3D 呈现 | `references/knowledge/character-image-prompt/hedgehog-2d3d.md`、`references/prompting.md` | 保留身份与服装，只转换已批准的媒介、材质和光照 |
 | 表情资产 | `references/expression.md`、`references/prompting.md` | 根据剧情选 9 或 16 个表情并生成图内中文标签 |
 | 执行资产表 | `references/execution-sheet.md`、`references/prompting.md` | 人形 2×2 精确版式及非人适配 |
 | 回图审查 | `references/review.md` | 核对事实、身份、版式、标签并分类阻断问题 |

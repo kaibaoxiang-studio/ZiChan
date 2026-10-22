@@ -84,7 +84,8 @@ def blueprint():
             "全身图头到脚完整；人形执行表按上正脸/45°半侧脸、下无头放大正面服装/完整背面四格。"
             "非人使用已批准替代布局。输出 CharacterPromptPackageV1 与检查点，经 CLI 合同校验后交操作者外部出图。",
             ["knowledge/index.md", "references/prompting.md", "references/expression.md",
-             "references/execution-sheet.md", "references/interfaces.md"],
+             "references/execution-sheet.md", "references/interfaces.md",
+             "references/knowledge/character-image-prompt/hedgehog-2d3d.md"],
             {**common, "stage": {"type": "string", "enum": ["avatar", "expression", "full_body", "execution"]}},
             ("project_root", "character_id", "stage", "request")),
         capability(
@@ -124,9 +125,13 @@ def blueprint():
         {"origin": "https://github.com/higgsfield-ai/skills", "revision": "f83af0bc1d937c8119099a11f8ebbf5e6fb99819", "license": "MIT", "adaptation": "独立编写参考图与局部编辑方法；未复制 CLI"},
         {"origin": "https://github.com/kaibaoxiang-studio/script-plugins", "revision": "9110d951e882e3ac89a013f2fea42e142fa08b3f", "adaptation": "沿用现有上游 JSON ID/来源契约，不复制业务代码"},
         {"origin": "https://developers.openai.com/api/docs/guides/image-prompting", "revision": "checked:2026-10-21", "adaptation": "独立编写 GPT Image 2.5 提示词与编辑规则"},
+        {"origin": "local:刺猬星球素材/3d角色质感提示词/2d转3d提示词.txt", "revision": "sha256:6faa60a3f7b37e46d2ae4401d2f83729887deba031c2619bb87d3d3ea210b7fa", "adaptation": "独立编写可选的媒介转换知识快照；保留身份与服装"},
+        {"origin": "local:刺猬星球素材/3d角色质感提示词/替换海报角色提示词.txt", "revision": "sha256:ec94b106196958c3d25332d07547192c9aec5d2eb7a6733aab9cece7ca779a79", "adaptation": "参考图职责分离；换装需要变体批准"},
+        {"origin": "local:刺猬星球素材/动漫PV角色概念设计/SKILL.md", "revision": "sha256:bf266f8942438273ead0e2d6fe1a26b9988e2dfaecd12b5b15eb48417975ae11", "adaptation": "独立提炼风格与角色细节分离以及回图局部诊断"},
+        {"origin": "local:刺猬星球素材/打斗提示词/四视图提示词.txt", "revision": "sha256:b750b10de906df64261ff823baf9f236077711eff4c8798efe68adcd27cef7d2", "adaptation": "对照已有执行参考板合同；只保留差异审查记录"},
     ]
     return {"schema_version": "HarnessBlueprintV1",
-            "plugin": {"name": "character-assets", "version": "0.1.0",
+            "plugin": {"name": "character-assets", "version": "0.1.1",
                        "description": "从剧本依据建设可追溯的角色视觉资产包与 GPT Image 2.5 提示词",
                        "author": {"name": "开宝箱工作室"}},
             "goal": "独立运行的角色资产子插件：设计、提示词、回图审查与可复用资产包",
@@ -143,6 +148,7 @@ def sha(path):
 def apply_interface(output):
     public = output / "plugin.json"
     manifest = json.loads(public.read_text(encoding="utf-8"))
+    version = blueprint()["plugin"]["version"]
     interface = {
         "displayName": "角色资产插件", "shortDescription": "从剧本依据到角色视觉资产包",
         "longDescription": "角色设计、GPT Image 2.5 提示词、回图审查与可追溯资产包。",
@@ -150,9 +156,11 @@ def apply_interface(output):
         "defaultPrompt": "Use $character-assets to build a character asset package from my screenplay and asset table."
     }
     manifest["extensions"]["com.openai"]["interface"] = interface
+    manifest["version"] = version
     public.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     local = output / ".codex-plugin" / "plugin.json"
     local_manifest = json.loads(local.read_text(encoding="utf-8"))
+    local_manifest["version"] = version
     local_manifest["interface"] = {key: interface[key] for key in
                                     ("displayName", "shortDescription", "defaultPrompt")}
     local.write_text(json.dumps(local_manifest, ensure_ascii=False, indent=2) + "\n",

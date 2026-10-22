@@ -284,7 +284,8 @@
         "references/prompting.md",
         "references/expression.md",
         "references/execution-sheet.md",
-        "references/interfaces.md"
+        "references/interfaces.md",
+        "references/knowledge/character-image-prompt/hedgehog-2d3d.md"
       ],
       "explicit_only": true
     },
