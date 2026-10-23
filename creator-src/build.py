@@ -277,7 +277,7 @@ def blueprint():
                  " 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"}
                 for item in adoption["sources"]]
     return {"schema_version": "HarnessBlueprintV1",
-            "plugin": {"name": "character-assets", "version": "0.2.5",
+            "plugin": {"name": "character-assets", "version": "0.2.5.1",
                        "description": "从剧本依据建设可追溯的角色视觉资产包与 GPT Image 2.5 提示词",
                        "author": {"name": "开宝箱工作室"}},
             "goal": "独立运行的角色资产子插件：设计、提示词、回图审查与可复用资产包",
@@ -297,6 +297,43 @@ def blueprint():
 
 def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def isolate_dispatcher(output):
+    """Keep internal agent work out of the user's persistent chat history."""
+    client = output / "runtime" / "harness_core" / "appserver.py"
+    source = client.read_text(encoding="utf-8")
+    previous = """        if thread_id:
+            thread = self.request('thread/resume', {'threadId':thread_id})['thread']
+        else:
+            thread = self.request('thread/start', {
+                'cwd':str(Path(workdir).resolve()), 'approvalPolicy':'never',
+                'sandbox':'workspace-write' if writable else 'read-only', 'ephemeral':False})['thread']
+"""
+    replacement = """        # Stored IDs are diagnostics, never resumable user chats. Rebuild a
+        # blocked attempt from the Harness task's inputs/answers/previous_output.
+        thread = self.request('thread/start', {
+            'cwd':str(Path(workdir).resolve()), 'approvalPolicy':'never',
+            'sandbox':'workspace-write' if writable else 'read-only', 'ephemeral':True})['thread']
+        if thread.get('ephemeral') is not True:
+            raise RuntimeError('App Server did not confirm an ephemeral dispatcher thread; refusing persistent fallback')
+"""
+    if previous not in source:
+        raise RuntimeError("Harness thread lifecycle changed; review dispatcher isolation before building")
+    client.write_text(source.replace(previous, replacement, 1), encoding="utf-8")
+    engine = output / "runtime" / "harness_core" / "engine.py"
+    source = engine.read_text(encoding="utf-8")
+    previous = """                          'inputs':inputs,'answers':state.get('answers',{}),'artifact_dir':str(directory)}
+                    record={'id':node_id,'status':'running','attempt':attempt,
+"""
+    replacement = """                          'inputs':inputs,'answers':state.get('answers',{}),'artifact_dir':str(directory)}
+                    if prior.get('status') == 'blocked':
+                        task['previous_output'] = prior.get('output')
+                    record={'id':node_id,'status':'running','attempt':attempt,
+"""
+    if previous not in source:
+        raise RuntimeError("Harness task recovery changed; review ephemeral dispatcher recovery")
+    engine.write_text(source.replace(previous, replacement, 1), encoding="utf-8")
 
 
 def finalize_output(output):
@@ -322,6 +359,7 @@ def finalize_output(output):
     source = source.replace(prompt_rule, "Write permitted artifacts only inside artifact_dir. Return every artifacts entry and result.artifact_path as a path relative to artifact_dir (e.g. design.md), never an absolute path. ", 1)
     source = source.replace(artifact_schema, "'artifacts':{'type':'array','items':{'type':'string','description':'File path relative to artifact_dir, e.g. design.md; never absolute.'}}", 1)
     client.write_text(source, encoding="utf-8")
+    isolate_dispatcher(output)
     names = {"character-assets": "角色资产主控", "character-evidence": "角色证据核对",
              "character-design": "人物设计总控", "character-image-prompt": "角色出图提示词",
              "character-image-review": "角色回图审查", "character-image-edit": "角色精确修图",

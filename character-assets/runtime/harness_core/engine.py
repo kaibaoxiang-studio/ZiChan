@@ -193,6 +193,8 @@ class Engine:
                     resumable.discard(node_id)
                     task={'task_id':f'{run_id}:{node_id}:{attempt}','objective':node.get('objective',''),
                           'inputs':inputs,'answers':state.get('answers',{}),'artifact_dir':str(directory)}
+                    if prior.get('status') == 'blocked':
+                        task['previous_output'] = prior.get('output')
                     record={'id':node_id,'status':'running','attempt':attempt,
                             'thread_id':prior.get('thread_id'),'started_at':now()}
                     self.store.append(run_id,'node',record)

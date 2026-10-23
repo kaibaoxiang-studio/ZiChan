@@ -2,7 +2,9 @@
 
 开宝箱工作室的资产插件仓库，当前交付[角色资产插件](character-assets/README.md)、[场景资产插件](scene-assets/README.md)和[道具资产插件](prop-assets/README.md)。各插件可独立使用，角色设计总控为未来的跨资产美术统筹保留设计简报接口。
 
-## 角色插件 v0.2.5
+## 角色插件 v0.2.5.1
+
+**0.2.5.1 修补**：内部 dispatcher 使用临时会话，不进入持久聊天列表；等待回答后的恢复从本地输入、回答和上次返回物重建，不恢复旧的聊天 ID。服务未确认临时会话时停止执行，不退回持久模式。此次同时归档已核实的历史验收聊天，保留本地运行证据。详见[内部调用隔离](character-assets/references/dispatcher-isolation.md)与[修补验证](research/v0.2.5.1-dispatcher-isolation/README.md)。
 
 **阅读全文 → 理解和定位人物 → 解析设计相关细节 → 形成设计意图 → 路由 Skill 或 knowledge/reference → 整合为具体设计。**
 
@@ -12,7 +14,7 @@
 
 新项目按 **头像 3:4 → 九宫格表情 → 全身模卡 9:16 → 每状态服饰设计图 → 对应执行资产图** 推进。身份、身体和各状态服饰分别设计与批准，后续补服装不会自动推翻头像。人物设计齐备后合成完整设计卡并保留来源。头像允许头肩至上胸取景，上胸入画使用对应白色中性背心；全身穿中性背心短裤、赤脚；服饰与执行图使用正式造型。图片按资产名、状态、阶段和短 SHA 命名。
 
-- [下载 character-assets-0.2.5.zip](dist/character-assets-0.2.5.zip)
+- [下载 character-assets-0.2.5.1.zip](dist/character-assets-0.2.5.1.zip)
 - [人物理解与设计统筹](character-assets/references/director-understanding.md) · [分阶段设计与候选转正](character-assets/references/phased-design.md) · [接口](character-assets/references/interfaces.md)
 - [真实调用与回归验证记录](research/v0.2.5-validation/README.md)
 
@@ -114,7 +116,7 @@ flowchart LR
 
 ### 历史版本
 
-[v0.2.4.1 安装包](dist/character-assets-0.2.4.1.zip) · [v0.2.3 安装包](dist/character-assets-0.2.3.zip)。旧版设计与批准记录保持可读；升级不自动重做已批准角色。
+[v0.2.5 安装包](dist/character-assets-0.2.5.zip) · [v0.2.4.1 安装包](dist/character-assets-0.2.4.1.zip) · [v0.2.3 安装包](dist/character-assets-0.2.3.zip)。旧版设计与批准记录保持可读；升级不自动重做已批准角色。
 
 ## 目录
 
@@ -132,4 +134,4 @@ flowchart LR
 
 ## 本地优先与团队交接
 
-角色插件当前版本为 **v0.2.5**，20 项能力包含人物设计总控、群像差异化与 13 个专项。新项目采用分阶段设计；旧项目保留原有整卡、图像阶段和批准记录。团队可从私有 `kaibaoxiang-studio/ZiChan` 下载完整插件目录或安装 ZIP。设计质量与实际回图按阶段核查，验证材料见[版本验证记录](research/v0.2.5-validation/README.md)。
+角色插件当前版本为 **v0.2.5.1**，20 项能力包含人物设计总控、群像差异化与 13 个专项。新项目采用分阶段设计；旧项目保留原有整卡、图像阶段和批准记录。团队可从私有 `kaibaoxiang-studio/ZiChan` 下载完整插件目录或安装 ZIP。设计质量与实际回图按阶段核查，验证材料见[版本验证记录](research/v0.2.5-validation/README.md)。
