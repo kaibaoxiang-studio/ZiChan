@@ -18,5 +18,3 @@
 ## 本地优先与团队交接
 
 本机已安装 v0.1.1，结构与输入输出契约已检查。操作者可按 [手动验收样例](character-assets/examples/manual-acceptance.md) 跑一部作品；图片生成、中文标签和四格执行表的视觉质量由操作者逐阶段检验。团队从私有 `kaibaoxiang-studio/ZiChan` 下载 `character-assets/` 或 `dist/` 的安装包。新增素材的采纳与后续路由见[刺猬星球素材拆解](research/刺猬星球素材拆解-2026-10-22.md)。
-
-以上本机安装状态指角色插件。道具插件可从 `prop-assets/` 或 `dist/prop-assets-0.1.0.zip` 获取，使用边界与验收方式见其 README；打包不代表已在本机或团队客户端安装。
