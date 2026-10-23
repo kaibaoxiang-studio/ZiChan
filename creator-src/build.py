@@ -95,7 +95,8 @@ def blueprint():
             "头像默认 3:4 竖版，全身图默认 9:16 竖版，只有操作者明确要求才更改。"
             "人形头像与表情以脸为主体，可取完整头部、双肩及上胸，不固定裁到锁骨以上；服装不入画用 face_only，上胸入画用对应白色背心，整组模式一致；"
             "全身图用白色背心、短裤、赤脚作模卡参考，执行资产表恢复已批准正式服装。"
-            "新项目的常规独立人物依次完成头像、九宫格、全身模卡、每状态一张 9:16 竖版四格服饰执行图。有指定台词的群演跳过前三张与穿衣圣经，每状态独立产一张 9:16 四格执行资产；无台词群演群像只产每状态一张完整全身群像执行图。先用 CLI plan 判定 asset_mode，不给群像套人形四格。文字设计先批准，图像每张审查批准一次，按资产名命名后打包。旧项目沿用原链路；仅显式 upgrade-pipeline 可迁移合格旧项目。运行中报告实际文件路径、未解决疑点与下一步；不虚报成图质量。",
+            "新项目的常规独立人物依次完成头像、九宫格、全身模卡、每状态一张 9:16 竖版四格服饰执行图。有指定台词的群演跳过前三张与穿衣圣经，每状态独立产一张 9:16 四格执行资产；无台词群演群像只产每状态一张完整全身群像执行图。先用 CLI plan 判定 asset_mode，不给群像套人形四格。文字设计先批准，图像每张审查批准一次，按资产名命名后打包。旧项目沿用原链路；仅显式 upgrade-pipeline 可迁移合格旧项目。运行中报告实际文件路径、未解决疑点与下一步；不虚报成图质量。"
+            "项目最终交付除逐角色包外，按 [有设定图资产表](../../references/final-asset-table.md) 把已批准图片放入资产表的角色/状态对应单元格；必须是真正嵌入单元格的图片，浮动锚点不合格。测试预览须标未批准，不能冒充定稿。",
             ["knowledge/index.md", "references/workflow.md", "references/interfaces.md",
              "references/routing-and-integration.md", "references/director-understanding.md",
              "references/phased-design.md", "references/costume-design-stage.md", "references/costume-designer.md",
@@ -103,7 +104,8 @@ def blueprint():
              "references/evidence.md", "references/source-notes.md",
              "references/differentiation-framework.md", "references/specialist-contract.md",
             "references/design-detail-standard.md", "references/render-texture-standard.md",
-             "references/feature-focus-and-body-form.md", "references/group-ensemble.md"],
+             "references/feature-focus-and-body-form.md", "references/group-ensemble.md",
+             "references/final-asset-table.md"],
             {**common, "mode": {"type": "string", "enum": ["single", "batch"]},
              "character_ids": {"type": "array", "items": text_field()},
              "variant_ids": {"type": "array", "items": text_field()},
@@ -318,7 +320,7 @@ def blueprint():
                  " 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"}
                 for item in adoption["sources"]]
     return {"schema_version": "HarnessBlueprintV1",
-            "plugin": {"name": "character-assets", "version": "0.2.6.1",
+            "plugin": {"name": "character-assets", "version": "0.2.6.2",
                        "description": "从剧本依据建设可追溯的角色视觉资产包与 GPT Image 2.5 提示词",
                        "author": {"name": "开宝箱工作室"}},
             "goal": "独立运行的角色资产子插件：设计、提示词、回图审查与可复用资产包",
@@ -331,7 +333,8 @@ def blueprint():
                                     "头像默认 3:4、全身图默认 9:16，且仅明确用户要求可覆盖",
                                     "人形头像以脸为主体，允许头肩至上胸取景；服装不入画用 face_only，上胸入画用对应白色背心，表情继承模式；全身图采用背心短裤赤脚模卡，执行表恢复正式服装",
                                     "新项目常规人物四图链路；有台词群演每状态一张独立 9:16 执行图，无台词群像每状态一张全员完整图；旧项目保留旧链路，显式升级保留合格身份图",
-                                    "去油与噪点修复区分设计和渲染证据"],
+                                    "去油与噪点修复区分设计和渲染证据",
+                                    "项目最终有设定图资产表按角色状态定位，图片真正嵌入单元格且非图片数据保留，浮动锚点不能冒充最终交付"],
             "open_questions": [], "capabilities": capabilities, "files": files,
             "workflows": [], "sources": sources}
 
@@ -416,7 +419,8 @@ def finalize_output(output):
         path.write_text(content, encoding="utf-8")
     lock = output / "generation-lock.json"
     hashes = {path.relative_to(output).as_posix(): sha(path) for path in output.rglob("*")
-              if path.is_file() and path != lock}
+              if path.is_file() and path != lock and path.suffix != ".pyc"
+              and "__pycache__" not in path.parts}
     lock.write_text(json.dumps({"files": hashes}, ensure_ascii=False, indent=2) + "\n",
                     encoding="utf-8")
 
@@ -523,7 +527,8 @@ def main():
             target.write_text(content, encoding="utf-8")
         apply_interface(output)
         hashes = {path.relative_to(output).as_posix(): sha(path) for path in output.rglob("*")
-                  if path.is_file() and path != lock}
+                  if path.is_file() and path != lock and path.suffix != ".pyc"
+                  and "__pycache__" not in path.parts}
         lock.write_text(json.dumps({"files": hashes}, ensure_ascii=False, indent=2) + "\n",
                         encoding="utf-8")
         print(output)

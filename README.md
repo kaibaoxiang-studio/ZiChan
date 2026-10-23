@@ -2,7 +2,9 @@
 
 开宝箱工作室的资产插件仓库，当前交付[角色资产插件](character-assets/README.md)、[场景资产插件](scene-assets/README.md)和[道具资产插件](prop-assets/README.md)。各插件可独立使用，角色设计总控为未来的跨资产美术统筹保留设计简报接口。
 
-## 角色插件 v0.2.6.1
+## 角色插件 v0.2.6.2
+
+**0.2.6.2 最终资产表交付**：完成角色资产包后，还要交付按角色和状态映射的“有设定图资产表”。图片须真正嵌入单元格，浮在单元格上的 drawing 图片不算完成；保留上游数据并重开核验。测试图只能进入标明未批准的预览表。见[规则](character-assets/references/final-asset-table.md)。
 
 **0.2.6.1 群像修补**：新项目按结构化剧本的指定台词判定路线。有指定台词的群演每状态只交一张独立 9:16 四格执行资产，跳过前三张身份图；无台词群演／群像每状态仅交一张同画布完整全身群像图。明确人数照数制作，未写人数按构图与辨识度选择代表人数并标注；多人横向画幅按人数选择。项目获批视觉基准决定画风，参考 DOCX 只提供群像编排形式。
 
@@ -16,7 +18,7 @@
 
 新项目的**常规人物**按 **头像 3:4 → 九宫格表情 → 全身模卡 9:16 → 每状态一张 9:16 竖版四格执行图** 推进。服饰设计先以文字快照批准，再由同一张执行图完成图像审查与批准。身份、身体、穿衣风格圣经和各状态服饰分别记录版本；后续补服装不会自动推翻头像。人物设计齐备后合成完整设计卡并保留来源。头像允许头肩至上胸取景，上胸入画使用对应白色中性背心；全身穿中性背心短裤、赤脚；服饰与执行图使用正式造型。图片按资产名、状态、阶段和短 SHA 命名。
 
-- [下载 character-assets-0.2.6.1.zip](dist/character-assets-0.2.6.1.zip)
+- [下载 character-assets-0.2.6.2.zip](dist/character-assets-0.2.6.2.zip)
 - [群演群像单图合同](character-assets/references/group-ensemble.md)
 - [v0.2.6.1 群演单图验证记录](research/v0.2.6.1-validation/README.md)
 - [人物理解与设计统筹](character-assets/references/director-understanding.md) · [分阶段设计与候选转正](character-assets/references/phased-design.md) · [接口](character-assets/references/interfaces.md)
@@ -152,4 +154,4 @@ flowchart LR
 
 ## 本地优先与团队交接
 
-角色插件当前版本为 **v0.2.6.1**，22 项能力包含人物设计总控、群像差异化、群演单图设计师与 13 个专项。新项目按资产模式分流；旧项目保留原有整卡、图像阶段和批准记录。团队可从私有 `kaibaoxiang-studio/ZiChan` 下载完整插件目录或安装 ZIP。结构与真实文字调用证据见[本版验证记录](research/v0.2.6.1-validation/README.md)；图像审美仍需正式回图核查。
+角色插件当前版本为 **v0.2.6.2**，22 项能力包含人物设计总控、群像差异化、群演单图设计师与 13 个专项。新项目按资产模式分流；旧项目保留原有整卡、图像阶段和批准记录。团队可从私有 `kaibaoxiang-studio/ZiChan` 下载完整插件目录或安装 ZIP。结构与真实文字调用证据见[v0.2.6.1 验证记录](research/v0.2.6.1-validation/README.md)；本次增加的最终工作簿规则按[交付合同](character-assets/references/final-asset-table.md)核验。

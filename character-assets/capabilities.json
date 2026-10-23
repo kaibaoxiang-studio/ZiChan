@@ -147,7 +147,8 @@
         "references/design-detail-standard.md",
         "references/render-texture-standard.md",
         "references/feature-focus-and-body-form.md",
-        "references/group-ensemble.md"
+        "references/group-ensemble.md",
+        "references/final-asset-table.md"
       ],
       "explicit_only": true
     },

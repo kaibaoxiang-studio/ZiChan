@@ -1,4 +1,4 @@
-# 角色资产项目工作流 v0.2.6.1
+# 角色资产项目工作流 v0.2.6.2
 
 ## 无台词群演群像分支
 
@@ -65,6 +65,8 @@ v3 常规独立人物顺序为头像 → 九宫格 → 全身模卡 → 每状�
 body和当前状态costume快照批准后，`compile-design-card --project-root /work/role-project --character-id CHR-001 --variant-id STATE_ID` 合成 V2.5 卡。它只合并同 SHA 已批准快照，冲突阻断，并记录 `system:approved-scope-composition` 与 `inherited_from`，不新增设计也不重复要求批准同一套细节。新创意必须回阶段快照，不直接 submit 手写 V2.5 卡。
 
 v3 当前状态服饰文字快照、穿衣圣经和合成卡批准后才能做唯一执行图；v2 历史项目仍须先批准服饰图。最终 `package --character-id ... --variant-id STATE_ID --output NEW_DIRECTORY` 按项目版本汇总正式阶段、设计、提示词、审查、批准与来源；输出目录必须新建，preview不能混入。
+
+项目级最终交付还须按[有设定图资产表规则](final-asset-table.md)制作工作簿：把已批准图片回填到资产表对应角色与状态行，以真正的单元格内图片保存并重开核验。只出角色包或把图片浮在格子上均不满足最终输出；测试图可另存明确标注的预览表。
 
 来源改版用 refresh。资产表变化按角色定位，剧本/场记先补读并分析影响，pending_impact 时停止新决策和发布。核对后 `resolve-impact --affected CHR-001 CHR-002 --operator OPERATOR`，改变整体风格/世界规则加 `--global-style`。未受影响批准保留，不凭空断言无影响。
 

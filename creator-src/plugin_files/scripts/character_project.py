@@ -27,7 +27,7 @@ import phased_design as phased
 import ensemble_assets as ensemble
 
 SCHEMA = "CharacterProjectV1"
-PLUGIN_VERSION = "0.2.6.1"
+PLUGIN_VERSION = "0.2.6.2"
 IDENTITY_STAGES = ("avatar", "expression", "full_body")
 STAGES = (*IDENTITY_STAGES, "costume_design", "execution")
 LEGACY_STAGES = (*IDENTITY_STAGES, "execution")

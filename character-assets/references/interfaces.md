@@ -1,4 +1,4 @@
-# 接口与文件契约 v0.2.6.1
+# 接口与文件契约 v0.2.6.2
 
 ## 群演单图扩展
 
@@ -81,5 +81,7 @@ v2 历史五阶段前三图用 base，后两图用当前状态；v3 前三图也
 `CharacterImageReviewV1` 有 `image_sha256,stage,verdict:pass|revise|uncertain`，数组 `factual_conflicts,identity_issues,layout_issues,label_issues,blocking_issues,adoption_proposals`。pass 时缺陷为空；没有图片不能给视觉结论。preview 转正前新细节提案也须解决。
 
 `CharacterAssetPackV2` 含当前状态五阶段正式图片、设计/提示词/审查、来源和批准记录，列 SHA、插件版本和用途；preview 不打包。保留context_source_receipt与项目knowledge-snapshots，重新核验所有哈希；插件升级不破坏已冻结知识依据。图片文件以真实资产名、状态名、阶段和短 SHA 命名。旧四阶段用 V1 清单。
+
+项目级最终交付另含一份“有设定图资产表” XLSX，执行[单元格内图片合同](final-asset-table.md)。按角色 ID、状态 ID、阶段和图片 SHA 对账；图片本体嵌入对应单元格，保留原资产表非图片数据，逐图重开核验。未批准图只进入明确标注的测试预览表，不进入定稿表。这个工作簿是角色包之外的交付物，不改变既有 `CharacterAssetPackV1/V2/V3` 结构。
 
 历史合同继续回读：V1基础字段；V2增加五轴和近邻复核；V2.1增加六组细节及10项覆盖；V2.2增加焦点、身体、11项路由和真实提案映射；v0.2.3增加比例锚点；V2.4增加世界/面部表面及13项覆盖。旧V1/V1.1提案、CastPlanV1及批准提示词保持有效。complete 的现有 V2.4 整卡流程继续可用，不能把新 inline 收据强塞给旧 used 合同。任何新修改按其模式和合同提交，不自动升级、重画或使旧批准无效。
