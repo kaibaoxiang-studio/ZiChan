@@ -1,6 +1,0 @@
-interface:
-  display_name: 场景设计
-  short_description: 建立全剧视觉基准与逐场景设计卡
-  default_prompt: Use $scene-design to complete the requested task.
-policy:
-  allow_implicit_invocation: false

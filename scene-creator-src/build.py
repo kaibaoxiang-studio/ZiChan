@@ -142,6 +142,8 @@ def main() -> None:
     parser.add_argument("--creator", type=Path, default=ROOT.parent / "harness-creator")
     parser.add_argument("--sync", action="store_true")
     args = parser.parse_args()
+    if (ROOT / "scene-assets" / "skills" / "sence-prompts" / "SKILL.md").is_file():
+        raise SystemExit("scene-assets now contains sence-prompts; this historical Harness builder must not overwrite it")
     spec = SOURCE / "blueprint.json"
     spec.write_text(json.dumps(blueprint(), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     output = ROOT / "scene-assets"

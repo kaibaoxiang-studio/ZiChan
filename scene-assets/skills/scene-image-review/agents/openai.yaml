@@ -1,6 +1,0 @@
-interface:
-  display_name: 场景回图审查
-  short_description: 按剧本事实和场景设计审查回流静帧
-  default_prompt: Use $scene-image-review to complete the requested task.
-policy:
-  allow_implicit_invocation: false

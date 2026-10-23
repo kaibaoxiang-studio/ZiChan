@@ -1,6 +1,0 @@
-interface:
-  display_name: 场景资产主控
-  short_description: 场景资产主控：证据、设计、静帧提示词和回图审查
-  default_prompt: Use $scene-assets to complete the requested task.
-policy:
-  allow_implicit_invocation: false

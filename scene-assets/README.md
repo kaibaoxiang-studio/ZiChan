@@ -1,19 +1,28 @@
 # 场景资产插件 v0.1.0
 
-独立的 `$scene-assets` 插件：依据标准剧本、资产表和可选场记，建立可追溯的场景设计卡，编写外部出图提示词，并审查回流图。`$scene-evidence`、`$scene-design`、`$scene-image-prompt`、`$scene-image-review` 可单独使用。插件不调用生图或视频 API。
+本目录以 `sence-prompts` 替换原场景资产实现；插件名称仍为 `scene-assets`，内置技能入口为 [`$sence-prompts`](skills/sence-prompts/SKILL.md)。版本号按本次发布要求统一为 `0.1.0`，不是原同版本 Harness 实现的兼容升级，具体内容以 Git 提交区分。
 
-中式幻想尺度方法是**按项目批准才加载**的知识情景。普通现实场景不自动加入仙宫、女性仙人或超现实空间。源方法缺少许可证，包内只有独立改写的规则和文件哈希收据，不包含原 Skill、示例提示词或图片。
+支持根据完整资产表及剧本设计中文静态场景提示词，第二步光影氛围与本地色卡，第三步反打／其他角度，以及局部修改和纹理修复。不提取资产、不生成视频分镜、不自动调用场景出图服务。
 
-## 本地使用
+## 使用与安装
 
-保留完整目录，用 Python 3.12+ 运行 `python3 scripts/bootstrap.py --install` 和 `python3 harness.py doctor`。从仓库的 `dist/scene-assets-local-marketplace.zip` 解压本地市场后，执行 `codex plugin marketplace add /absolute/path/to/scene-assets-local-marketplace`、`codex plugin add scene-assets@scene-assets-local`。安装后选择“场景资产插件”或明确调用 `$scene-assets`。聊天附件或本地路径均可作为输入；结构化接口见 [接口说明](references/interfaces.md)。
+插件安装保留完整 `scene-assets/`。使用仓库 [本地市场安装包](../dist/scene-assets-local-marketplace.zip)时，解压后沿用现有安装方式：
 
-```text
-$scene-assets 依据这份标准剧本和资产表建立场景项目。先列场景原文事实与疑点，再给出全剧视觉基准和场景设计卡；在我确认后写外部出图提示词。
+```sh
+codex plugin marketplace add /absolute/path/to/scene-assets-local-marketplace
+codex plugin add scene-assets@scene-assets-local
 ```
 
-若剧本已经批准中式幻想视觉方向，可追加“为 SCN-001 使用中式幻想尺度知识”；未批准时先提出选择，不能直接写成项目事实。操作者外部出图后用 `$scene-image-review` 回传并审查。小型项目状态 CLI 的命令见 [工作流](references/workflow.md)；手动验收路径见 [样例](examples/manual-acceptance.md)。
+仅安装 Skill 时，将整个 `skills/sence-prompts/` 目录复制到个人技能目录，不只复制 SKILL.md；也可下载 [插件目录压缩包](../dist/scene-assets-0.1.0.zip)。本包提供提示词，操作者在外部生成场景图；第二步色卡绘制需要 Python 与 Pillow，并有可用中文字体。
 
-## 已知边界
+```text
+$sence-prompts 根据这份完整资产表与对应剧本，为指定场景生成一条完整中文静态场景提示词。
+```
 
-首版只处理场景静帧资产。场景内部人物由已批准角色资产提供身份参考，不在这里重新设计角色；首尾帧视频提示词留给后续能力。输入改版会保守地使当前审批全部失效，由操作者核对并重新提交；尚未提供自动场景级差异判定。
+已有可靠图／完整文字稿时可直接进入打光、反打或局部修改，不必重交全表；依赖原图的编辑任务仍须提供实际可访问图像。验证方法见 [验证规则](skills/sence-prompts/references/verification.md)。文件与文字检查不代表真实出图、像素保留或空间实测通过。
+
+## 替换边界
+
+原 `scene-assets`、`scene-design`、`scene-evidence`、`scene-image-prompt`、`scene-image-review` 五个技能及其 Harness／项目 CLI 已从当前插件移除，不再运行旧 bootstrap 或 harness.py；旧项目审批、设计卡和数据接口不会自动迁移。
+
+旧实现保留在 Git 历史与替换前备份。仓库 `scene-creator-src/` 保留历史源码，不是当前插件的生成来源；当前技能直接维护 `scene-assets/skills/sence-prompts/`。本次两个同名 ZIP 已重新打包为当前实现，历史安装包可从此前 Git 提交恢复。之前的 `feat/sence-prompts` 分支保留原上传版本，不作为当前 main 的发布入口。
