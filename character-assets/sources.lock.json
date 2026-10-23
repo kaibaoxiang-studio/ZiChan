@@ -80,6 +80,11 @@
       "adaptation": "改写单项修图与全图复核方法；保留外部出图"
     },
     {
+      "origin": "local:AI角色_上传一个故事做出整套角色设计.docx",
+      "revision": "sha256:d42c3893aa8399f81f28c8fd16a95e74cf485960649f4aff15f08c629053dc94",
+      "adaptation": "仅提炼完整群像同画布的编排形式；不继承示例画风、人物设定或固定画幅"
+    },
+    {
       "origin": "local:发型设计知识库.zip",
       "revision": "sha256:54c08406b4382ea0f4b7a749055ce9f86743a8257d0f2588254252fff1928abb",
       "adaptation": "用户课程方法精炼为 character-hair-design 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"

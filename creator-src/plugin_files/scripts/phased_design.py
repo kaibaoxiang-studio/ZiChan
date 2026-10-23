@@ -535,6 +535,8 @@ def submit(cp, args, root, state):
         validate_context(cp, root, state, data)
     else:
         cp.require_known_variant(state, character, variant)
+        cp.ensure(cp.ensemble.mode(cp, root, state, character) == "individual",
+                  "Extras use a one-sheet design, not individual multi-stage design scopes")
         cp._checked_record(root, state, "visual-bible")
         cp._checked_record(root, state, "cast-plan")
         if args.kind == "design-brief":

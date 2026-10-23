@@ -1,4 +1,8 @@
-# 角色资产项目工作流 v0.2.5
+# 角色资产项目工作流 v0.2.6.1
+
+## 无台词群演群像分支
+
+先运行 `plan` 查看 `asset_mode`。`ensemble` 按[群像单图合同](group-ensemble.md)从标准剧本人数、动作、道具与已批视觉基准形成 `GroupEnsembleDesignV1`，文字稿获批后每状态只生成一张完整全身群像 `execution` 图，再审图、批准和打包。有指定台词的群演走 `speaking_extra`：以原文台词和获批风格设计 `SpeakingExtraDesignV1`，每状态只产一张独立 9:16 四格执行资产，跳过前三张身份图。旧项目已批准记录不自动迁移。
 
 ## v0.2.6 新项目链路
 
@@ -52,7 +56,7 @@ python scripts/character_project.py submit-review --project-root /work/role-proj
 
 实际看图并保存 `CharacterImageReviewV1`。方向、身份与该图获用户确认，review pass、无待采纳新细节、依据和图片 SHA 不变后，可 `promote-candidate --project-root /work/role-project --image-id avatar-HASH --operator OPERATOR --approve-design-basis`，显式承接同 SHA 方向/身份审批并同图转正；已先批依据则省略 flag。不需要重新生图，不能自动接纳其他候选。改变身份快照后原图不能沿旧 SHA 转正。
 
-v3 正式顺序为头像 → 九宫格 → 全身模卡 → 每状态一张 9:16 四格执行图；服饰设计先以文字批准。v2 历史项目保持每状态服饰设计图 → 对应执行图。后续阶段的设计快照按需深化并批准，图像提示词只取当前可见项。头像默认3:4，身体图默认9:16；基础图采用 [模卡基线](model-card-baseline.md)，正式服饰图和执行图恢复角色衣装。头像可完整头部、双肩与上胸，不强制锁骨以上；上胸入画可直接白背心；全身背心、短裤、赤脚。背景未另获批时用中性纯色。
+v3 常规独立人物顺序为头像 → 九宫格 → 全身模卡 → 每状态一张 9:16 四格执行图；服饰设计先以文字批准。v2 历史项目保持每状态服饰设计图 → 对应执行图。后续阶段的设计快照按需深化并批准，图像提示词只取当前可见项。头像默认3:4，身体图默认9:16；基础图采用 [模卡基线](model-card-baseline.md)，正式服饰图和执行图恢复角色衣装。头像可完整头部、双肩与上胸，不强制锁骨以上；上胸入画可直接白背心；全身背心、短裤、赤脚。背景未另获批时用中性纯色。
 
 正式图片继续 import-image → 实际审图 → submit-review → `approve-image --image-id ... --operator ...`。与近邻已有图并排比较；只换衣发色却同脸同体型属于设计或执行缺陷，分别回设计或修图。`character-image-edit` 针对具体缺陷修图，重新导入后整图复核。
 

@@ -87,7 +87,7 @@ def blueprint():
             "从角色清单做第 -1 阶段视觉基准和全员轻规划；用群像差异化总控建立比较组与五轴矩阵，"
             "由人物设计总控先阅读全文，建立按来源版本复用的 ScriptContextV1，再形成 DesignDirectionBriefV1：人物定位、言行与关系、目标矛盾、人物弧线、观众信息、设计意图和专项任务。"
             "按 [人物理解与设计统筹](../../references/director-understanding.md) 从人物需要路由 Skill 或 knowledge/reference；未写外观不等于不需设计。常规问题同轮执行专项规范，复杂冲突独立会诊，保存真实参与方式和可见成果。"
-            "新项目默认按 [分阶段设计](../../references/phased-design.md) 提交身份、身体、穿衣风格圣经与各状态服饰文字快照。服饰设计师 Skill 必经，接收人物总控理解与方向，协调五个服饰专项；当前画幅做实后再推进。身体阶段仍须有五组比例锚点；全部完成后机械合成完整卡。"
+            "新项目的常规独立人物默认按 [分阶段设计](../../references/phased-design.md) 提交身份、身体、穿衣风格圣经与各状态服饰文字快照。服饰设计师 Skill 对常规独立人物服饰阶段必经，接收人物总控理解与方向，协调五个服饰专项；有台词群演与无台词群像都由群演单图设计师处理。当前画幅做实后再推进。身体阶段仍须有五组比例锚点；全部完成后机械合成完整卡。"
             "默认一套连贯推荐，关键分歧给备选；先集中确认人物方向，再审当前阶段设计，不为微参数反复采访。用户要求先看一版时使用 preview 候选流程，实际审图和明确确认后同图转正。普通角色分层处理；已批准角色不因新方法自动重做。"
             "每轮只推进一个已授权且依赖已批准的阶段；及时提交结构化 JSON 并通过 CLI 记录批准、图片、审查和来源。"
             "本插件只写 GPT Image 2.5 提示词，不调用生图工具。用户回图后必须实际查看图片，"
@@ -95,7 +95,7 @@ def blueprint():
             "头像默认 3:4 竖版，全身图默认 9:16 竖版，只有操作者明确要求才更改。"
             "人形头像与表情以脸为主体，可取完整头部、双肩及上胸，不固定裁到锁骨以上；服装不入画用 face_only，上胸入画用对应白色背心，整组模式一致；"
             "全身图用白色背心、短裤、赤脚作模卡参考，执行资产表恢复已批准正式服装。"
-            "新项目依次完成头像、九宫格、全身模卡、每状态一张 9:16 竖版四格服饰执行图；文字设计先批准，图像每张审查批准一次，按资产名命名后打包。旧项目沿用原链路；仅显式 upgrade-pipeline 可迁移合格旧项目。运行中报告实际文件路径、未解决疑点与下一步；不虚报成图质量。",
+            "新项目的常规独立人物依次完成头像、九宫格、全身模卡、每状态一张 9:16 竖版四格服饰执行图。有指定台词的群演跳过前三张与穿衣圣经，每状态独立产一张 9:16 四格执行资产；无台词群演群像只产每状态一张完整全身群像执行图。先用 CLI plan 判定 asset_mode，不给群像套人形四格。文字设计先批准，图像每张审查批准一次，按资产名命名后打包。旧项目沿用原链路；仅显式 upgrade-pipeline 可迁移合格旧项目。运行中报告实际文件路径、未解决疑点与下一步；不虚报成图质量。",
             ["knowledge/index.md", "references/workflow.md", "references/interfaces.md",
              "references/routing-and-integration.md", "references/director-understanding.md",
              "references/phased-design.md", "references/costume-design-stage.md", "references/costume-designer.md",
@@ -103,7 +103,7 @@ def blueprint():
              "references/evidence.md", "references/source-notes.md",
              "references/differentiation-framework.md", "references/specialist-contract.md",
             "references/design-detail-standard.md", "references/render-texture-standard.md",
-            "references/feature-focus-and-body-form.md"],
+             "references/feature-focus-and-body-form.md", "references/group-ensemble.md"],
             {**common, "mode": {"type": "string", "enum": ["single", "batch"]},
              "character_ids": {"type": "array", "items": text_field()},
              "variant_ids": {"type": "array", "items": text_field()},
@@ -148,7 +148,7 @@ def blueprint():
         capability(
             "character-costume-designer", "服饰设计师：从人物弧线与世界规则建立穿衣风格圣经和状态服饰",
             "# 服饰设计师\n\n读取 [服饰设计师合同](../../references/costume-designer.md) 与 [深层服饰方法](../../references/knowledge/character-costume-designer/costume-deep.md)。"
-            "接收总控已验证的全文理解、人物方向、项目美术基准和状态证据；优先核对来源SHA与服饰相关原文，不在服饰阶段重复阅读全文。若全文理解缺失或来源变更，交回人物总控补读；不把剧本的服装类别当作设计终点。先建立每角色 CostumeStyleBibleV1，重要角色完整状态矩阵，普通角色简版，群像可共用组基准。"
+            "接收总控已验证的全文理解、人物方向、项目美术基准和状态证据；优先核对来源SHA与服饰相关原文，不在服饰阶段重复阅读全文。若全文理解缺失或来源变更，交回人物总控补读；不把剧本的服装类别当作设计终点。常规独立人物先建立每角色 CostumeStyleBibleV1，重要角色完整状态矩阵，普通角色简版；有台词群演与无台词群像由群演单图设计师统筹衣装，不套常规人物圣经合同。"
             "按状态统筹款式、剪裁、配色、材质四项必做成果，饰品可有理由不用。推荐稿具体写正背结构、衣层连接、活动余量、材质行为、镜头焦点、人物弧线、跨状态延续与妆面发饰；每项区分原文、推导和创作选择。"
             "任何新增家族、宗教、阵营含义单独待确认；不得强加世界符号或预设配色公式。常规问题同轮整合一稿，不为每项专项反复开启会诊。独立文字验收或单状态试稿默认只交一份约 2000–3000 汉字的具体设计；没有正式项目时不生成生产 JSON。正式项目则按已批准记录合同写结构化快照。不在此阶段产出横版服饰设计图。",
             ["knowledge/index.md", "references/costume-designer.md", "references/phased-design.md",
@@ -171,10 +171,10 @@ def blueprint():
             "头像默认 3:4 竖版且每条提示词写明比例，只有操作者明确指定才覆盖；新分阶段项目默认一条推荐提示词，重要分歧再给备选；旧项目保留其候选合同；"
             "人形头像与表情以脸为主体，可取完整头部、双肩及上胸，不固定裁到锁骨以上；服装不入画用 face_only，上胸入画用对应白色背心，整组模式一致；新项目默认九宫格并写中文标签，16 格须有用户明确要求；"
             "全身图默认 9:16 竖版，每条提示词与验收项写明比例，穿对应白色背心、短裤并赤脚，头到双脚完整并留边界，逐条继承已批准身体快照（旧项目为设计卡）中的头身、肩胯与腿身关系并核对；"
-            "九宫格和全身模卡批准后，每状态从已批准的穿衣风格圣经和服饰文字快照直接产出一张 9:16 竖版四格执行图：上正脸/45°半侧脸、下无头放大正面服装/完整背面。单图审查批准后直接打包；不得回退成横版服饰双视图。"
+            "常规独立人物九宫格和全身模卡批准后，每状态从已批准的穿衣风格圣经和服饰文字快照直接产出一张 9:16 竖版四格执行图：上正脸/45°半侧脸、下无头放大正面服装/完整背面。有指定台词的群演直接以 SpeakingExtraDesignV1 做同版式的一张 9:16 执行图，无前三张锚图。无台词群像按 GroupEnsembleDesignV1 出一张所有成员全身可见的图，人数和横向比例依剧本与辨识度确定；不得套四格。单图审查批准后直接打包。"
             "非人使用已批准替代布局。输出 CharacterPromptPackageV1 与检查点，经 CLI 合同校验后交操作者外部出图。",
             ["knowledge/index.md", "references/prompting.md", "references/model-card-baseline.md", "references/expression.md",
-             "references/execution-sheet.md", "references/costume-design-stage.md", "references/interfaces.md",
+             "references/execution-sheet.md", "references/group-ensemble.md", "references/costume-design-stage.md", "references/interfaces.md",
              "references/phased-design.md",
              "references/knowledge/character-costume-designer/state-makeup.md",
              "references/design-detail-standard.md", "references/render-texture-standard.md",
@@ -232,6 +232,19 @@ def blueprint():
          "references/knowledge/character-cast-differentiation/anti-stereotype-texture.md"],
         {**common, "cast_plan_path": text_field(), "comparison_group": {"type": "array", "items": text_field()}},
         ("project_root", "request")))
+    capabilities.append(capability(
+        "character-ensemble-designer", "群演单图设计师：有台词单人执行图与无台词群像图",
+        "# 群演单图设计师\n\n读取 [群演单图合同](../../references/group-ensemble.md)、"
+        "[群像差异化框架](../../references/differentiation-framework.md) 与 [图像提示词](../../references/prompting.md)。"
+        "先以 scripts/character_project.py plan 的 asset_mode 判定路线。speaking_extra 有指定台词，每状态只做一张 9:16 四格执行资产并独立打包；ensemble 无台词群演群像，每状态只做一张完整全身群像图。两者均不制作头像、九宫格、全身模卡或独立穿衣圣经。"
+        "从标准剧本原文核对人数、行动、职业/群体功能、道具和所在世界；从已批准 ProjectVisualBibleV1 读取整套项目风格，不能沿用参考文档的插画画风或固定 21:9。"
+        "有明确人数就逐人对应；不明确就按单画布辨识度选择代表人数并标注是创作选择。每个画中人写站位、体型姿态、脸发、衣装结构与材质、行动/道具，保证共性属于同组，差异能在缩略图辨认。"
+        "一张画布按左至右定序，每人全身可见、不重叠、不裁脚，道具归属清楚；多人用依人数和可辨识度选定的横版比例，单人用 9:16 全身。"
+        "无台词组保存 GroupEnsembleDesignV1；有台词者保存 SpeakingExtraDesignV1，须对照原文台词与人物行动，具体设计脸发体态、正式服装正背结构及道具，采用正脸/45°/无头正面服装/完整背面四格。两类均集中审阅文字，获批后生成只含 execution 的 CharacterPromptPackageV1；一张图一次实际审图与操作者批准，分别打包 CharacterEnsemblePackV1 或 CharacterSpeakingExtraPackV1。"
+        "只取参考文档的群像编排形式；剧本和获批美术基准决定世界、配色、媒介与真实度。",
+        ["knowledge/index.md", "references/group-ensemble.md", "references/differentiation-framework.md",
+         "references/prompting.md", "references/review.md", "references/interfaces.md"],
+        common, ("request",)))
     for ident, description, source_id, method in SPECIALISTS:
         extra_refs = (["references/render-texture-standard.md",
                        f"references/knowledge/{ident}/anti-stereotype-texture.md"]
@@ -297,6 +310,7 @@ def blueprint():
         {"origin": "local:刺猬星球素材/打斗提示词/四视图提示词.txt", "revision": "sha256:b750b10de906df64261ff823baf9f236077711eff4c8798efe68adcd27cef7d2", "adaptation": "对照已有执行参考板合同；只保留差异审查记录"},
         {"origin": "local:刺猬星球素材/01-通用图片生成/SKILL.md", "revision": "sha256:3e8fdab2d0c0b69d121503a2d2833a067a672afca21b51c5e1ac99a1f30860fb", "license": "Apache-2.0", "adaptation": "改写角色提示词结构与参考图职责；不携带生图 API/CLI"},
         {"origin": "local:刺猬星球素材/01-通用图片生成/references/prompting.md", "revision": "sha256:d957a45cb24fe2cf1a85858674fc533f15a5f4621355f559a13a93168999c2dd", "license": "Apache-2.0", "adaptation": "改写单项修图与全图复核方法；保留外部出图"},
+        {"origin": "local:AI角色_上传一个故事做出整套角色设计.docx", "revision": "sha256:d42c3893aa8399f81f28c8fd16a95e74cf485960649f4aff15f08c629053dc94", "adaptation": "仅提炼完整群像同画布的编排形式；不继承示例画风、人物设定或固定画幅"},
     ]
     sources += [{"origin": "local:" + item["archive"],
                  "revision": "sha256:" + item["archive_sha256"],
@@ -304,7 +318,7 @@ def blueprint():
                  " 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"}
                 for item in adoption["sources"]]
     return {"schema_version": "HarnessBlueprintV1",
-            "plugin": {"name": "character-assets", "version": "0.2.6",
+            "plugin": {"name": "character-assets", "version": "0.2.6.1",
                        "description": "从剧本依据建设可追溯的角色视觉资产包与 GPT Image 2.5 提示词",
                        "author": {"name": "开宝箱工作室"}},
             "goal": "独立运行的角色资产子插件：设计、提示词、回图审查与可复用资产包",
@@ -316,7 +330,7 @@ def blueprint():
                                     "首图候选经实际审图和明确确认可同图转正，未确认候选不能充当正式锚点",
                                     "头像默认 3:4、全身图默认 9:16，且仅明确用户要求可覆盖",
                                     "人形头像以脸为主体，允许头肩至上胸取景；服装不入画用 face_only，上胸入画用对应白色背心，表情继承模式；全身图采用背心短裤赤脚模卡，执行表恢复正式服装",
-                                    "新项目四图链路、服饰文字快照与逐状态 9:16 四格执行图；旧项目保留旧链路，显式升级保留合格身份图",
+                                    "新项目常规人物四图链路；有台词群演每状态一张独立 9:16 执行图，无台词群像每状态一张全员完整图；旧项目保留旧链路，显式升级保留合格身份图",
                                     "去油与噪点修复区分设计和渲染证据"],
             "open_questions": [], "capabilities": capabilities, "files": files,
             "workflows": [], "sources": sources}
@@ -390,7 +404,8 @@ def finalize_output(output):
     names = {"character-assets": "角色资产主控", "character-evidence": "角色证据核对",
              "character-design": "人物设计总控", "character-image-prompt": "角色出图提示词",
              "character-image-review": "角色回图审查", "character-image-edit": "角色精确修图",
-             "character-cast-differentiation": "角色群像差异化",
+        "character-cast-differentiation": "角色群像差异化",
+        "character-ensemble-designer": "群演群像设计师",
              "character-costume-designer": "角色服饰设计师"}
     names.update({ident: description.split("：", 1)[0]
                   for ident, description, _, _ in SPECIALISTS})

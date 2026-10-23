@@ -1,11 +1,13 @@
-# 角色资产插件 v0.2.6
+# 角色资产插件 v0.2.6.1
 
-**0.2.6 小版本更新**：新项目采用四图链路：头像 3:4、表情九宫格、全身模卡 9:16、每状态一张 **9:16 竖版四格服饰执行图**。`$character-costume-designer` 是服饰阶段必经协调 Skill：人物总控交付全文理解和设计意图，它建立 `CostumeStyleBibleV1` 并统筹款式、剪裁、配色、材质与饰品五专项。前四项须留下服装部位成果；饰品可有理由不用。逐状态文字设计获批后直接出唯一执行图，审查批准一次并打包 `CharacterAssetPackV3`。新知识分别强化世界符号与纹样的叙事使用、原创脸部结构和逐状态妆造；70:25:5 为可选方法。已批准旧项目按原图像阶段和审批读取；无已批准服饰/执行图的 v2 项目可显式 `upgrade-pipeline`。
+**0.2.6.1 群像修补**：新 phased 项目中，有指定台词的群演每状态只交一张独立 9:16 四格执行资产，跳过头像、九宫格和全身模卡；无台词群演／群像每状态只交一张同画布完整全身群像执行图，跳过头像、九宫格、模卡和单人四格。人数明确就照数制作，未明确时记录代表人数；多人画幅按辨识度选横向比例。参考 DOCX 仅供同画布编排，画风以项目获批视觉基准为准。见[群像单图合同](references/group-ensemble.md)。
+
+**0.2.6 小版本更新（独立人物）**：新项目常规人物采用四图链路：头像 3:4、表情九宫格、全身模卡 9:16、每状态一张 **9:16 竖版四格服饰执行图**。`$character-costume-designer` 是服饰阶段必经协调 Skill：人物总控交付全文理解和设计意图，它建立 `CostumeStyleBibleV1` 并统筹款式、剪裁、配色、材质与饰品五专项。前四项须留下服装部位成果；饰品可有理由不用。逐状态文字设计获批后直接出唯一执行图，审查批准一次并打包 `CharacterAssetPackV3`。新知识分别强化世界符号与纹样的叙事使用、原创脸部结构和逐状态妆造；70:25:5 为可选方法。已批准旧项目按原图像阶段和审批读取；无已批准服饰/执行图的 v2 项目可显式 `upgrade-pipeline`。
 
 
 **0.2.5.1 修补**：内部 dispatcher 每次使用 `ephemeral: true` 临时会话，服务未确认时直接失败，不降级持久聊天。Harness 的等待回答、恢复和重试依靠本地记录重建任务；旧 thread ID 仅作诊断，不执行 `thread/resume`。后台验收不再向“最近”写入 `Use $character-…` 任务。详见[内部调用隔离与恢复](references/dispatcher-isolation.md)。
 
-独立安装的 Codex 插件。主入口为 `$character-assets`；原有的证据、角色设计、提示词、回图审查和局部修图能力继续保留。v0.2.5 具备 **群像差异化总控**与 **13 个专项设计 Skill**，共 21 项能力。它们可单独调用，由人物设计总控依据全文中的人物定位与设计任务选用，常规项同轮执行规范，复杂冲突独立会诊。
+独立安装的 Codex 插件。主入口为 `$character-assets`；原有的证据、角色设计、提示词、回图审查和局部修图能力继续保留。当前包括 **群像差异化总控、群演单图设计师**与 **13 个专项设计 Skill**，共 22 项能力。它们可单独调用，由人物设计总控依据全文中的人物定位与设计任务选用，常规项同轮执行规范，复杂冲突独立会诊。
 
 **0.2.5 小版本更新**：强化 `$character-design` 为人物设计总控：**阅读全文 → 理解和定位人物 → 解析设计相关细节 → 形成设计意图 → 路由 Skill 或 knowledge/reference → 整合为具体设计**。全剧分析记录阅读覆盖并按来源 SHA 复用；区分自述、他评与实际行为，综合人物目标、矛盾、关系、生活处境、弧线及观众信息。剧本未写外貌时主动设计，标明事实、推导和创作选择，重要身份或剧情新设定单独提出。
 
@@ -21,6 +23,7 @@
 
 | 新能力 | 解决的问题 |
 | --- | --- |
+| `$character-ensemble-designer` | 按获批风格制作有台词群演的独立 9:16 执行图、无台词群像的完整同画布图 |
 | `$character-cast-differentiation` | 建同框/近邻比较组，检查五轴矩阵、撞脸与全员美型倾向 |
 | `$character-feature-focus` | 少量主锚点、安静区、可见视角与自然不对称 |
 | `$character-hair-design`、`$character-body-design`、`$character-face-design` | 发型块面、形体体态、五官骨相的具体差异 |
@@ -37,13 +40,20 @@
 flowchart TD
     A["剧本全文与资产表"] --> B["ScriptContextV1：阅读全文并跨场理解"]
     B --> C["人物总控：定位人物、设计意图、专项路由"]
-    C --> D["身份快照 → 头像 3:4 → 九宫格"]
+    C --> X{"资产模式?"}
+    X -- "常规人物" --> D["身份快照 → 头像 3:4 → 九宫格"]
     D --> E["身体快照 → 全身模卡 9:16"]
     E --> F["服饰设计师：CostumeStyleBibleV1"]
     F --> G["逐状态款式／剪裁／配色／材质必做，饰品可有理由不用"]
     G --> H["逐状态服饰文字快照批准 → 合成设计卡"]
     H --> I["每状态一张 9:16 竖版四格执行图"]
     I --> J["实际审图 → 操作者批准一次 → 打包"]
+    X -- "无台词群像" --> Q["群像设计师：人数、排位、群内差异、获批风格"]
+    Q --> R["每状态一张完整全身群像图"]
+    R --> J
+    X -- "有台词群演" --> T["SpeakingExtraDesignV1：台词与完整造型"]
+    T --> U["每状态一张独立 9:16 四格执行图"]
+    U --> J
 ```
 
 新项目为 `pipeline_version:3`，旧 v1/v2 项目按原合同读取。可显式迁移没有已批准服饰或执行图的 v2 项目，保留已批准身份图。
@@ -61,6 +71,18 @@ sequenceDiagram
     participant G as 外部生图工具
     U->>P: 提供剧本、资产表与设计目标
     P->>D: 全文理解、人物定位与视觉意图
+    P->>C: plan 判定 individual、speaking_extra 或 ensemble
+    alt 无指定台词群像
+        P->>C: 提交并批准 GroupEnsembleDesignV1
+        P->>G: 每状态一张全身群像执行图提示词
+        G-->>P: 一张群像图
+        P->>C: 审图、批准、打包 CharacterEnsemblePackV1
+    else 有台词群演
+        P->>C: 提交并批准 SpeakingExtraDesignV1
+        P->>G: 每状态一张独立 9:16 四格执行图提示词
+        G-->>P: 一张执行图
+        P->>C: 审图、批准、打包 CharacterSpeakingExtraPackV1
+    else 常规人物
     D-->>U: 身份方向与阶段设计
     U->>C: 确认身份与身体快照
     P->>G: 头像、九宫格、全身模卡提示词
@@ -76,6 +98,7 @@ sequenceDiagram
     P->>C: 实际审图并记录结果
     U->>C: 批准本状态唯一服饰图
     C-->>U: 打包 CharacterAssetPackV3
+    end
 ```
 
 ### 资产数据流
@@ -84,6 +107,8 @@ sequenceDiagram
 flowchart LR
     A["剧本全文与来源 SHA"] --> B["ScriptContextV1"]
     B --> C["DesignDirectionBriefV1"]
+    B --> Q["无台词群像 GroupEnsembleDesignV1"]
+    B --> T["有台词群演 SpeakingExtraDesignV1"]
     D["视觉基准、群像比较、资产状态"] --> C
     C --> E["身份与身体快照"]
     C --> F["CostumeStyleBibleV1"]
@@ -99,15 +124,21 @@ flowchart LR
     L --> M["审图报告与批准"]
     M --> N["CharacterAssetPackV3"]
     I --> N
+    D --> Q
+    Q --> R["一张全身群像 execution 图"]
+    R --> S["审图批准 → CharacterEnsemblePackV1"]
+    D --> T
+    T --> U["一张 9:16 四格 execution 图"]
+    U --> V["审图批准 → CharacterSpeakingExtraPackV1"]
 ```
 
 ## 输入与产物
 
-正式资产项目需要标准化剧本和资产表，场记表可选；只有剧本或人物小传时，也可独立调用 `$character-design` 先分析设计，注明材料覆盖范围，正式建资产时再映射角色 ID。支持 JSON、Markdown、Excel，优先使用 JSON；也可用顶层 `AssetProjectSnapshotV1` 初始化。文件可以作为聊天附件提供，也可以给绝对路径。项目工作目录保留原件副本、SHA、设计卡、提示词、回流图片、审查与审批。新项目最终 `CharacterAssetPackV3` 包含该状态已定稿的四类图片和设计来源；旧项目的 `CharacterAssetPackV1/V2` 仍可读取与打包。
+正式资产项目需要标准化剧本和资产表，场记表可选；只有剧本或人物小传时，也可独立调用 `$character-design` 先分析设计，注明材料覆盖范围，正式建资产时再映射角色 ID。支持 JSON、Markdown、Excel，优先使用 JSON；也可用顶层 `AssetProjectSnapshotV1` 初始化。文件可以作为聊天附件提供，也可以给绝对路径。项目工作目录保留原件副本、SHA、设计卡、提示词、回流图片、审查与审批。新项目常规人物的 `CharacterAssetPackV3` 包含该状态已定稿的四类图片和设计来源；有台词群演的 `CharacterSpeakingExtraPackV1` 只含该状态一张获批 9:16 四格执行图和设计依据；无台词群像的 `CharacterEnsemblePackV1` 只含该状态一张获批群像执行图和可追溯设计依据；旧项目的 `CharacterAssetPackV1/V2` 仍可读取与打包。
 
-新项目使用 `ScriptContextV1` 保存全文理解与覆盖，`DesignDirectionBriefV1` 保存人物定位、设计意图和专项任务，`CharacterStageDesignV1` 分别保存身份、身体及状态服饰快照。阶段提示词按 `design_basis` 绑定来源；全部设计完成后合成 `CharacterDesignCardV2.5`。`CastPlanV2` 继续记录群像比较。旧项目的 V1/V2/V2.1 记录继续可读，已批准角色不因升级自动重设计。`scripts/cast_diff_audit.py` 能列出文本字段重复与待补轴；实际撞脸、真实度和皮肤质感仍需看回流图并排判断。
+新项目使用 `ScriptContextV1` 保存全文理解与覆盖。独立人物`DesignDirectionBriefV1` 保存人物定位、设计意图和专项任务，`CharacterStageDesignV1` 分别保存身份、身体及状态服饰快照。阶段提示词按 `design_basis` 绑定来源；全部设计完成后合成 `CharacterDesignCardV2.5`。`CastPlanV2` 继续记录群像比较。旧项目的 V1/V2/V2.1 记录继续可读，已批准角色不因升级自动重设计。`scripts/cast_diff_audit.py` 能列出文本字段重复与待补轴；实际撞脸、真实度和皮肤质感仍需看回流图并排判断。
 
-插件**只写 GPT Image 2.5 提示词**。操作者在外部工具生成图片，回传并逐阶段确认。人形执行资产表上左正脸、上右约 45° 半侧脸；下左是从颈肩以下到鞋的放大无头正面服装主体，下右是从头到鞋的完整背面。非人按设计卡批准的版式适配。
+插件**只写 GPT Image 2.5 提示词**。操作者在外部工具生成图片，回传并逐阶段确认。独立人形执行资产表上左正脸、上右约 45° 半侧脸；下左是从颈肩以下到鞋的放大无头正面服装主体，下右是从头到鞋的完整背面。非人按设计卡批准的版式适配。
 
 ## 安装
 

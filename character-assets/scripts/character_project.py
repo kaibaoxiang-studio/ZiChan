@@ -24,9 +24,10 @@ import zipfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import phased_design as phased
+import ensemble_assets as ensemble
 
 SCHEMA = "CharacterProjectV1"
-PLUGIN_VERSION = "0.2.6"
+PLUGIN_VERSION = "0.2.6.1"
 IDENTITY_STAGES = ("avatar", "expression", "full_body")
 STAGES = (*IDENTITY_STAGES, "costume_design", "execution")
 LEGACY_STAGES = (*IDENTITY_STAGES, "execution")
@@ -642,6 +643,8 @@ def _record_key(kind, character_id=None, variant_id=None, stage=None):
         return kind
     safe_id(character_id)
     safe_id(variant_id or "base")
+    if kind in {"ensemble-design", "extra-design"}:
+        return ensemble.key(character_id, variant_id or "base") if kind == "ensemble-design" else ensemble.extra_key(character_id, variant_id or "base")
     if kind == "design-card":
         return f"design-card:{character_id}:{variant_id or 'base'}"
     ensure(kind == "prompt-package" and stage in STAGES, "Invalid record kind or stage")
@@ -667,6 +670,10 @@ def _checked_record(root, state, key):
             validate_design_handoffs(card, root)
     if phased.enabled(state):
         phased.checked_dependencies(_runtime(), root, state, key, read_json(root / value["path"]))
+        if key.startswith(("ensemble-design:", "extra-design:")):
+            check = ensemble.validate_extra if key.startswith("extra-design:") else ensemble.validate
+            check(_runtime(), root, state, read_json(root / value["path"]),
+                  key.split(":")[1], key.split(":")[2])
     return value
 
 
@@ -696,7 +703,10 @@ def _checked_image(root, state, stage, character_id, variant_id):
         ensure(image.get("purpose", "production") == "production", "Preview candidates cannot be migrated identity anchors")
     elif phased.enabled(state):
         package = read_json(root / prompt["path"])
-        phased.resolve_basis(_runtime(), root, state, package, character_id, variant_id, stage, force_approved=True)
+        if ensemble.mode(_runtime(), root, state, character_id) in {"ensemble", "speaking_extra"}:
+            ensemble.resolve(_runtime(), root, state, package, character_id, variant_id)
+        else:
+            phased.resolve_basis(_runtime(), root, state, package, character_id, variant_id, stage, force_approved=True)
         ensure(image.get("purpose", "production") == "production", "Preview candidates cannot be downstream anchors")
     return image
 
@@ -712,9 +722,11 @@ def _approved_image(state, stage, character_id, variant_id):
 
 def _invalidate(state, character_id=None, variant_id=None, start="visual-bible"):
     downstream = {
-        "visual-bible": {"visual-bible", "cast-plan", "design-card", *STAGES},
-        "cast-plan": {"cast-plan", "design-card", *STAGES},
-        "design-card": {"design-card", *STAGES},
+        "visual-bible": {"visual-bible", "cast-plan", "design-card", "ensemble-design", "extra-design", *STAGES},
+        "cast-plan": {"cast-plan", "design-card", "ensemble-design", "extra-design", *STAGES},
+        "design-card": {"design-card", "ensemble-design", "extra-design", *STAGES},
+        "ensemble-design": {"ensemble-design", "execution"},
+        "extra-design": {"extra-design", "execution"},
         "avatar": set(STAGES),
         "expression": {"expression", "full_body", "costume_design", "execution"},
         "full_body": {"full_body", "costume_design", "execution"},
@@ -883,7 +895,7 @@ def _validate_record(kind, data, state, character_id=None, variant_id=None, stag
                    "Costume design must name its exact asset-table variant")
             ensure(any("服饰" in x or "服装" in x for x in data["acceptance_checks"]),
                    "Costume design checks must cover visible garment structure")
-        if stage == "execution" and state.get("pipeline_version", 1) >= 3:
+        if stage == "execution" and state.get("pipeline_version", 1) >= 3 and data.get("morphology") != "group":
             ratio = data.get("aspect_ratio")
             ensure(isinstance(ratio, str) and re.fullmatch(r"[1-9][0-9]*:[1-9][0-9]*", ratio),
                    "V3 costume execution sheet needs aspect_ratio; default is 9:16")
@@ -1076,9 +1088,11 @@ def cmd_plan(args):
                    for row in roster), "Requested variant is absent from selected roster")
     tasks = []
     for person in roster:
+        asset_mode = ensemble.mode(_runtime(), root, state, person["id"])
         variants = [x["id"] for x in person.get("states", []) if x.get("id")]
         variants = variants or ["base"]
-        targets = ([(stage, "base") for stage in IDENTITY_STAGES] +
+        targets = ([("execution", variant) for variant in variants] if asset_mode in {"ensemble", "speaking_extra"} else
+                   [(stage, "base") for stage in IDENTITY_STAGES] +
                    [(stage, variant) for variant in variants
                     for stage in pipeline_stages(state) if stage not in IDENTITY_STAGES]
                    if modern else [(stage, variant) for variant in variants for stage in LEGACY_STAGES])
@@ -1091,14 +1105,16 @@ def cmd_plan(args):
             if state.get("pending_impact"):
                 blockers.append("Unresolved upstream impact")
             card_variant = variant
-            design_dependencies = (phased.basis_keys(person["id"], variant, stage, state) if phased.enabled(state)
+            design_dependencies = (["script-context", ensemble.design_key(asset_mode, person["id"], variant)]
+                                   if asset_mode in {"ensemble", "speaking_extra"} else
+                                   phased.basis_keys(person["id"], variant, stage, state) if phased.enabled(state)
                                    else [_record_key("design-card", person["id"], card_variant)])
             for key in ("visual-bible", "cast-plan", *design_dependencies):
                 try:
                     _checked_record(root, state, key)
                 except (ValueError, KeyError) as exc:
                     blockers.append(str(exc))
-            predecessors = image_predecessors(state, stage)
+            predecessors = () if asset_mode in {"ensemble", "speaking_extra"} else image_predecessors(state, stage)
             for prior in predecessors:
                 anchor_variant = "base" if modern and prior in IDENTITY_STAGES else variant
                 try:
@@ -1110,7 +1126,8 @@ def cmd_plan(args):
                 status = "blocked" if blockers else "approved"
             except (ValueError, KeyError):
                 status = "blocked" if blockers else "ready"
-            task = {"asset_name": person["name"], "character_id": person["id"],
+            task = {"asset_name": person["name"], "asset_mode": asset_mode,
+                          "character_id": person["id"],
                           "variant_id": variant, "variant_name": variant_name(state, person["id"], variant),
                            "stage": stage, "status": status, "blockers": blockers}
             if phased.enabled(state) and stage == "avatar":
@@ -1133,6 +1150,8 @@ def cmd_plan(args):
 def cmd_submit(args):
     with locked_project(args.project_root) as (root, state):
         ensure(not state["pending_impact"], "Resolve upstream impact before new design decisions")
+        if args.kind in {"ensemble-design", "extra-design"}:
+            return ensemble.submit(_runtime(), args, root, state)
         if args.kind in phased.KINDS:
             return phased.submit(_runtime(), args, root, state)
         ensure(not (phased.enabled(state) and args.kind == "design-card"),
@@ -1144,8 +1163,12 @@ def cmd_submit(args):
         if args.kind in {"design-card", "prompt-package"}:
             if modern:
                 require_known_variant(state, character_id, variant_id)
+        asset_mode = (ensemble.mode(_runtime(), root, state, character_id)
+                      if character_id and modern else "individual")
         if args.kind == "prompt-package":
             ensure(args.stage in pipeline_stages(state), "Stage is not available in this project pipeline")
+            if asset_mode in {"ensemble", "speaking_extra"}:
+                ensure(args.stage == "execution", "Extras have one execution sheet, not multi-stage identity images")
             if modern and args.stage in IDENTITY_STAGES:
                 ensure(variant_id == "base", "V0.2.4.1 identity stages belong to the base character, not each costume variant")
         key = _record_key(args.kind, character_id, variant_id, args.stage)
@@ -1158,13 +1181,18 @@ def cmd_submit(args):
             _checked_record(root, state, dep)
         if args.kind == "prompt-package":
             card_key = _record_key("design-card", character_id, variant_id)
-            if phased.enabled(state):
+            if asset_mode in {"ensemble", "speaking_extra"}:
+                card = ensemble.resolve(_runtime(), root, state, content, character_id, variant_id)
+                card_record = None
+            elif phased.enabled(state):
                 card = phased.resolve_basis(_runtime(), root, state, content, character_id, variant_id, args.stage)
                 card_record = None
             else:
                 card_record = _checked_record(root, state, card_key)
             anchors = {}
-            if modern:
+            if asset_mode in {"ensemble", "speaking_extra"}:
+                predecessors = ()
+            elif modern:
                 predecessors = image_predecessors(state, args.stage)
                 for anchor_stage in predecessors:
                     anchor_variant = "base" if anchor_stage in IDENTITY_STAGES else variant_id
@@ -1193,18 +1221,21 @@ def cmd_submit(args):
                        "Prompt package refers to a different design card version")
             ensure(content["anchor_images"] == anchors,
                    "Prompt package anchor image versions do not match the current approvals")
-            if not phased.enabled(state):
+            if asset_mode in {"ensemble", "speaking_extra"}:
+                (ensemble.validate_extra_prompt if asset_mode == "speaking_extra" else ensemble.validate_prompt)(_runtime(), content, card)
+            elif not phased.enabled(state):
                 card = read_json(root / state["records"][
                     _record_key("design-card", character_id, variant_id)]["path"])
-            validate_model_card_attire(content, card)
-            if args.stage == "expression" and card.get("morphology") in {"human", "humanoid"}:
+            if asset_mode not in {"ensemble", "speaking_extra"}:
+                validate_model_card_attire(content, card)
+            if asset_mode == "individual" and args.stage == "expression" and card.get("morphology") in {"human", "humanoid"}:
                 avatar_record = state["records"][_record_key(
                     "prompt-package", character_id, "base" if modern else variant_id, "avatar")]
                 validate_expression_attire_transition(
                     content, read_json(root / avatar_record["path"]))
-            if args.stage == "full_body" and (phased.enabled(state) or card.get("schema_version") in {"CharacterDesignCardV2.2", "CharacterDesignCardV2.4"}) and card.get("morphology") in {"human", "humanoid"}:
+            if asset_mode == "individual" and args.stage == "full_body" and (phased.enabled(state) or card.get("schema_version") in {"CharacterDesignCardV2.2", "CharacterDesignCardV2.4"}) and card.get("morphology") in {"human", "humanoid"}:
                 validate_full_body_prompt_proportions(content, card)
-            if args.stage == "execution":
+            if asset_mode == "individual" and args.stage == "execution":
                 ensure(content.get("morphology") == card["morphology"],
                        "Execution prompt morphology must match the approved design card")
                 if card["morphology"] != "human":
@@ -1238,6 +1269,8 @@ def cmd_submit(args):
 def cmd_approve_record(args):
     with locked_project(args.project_root) as (root, state):
         ensure(not state["pending_impact"], "Unresolved upstream impact")
+        if args.kind in {"ensemble-design", "extra-design"}:
+            return ensemble.approve(_runtime(), args, root, state)
         if args.kind in phased.KINDS:
             return phased.approve(_runtime(), args, root, state)
         ensure(args.kind != "prompt-package", "Prompt packages become ready after contract check")
@@ -1300,10 +1333,15 @@ def cmd_import_image(args):
                  if state.get("pipeline_version", 1) >= 2 else f"{args.stage}-{sha[:16]}")
         roster_item = next((x for x in state["roster"] if x["id"] == args.character_id), None)
         ensure(roster_item is not None, "Unknown character ID")
+        asset_mode = ensemble.mode(_runtime(), root, state, args.character_id)
+        if asset_mode in {"ensemble", "speaking_extra"}:
+            ensure(args.stage == "execution", "An extra has only one execution image per state")
         asset_name = safe_asset_label(roster_item["name"])
         state_name = safe_asset_label(variant_name(state, args.character_id, variant_id))
         stage_name = {"avatar": "头像", "expression": "九宫格表情", "full_body": "全身模卡",
                       "costume_design": "服饰设计", "execution": "执行资产"}[args.stage]
+        if args.stage == "execution" and asset_mode in {"ensemble", "speaking_extra"}:
+            stage_name = "群像执行资产" if asset_mode == "ensemble" else "独立执行资产"
         filename = f"{asset_name}_{state_name}_{stage_name}_{sha[:12]}{source.suffix.lower()}"
         target = root / "images" / args.character_id / variant_id / args.stage / filename
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -1368,8 +1406,12 @@ def cmd_approve_image(args):
             prompt_key = _record_key("prompt-package", image["character_id"], image["variant_id"], image["stage"])
             prompt = _checked_record(root, state, prompt_key)
             ensure(prompt["sha256"] == image["prompt_sha256"], "Image prompt version changed")
-            phased.resolve_basis(_runtime(), root, state, read_json(root / prompt["path"]), image["character_id"],
-                                 image["variant_id"], image["stage"], force_approved=True)
+            if ensemble.mode(_runtime(), root, state, image["character_id"]) in {"ensemble", "speaking_extra"}:
+                ensemble.resolve(_runtime(), root, state, read_json(root / prompt["path"]),
+                                 image["character_id"], image["variant_id"])
+            else:
+                phased.resolve_basis(_runtime(), root, state, read_json(root / prompt["path"]), image["character_id"],
+                                     image["variant_id"], image["stage"], force_approved=True)
         entry = state["reviews"].get(image["id"])
         ensure(entry, "Image must be reviewed first")
         ensure(digest(root / image["path"]) == image["sha256"],
@@ -1463,6 +1505,8 @@ def cmd_resolve_impact(args):
 def cmd_package(args):
     root = Path(args.project_root).expanduser().resolve()
     state = read_json(root / "project.json")
+    if ensemble.mode(_runtime(), root, state, args.character_id) in {"ensemble", "speaking_extra"}:
+        return ensemble.package(_runtime(), args, root, state)
     ensure(not state["pending_impact"], "Unresolved upstream impact")
     ident = args.character_id
     variant = args.variant_id or "base"
@@ -1628,7 +1672,7 @@ def build_parser():
     plan.add_argument("--stage", choices=STAGES)
     submit = sub.add_parser("submit", help="Register a structured design/prompt draft")
     submit.add_argument("--project-root", required=True)
-    submit.add_argument("--kind", choices=("visual-bible", "cast-plan", "design-card", "prompt-package", *sorted(phased.KINDS)), required=True)
+    submit.add_argument("--kind", choices=("visual-bible", "cast-plan", "design-card", "ensemble-design", "extra-design", "prompt-package", *sorted(phased.KINDS)), required=True)
     submit.add_argument("--file", required=True)
     submit.add_argument("--character-id")
     submit.add_argument("--variant-id", default="base")
@@ -1636,7 +1680,7 @@ def build_parser():
     submit.add_argument("--scope", choices=sorted(phased.SCOPES))
     approve = sub.add_parser("approve-record")
     approve.add_argument("--project-root", required=True)
-    approve.add_argument("--kind", choices=("visual-bible", "cast-plan", "design-card", *sorted(phased.KINDS)), required=True)
+    approve.add_argument("--kind", choices=("visual-bible", "cast-plan", "design-card", "ensemble-design", "extra-design", *sorted(phased.KINDS)), required=True)
     approve.add_argument("--character-id")
     approve.add_argument("--variant-id", default="base")
     approve.add_argument("--operator", required=True)

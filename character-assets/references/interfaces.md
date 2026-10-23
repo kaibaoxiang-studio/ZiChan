@@ -1,4 +1,10 @@
-# 接口与文件契约 v0.2.5
+# 接口与文件契约 v0.2.6.1
+
+## 群演单图扩展
+
+`plan.asset_mode=speaking_extra` 的有台词群演先获批 `SpeakingExtraDesignV1`，字段和命令见[群演单图合同](group-ensemble.md)。每状态只用一张 9:16 四格 `execution` 图，`design_basis.records` 只绑定 `extra-design:角色ID:状态ID`，`anchor_images:{}`；审图批准后打包 `CharacterSpeakingExtraPackV1`。头像、九宫格、模卡和穿衣圣经不作前置。
+
+`pipeline_version:3` 且 `plan.asset_mode=ensemble` 时，先提交并批准 `GroupEnsembleDesignV1`，字段和命令见[群像单图合同](group-ensemble.md)。正式提示词仍用 `CharacterPromptPackageV1` 的 `stage:execution`，但 `morphology:group`、`anchor_images:{}`、`layout.type:ensemble_lineup`、`layout.single_canvas:true`、`layout.full_body:true`、逐人 `ordered_slots`，`design_basis.records` 只绑定对应 `ensemble-design:角色ID:状态ID`。多人横版比例按人数与辨识度决定，单人 9:16。审图批准一次后打包 `CharacterEnsemblePackV1`。下文身份图前置仅适用于 `asset_mode=individual`；有台词群演沿用四格布局，无台词群像使用完整全身同画布布局。
 
 ## v0.2.6 / pipeline_version 3 接口覆盖
 

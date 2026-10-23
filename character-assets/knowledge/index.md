@@ -1,8 +1,10 @@
-# 角色资产知识索引 v0.2.6
+# 角色资产知识索引 v0.2.6.1
 
-新项目服饰阶段必须调用 `$character-costume-designer`，先读 `references/costume-designer.md`，再按当前设计问题读 `references/knowledge/character-costume-designer/costume-deep.md`。它从人物总控已验证的全文理解与方向建立穿衣风格圣经和逐状态文字设计，统筹款式、剪裁、配色、材质、饰品五专项；前四项须有实际部位成果。头像身份阶段可用 `references/knowledge/character-face-design/original-face.md` 固定原创骨相与比例；服饰状态妆造用 `references/knowledge/character-costume-designer/state-makeup.md`，不改变已批准的脸。三份新增知识快照分别溯源用户 ZIP 与两份 DOCX，原文件成员哈希见 `knowledge/archive-manifest.json`。
+无台词群演／群像先由 `plan.asset_mode=ensemble` 路由 `$character-ensemble-designer`，加载 `references/group-ensemble.md`：剧本明确人数照数、未明确标代表人数；按获批世界美术基准做一张全身同画布执行图。有指定台词者走 `speaking_extra`，每状态只做一张独立 9:16 四格执行图。下文服饰设计师与四图链路只适用于常规 `individual`。
 
-`pipeline_version:3` 采用头像、九宫格、全身模卡、逐状态 9:16 四格执行图四类图片。旧 `costume_design` 图仅适用 v2 项目。
+新项目独立人物服饰阶段必须调用 `$character-costume-designer`，先读 `references/costume-designer.md`，再按当前设计问题读 `references/knowledge/character-costume-designer/costume-deep.md`。它从人物总控已验证的全文理解与方向建立穿衣风格圣经和逐状态文字设计，统筹款式、剪裁、配色、材质、饰品五专项；前四项须有实际部位成果。头像身份阶段可用 `references/knowledge/character-face-design/original-face.md` 固定原创骨相与比例；服饰状态妆造用 `references/knowledge/character-costume-designer/state-makeup.md`，不改变已批准的脸。三份新增知识快照分别溯源用户 ZIP 与两份 DOCX，原文件成员哈希见 `knowledge/archive-manifest.json`。
+
+`pipeline_version:3` 的独立人物采用头像、九宫格、全身模卡、逐状态 9:16 四格执行图四类图片；无台词群像每状态一张全身单图。旧 `costume_design` 图仅适用 v2 项目。
 
 先读 [人物总控](../references/director-understanding.md)：全文理解人物与故事、定位、解析细节、形成设计意图后，再决定 Skill 执行和知识加载。先读用户全文或复用有效context，再按当前任务读取必要知识。references是目录，不是全读清单；可按问题读相关知识全文，但不机械全读，也不为了省时省略人物理解。knowledge/reference 是方法，当前人物事实与已确认决定优先；本次不新增知识采集工程。
 
@@ -11,6 +13,7 @@
 | 全文阅读、人物理解与定位 | `references/director-understanding.md`、`references/evidence.md` | 连续阅读全文与覆盖复用；跨场言行、评价可靠性、关系、弧线与观众信息；理解后再路由 |
 | 默认阶段深化与首图快看 | `references/phased-design.md` | ScriptContext、方向稿、身份/身体/服饰快照；冻结预览、同图转正、机械合成与旧项目兼容 |
 | 项目启动、全员规划 | `references/evidence.md`、`references/character-design.md`、`references/differentiation-framework.md`、`references/knowledge/character-cast-differentiation/ensemble.md` | 建立第 -1 阶段视觉基准、比较组与五轴矩阵；旧 Skill 的占用表方法按需加载 `legacy-visual.md` |
+| 无台词群演群像 | `$character-ensemble-designer`、`references/group-ensemble.md`、`references/differentiation-framework.md` | 核人数与同组差异，按项目获批风格设计一张全身同画布执行图 |
 | 单张或批量产出、状态与技能路由 | `references/routing-and-integration.md`、`references/workflow.md` | 规格化需求，用 CLI plan 列阻断，按阶段和状态交接 |
 | 环境、资源、科技改变外观 | `references/knowledge/character-world-appearance-design/world-appearance.md` | 区分实际接触的机制推演与世界相容的主动创作选择；没外观原文不等于跳过设计，避免族群刻板映射 |
 | 面部标记、妆容或状态变化 | `references/knowledge/character-face-decoration-design/face-decoration.md` | 稳定痕迹、主动施加、临时效果分层，逐项写叙事与连续性 |

@@ -2,7 +2,9 @@
 
 开宝箱工作室的资产插件仓库，当前交付[角色资产插件](character-assets/README.md)、[场景资产插件](scene-assets/README.md)和[道具资产插件](prop-assets/README.md)。各插件可独立使用，角色设计总控为未来的跨资产美术统筹保留设计简报接口。
 
-## 角色插件 v0.2.6
+## 角色插件 v0.2.6.1
+
+**0.2.6.1 群像修补**：新项目按结构化剧本的指定台词判定路线。有指定台词的群演每状态只交一张独立 9:16 四格执行资产，跳过前三张身份图；无台词群演／群像每状态仅交一张同画布完整全身群像图。明确人数照数制作，未写人数按构图与辨识度选择代表人数并标注；多人横向画幅按人数选择。项目获批视觉基准决定画风，参考 DOCX 只提供群像编排形式。
 
 **0.2.6** 增加必经的 `$character-costume-designer`：从全文人物理解和项目美术基准建立每角色穿衣风格圣经，再统筹款式、剪裁、配色、材质与饰品五专项形成逐状态具体服饰。剧本服装类别是约束，服饰设计要交前背结构、衣层连接、活动余量、材料行为、人物弧线与镜头焦点。两份新教程加强原创面部结构和逐状态妆造；保留 v0.2.5.1 的临时会话隔离。
 
@@ -12,9 +14,11 @@
 
 总控按任务选择现有 13 个专项：常规项同轮执行对应规范，复杂结构或跨专业冲突独立会诊，并保存真实参与方式和设计成果。默认一套连贯推荐，重要分歧再给备选。用户先集中确认人物方向，再审当前阶段设计；要求“先看一版”时可先交首图候选，实际审图、设计对齐并确认后，同一张图可以转正继续使用。
 
-新项目按 **头像 3:4 → 九宫格表情 → 全身模卡 9:16 → 每状态一张 9:16 竖版四格执行图** 推进。服饰设计先以文字快照批准，再由同一张执行图完成图像审查与批准。身份、身体、穿衣风格圣经和各状态服饰分别记录版本；后续补服装不会自动推翻头像。人物设计齐备后合成完整设计卡并保留来源。头像允许头肩至上胸取景，上胸入画使用对应白色中性背心；全身穿中性背心短裤、赤脚；服饰与执行图使用正式造型。图片按资产名、状态、阶段和短 SHA 命名。
+新项目的**常规人物**按 **头像 3:4 → 九宫格表情 → 全身模卡 9:16 → 每状态一张 9:16 竖版四格执行图** 推进。服饰设计先以文字快照批准，再由同一张执行图完成图像审查与批准。身份、身体、穿衣风格圣经和各状态服饰分别记录版本；后续补服装不会自动推翻头像。人物设计齐备后合成完整设计卡并保留来源。头像允许头肩至上胸取景，上胸入画使用对应白色中性背心；全身穿中性背心短裤、赤脚；服饰与执行图使用正式造型。图片按资产名、状态、阶段和短 SHA 命名。
 
-- [下载 character-assets-0.2.6.zip](dist/character-assets-0.2.6.zip)
+- [下载 character-assets-0.2.6.1.zip](dist/character-assets-0.2.6.1.zip)
+- [群演群像单图合同](character-assets/references/group-ensemble.md)
+- [v0.2.6.1 群演单图验证记录](research/v0.2.6.1-validation/README.md)
 - [人物理解与设计统筹](character-assets/references/director-understanding.md) · [分阶段设计与候选转正](character-assets/references/phased-design.md) · [接口](character-assets/references/interfaces.md)
 - [v0.2.6 真实调用与回归验证记录](research/v0.2.6-validation/README.md)
 
@@ -36,13 +40,20 @@ $character-design 阅读这份完整剧本，理解并定位其中的 CHR-001。
 flowchart TD
     A["剧本全文与资产表"] --> B["ScriptContextV1：阅读全文并跨场理解"]
     B --> C["人物总控：定位人物、设计意图、专项路由"]
-    C --> D["身份快照 → 头像 3:4 → 九宫格"]
+    C --> X{"资产模式?"}
+    X -- "常规人物" --> D["身份快照 → 头像 3:4 → 九宫格"]
     D --> E["身体快照 → 全身模卡 9:16"]
     E --> F["服饰设计师：CostumeStyleBibleV1"]
     F --> G["逐状态款式／剪裁／配色／材质必做，饰品可有理由不用"]
     G --> H["逐状态服饰文字快照批准 → 合成设计卡"]
     H --> I["每状态一张 9:16 竖版四格执行图"]
     I --> J["实际审图 → 操作者批准一次 → 打包"]
+    X -- "无台词群像" --> Q["群像设计师：人数、排位、群内差异、获批风格"]
+    Q --> R["每状态一张完整全身群像图"]
+    R --> J
+    X -- "有台词群演" --> T["SpeakingExtraDesignV1：台词与完整造型"]
+    T --> U["每状态一张独立 9:16 四格执行图"]
+    U --> J
 ```
 
 新项目为 `pipeline_version:3`，旧 v1/v2 项目按原合同读取。可显式迁移没有已批准服饰或执行图的 v2 项目，保留已批准身份图。
@@ -60,6 +71,18 @@ sequenceDiagram
     participant G as 外部生图工具
     U->>P: 提供剧本、资产表与设计目标
     P->>D: 全文理解、人物定位与视觉意图
+    P->>C: plan 判定 individual、speaking_extra 或 ensemble
+    alt 无指定台词群像
+        P->>C: 提交并批准 GroupEnsembleDesignV1
+        P->>G: 每状态一张全身群像执行图提示词
+        G-->>P: 一张群像图
+        P->>C: 审图、批准、打包 CharacterEnsemblePackV1
+    else 有台词群演
+        P->>C: 提交并批准 SpeakingExtraDesignV1
+        P->>G: 每状态一张独立 9:16 四格执行图提示词
+        G-->>P: 一张执行图
+        P->>C: 审图、批准、打包 CharacterSpeakingExtraPackV1
+    else 常规人物
     D-->>U: 身份方向与阶段设计
     U->>C: 确认身份与身体快照
     P->>G: 头像、九宫格、全身模卡提示词
@@ -75,6 +98,7 @@ sequenceDiagram
     P->>C: 实际审图并记录结果
     U->>C: 批准本状态唯一服饰图
     C-->>U: 打包 CharacterAssetPackV3
+    end
 ```
 
 ### 资产数据流
@@ -83,6 +107,8 @@ sequenceDiagram
 flowchart LR
     A["剧本全文与来源 SHA"] --> B["ScriptContextV1"]
     B --> C["DesignDirectionBriefV1"]
+    B --> Q["无台词群像 GroupEnsembleDesignV1"]
+    B --> T["有台词群演 SpeakingExtraDesignV1"]
     D["视觉基准、群像比较、资产状态"] --> C
     C --> E["身份与身体快照"]
     C --> F["CostumeStyleBibleV1"]
@@ -98,6 +124,12 @@ flowchart LR
     L --> M["审图报告与批准"]
     M --> N["CharacterAssetPackV3"]
     I --> N
+    D --> Q
+    Q --> R["一张全身群像 execution 图"]
+    R --> S["审图批准 → CharacterEnsemblePackV1"]
+    D --> T
+    T --> U["一张 9:16 四格 execution 图"]
+    U --> V["审图批准 → CharacterSpeakingExtraPackV1"]
 ```
 
 ### 历史版本
@@ -120,4 +152,4 @@ flowchart LR
 
 ## 本地优先与团队交接
 
-角色插件当前版本为 **v0.2.6**，21 项能力包含人物设计总控、群像差异化与 13 个专项。新项目采用分阶段设计；旧项目保留原有整卡、图像阶段和批准记录。团队可从私有 `kaibaoxiang-studio/ZiChan` 下载完整插件目录或安装 ZIP。设计质量与实际回图按阶段核查，验证材料见[版本验证记录](research/v0.2.6-validation/README.md)。
+角色插件当前版本为 **v0.2.6.1**，22 项能力包含人物设计总控、群像差异化、群演单图设计师与 13 个专项。新项目按资产模式分流；旧项目保留原有整卡、图像阶段和批准记录。团队可从私有 `kaibaoxiang-studio/ZiChan` 下载完整插件目录或安装 ZIP。结构与真实文字调用证据见[本版验证记录](research/v0.2.6.1-validation/README.md)；图像审美仍需正式回图核查。

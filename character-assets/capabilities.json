@@ -146,7 +146,8 @@
         "references/specialist-contract.md",
         "references/design-detail-standard.md",
         "references/render-texture-standard.md",
-        "references/feature-focus-and-body-form.md"
+        "references/feature-focus-and-body-form.md",
+        "references/group-ensemble.md"
       ],
       "explicit_only": true
     },
@@ -593,6 +594,7 @@
         "references/model-card-baseline.md",
         "references/expression.md",
         "references/execution-sheet.md",
+        "references/group-ensemble.md",
         "references/costume-design-stage.md",
         "references/interfaces.md",
         "references/phased-design.md",
@@ -962,6 +964,111 @@
         "references/knowledge/character-cast-differentiation/ensemble.md",
         "references/knowledge/character-cast-differentiation/legacy-visual.md",
         "references/knowledge/character-cast-differentiation/anti-stereotype-texture.md"
+      ],
+      "explicit_only": true
+    },
+    {
+      "id": "character-ensemble-designer",
+      "skill_name": "character-ensemble-designer",
+      "description": "群演单图设计师：有台词单人执行图与无台词群像图",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "project_root": {
+            "type": "string",
+            "minLength": 1
+          },
+          "character_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "variant_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "request": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "script_context_path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "direction_brief_path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "scope": {
+            "type": "string",
+            "minLength": 1
+          },
+          "review_mode": {
+            "type": "string",
+            "enum": [
+              "direction_first",
+              "image_first"
+            ]
+          },
+          "execution_mode": {
+            "type": "string",
+            "enum": [
+              "inline",
+              "independent"
+            ]
+          }
+        },
+        "required": [
+          "request"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "artifact_path": {
+            "type": "string",
+            "description": "Main output path relative to artifact_dir, for example design.md; never an absolute path."
+          },
+          "summary": {
+            "type": "string"
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "status",
+          "artifact_path",
+          "summary",
+          "questions"
+        ],
+        "additionalProperties": false
+      },
+      "execution": {
+        "kind": "agent",
+        "access": "workspace-write",
+        "network": false
+      },
+      "knowledge_refs": [
+        "knowledge/index.md",
+        "references/group-ensemble.md",
+        "references/differentiation-framework.md",
+        "references/prompting.md",
+        "references/review.md",
+        "references/interfaces.md"
       ],
       "explicit_only": true
     },
