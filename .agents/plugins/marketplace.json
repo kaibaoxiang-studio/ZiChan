@@ -1,0 +1,10 @@
+{
+  "name": "scene-assets-local",
+  "interface": {"displayName": "场景资产 Local"},
+  "plugins": [{
+    "name": "scene-assets",
+    "source": {"source": "local", "path": "./scene-assets"},
+    "policy": {"installation": "AVAILABLE", "authentication": "ON_INSTALL"},
+    "category": "Productivity"
+  }]
+}

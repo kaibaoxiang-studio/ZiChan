@@ -123,6 +123,8 @@ flowchart LR
 - `creator-src/`：角色插件的 Harness Creator 蓝图生成器与自编业务资源；角色插件后续更新先改这里，再审查同步到插件。道具插件直接维护 `prop-assets/`。
 - `scene-assets/`：场景资产插件 v0.1.0，当前由 `skills/sence-prompts/` 替换旧实现，提供静态场景设计、光影及反打提示词；使用与替换边界见其 README。
 - `scene-creator-src/`：旧场景 Harness 实现的历史源码，不再生成当前插件；当前直接维护 `scene-assets/skills/sence-prompts/`。
+- `scene-plugin-maintenance/`：当前场景插件的可复现打包、26 项测试及维护交接 harness；不进入插件安装包。
+- `.agents/plugins/marketplace.json`：场景插件本地市场入口，可在仓库根目录添加市场并安装 `scene-assets@scene-assets-local`；详见场景插件 README。
 - `dist/`：可下载的安装 ZIP。
 - `research/15-视觉故事待接入知识/`：视频提示词未来能力的候选规则，目前不改变已安装插件。
 

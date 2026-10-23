@@ -6,6 +6,16 @@
 
 ## 使用与安装
 
+仓库根目录现已提供本地市场入口，可在完整 checkout 根目录直接安装：
+
+```sh
+codex plugin marketplace add "$PWD"
+codex plugin add scene-assets@scene-assets-local
+codex plugin list
+```
+
+添加市场会记录其来源，安装会写入 Codex 插件配置和缓存；若已有同名市场先核对来源，不自动覆盖。保留注册的本地目录。原个人 `sence-prompts` skill 不必删除；如选择器出现同名条目，选择场景资产插件下的技能。
+
 插件安装保留完整 `scene-assets/`。使用仓库 [本地市场安装包](../dist/scene-assets-local-marketplace.zip)时，解压后沿用现有安装方式：
 
 ```sh
@@ -20,6 +30,19 @@ $sence-prompts 根据这份完整资产表与对应剧本，为指定场景生�
 ```
 
 已有可靠图／完整文字稿时可直接进入打光、反打或局部修改，不必重交全表；依赖原图的编辑任务仍须提供实际可访问图像。验证方法见 [验证规则](skills/sence-prompts/references/verification.md)。文件与文字检查不代表真实出图、像素保留或空间实测通过。
+
+## 构建与验证
+
+仓库根目录运行：
+
+```sh
+python3 -B scene-plugin-maintenance/package_plugin.py
+./scene-plugin-maintenance/init.sh
+```
+
+构建只替换 `dist/` 中两个场景 ZIP；维护 harness 不进入安装包。版本按用户要求保持 `0.1.0`，构建内容以 Git 提交及 ZIP SHA256 区分。
+2026-10-23：26 项单元测试通过；260 个技能文件、205 本地链接及 52 锚点通过；本地 CLI 安装显示 installed, enabled，安装缓存与源一致。新会话实际调用及真实场景出图尚未验证。
+详细边界见 [维护说明](../scene-plugin-maintenance/README.md)。
 
 ## 替换边界
 
