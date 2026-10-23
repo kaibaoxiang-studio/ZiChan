@@ -1,157 +1,99 @@
-# ZiChan · 资产插件
+# ZiChan · 影视资产插件
 
-开宝箱工作室的资产插件仓库，当前交付[角色资产插件](character-assets/README.md)、[场景资产插件](scene-assets/README.md)和[道具资产插件](prop-assets/README.md)。各插件可独立使用，角色设计总控为未来的跨资产美术统筹保留设计简报接口。
+ZiChan 收录三项平行、可独立安装的资产插件。剧本与资产表是共同依据；各插件分别负责人物、道具或场景，不会自动调用另一个插件，也不会自动生成图片。设计、提示词、回图审查和交付以各插件自己的规则为准。
 
-## 角色插件 v0.2.6.2
+| 插件 | 当前版本 | 维护来源 | 主要交付 |
+| --- | --- | --- | --- |
+| [角色资产插件](character-assets/README.md) | **v0.2.6.2** | 项目维护者 | 全文人物理解、角色设计、分阶段提示词、回图审查、逐状态资产包与有设定图资产表规则 |
+| [道具资产插件](prop-assets/README.md) | **v0.2.0** | [18571635839-a11y](https://github.com/18571635839-a11y) | 道具概念与材质、配色、纹样、轮廓专项；逐件设计及完整 Prompt 表 |
+| [场景资产插件](scene-assets/README.md) | **v1.0.0** | [runningg0301-prog](https://github.com/runningg0301-prog) | 静态场景设计、光影氛围与色卡、反打／多角度及局部修改提示词 |
 
-**0.2.6.2 最终资产表交付**：完成角色资产包后，还要交付按角色和状态映射的“有设定图资产表”。图片须真正嵌入单元格，浮在单元格上的 drawing 图片不算完成；保留上游数据并重开核验。测试图只能进入标明未批准的预览表。见[规则](character-assets/references/final-asset-table.md)。
+版本以各目录的 `.codex-plugin/plugin.json` 为准。角色插件另有 `plugin.json` 与项目 CLI；场景插件内置的 Skill 名称保留原拼写 `$sence-prompts`，其方法内容对应[作者上传的 v1.0.0 分支](https://github.com/kaibaoxiang-studio/ZiChan/tree/feat/sence-prompts/sence-prompts)。道具插件入口为 `$prop-concept-design`。
 
-**0.2.6.1 群像修补**：新项目按结构化剧本的指定台词判定路线。有指定台词的群演每状态只交一张独立 9:16 四格执行资产，跳过前三张身份图；无台词群演／群像每状态仅交一张同画布完整全身群像图。明确人数照数制作，未写人数按构图与辨识度选择代表人数并标注；多人横向画幅按人数选择。项目获批视觉基准决定画风，参考 DOCX 只提供群像编排形式。
-
-**0.2.6** 增加必经的 `$character-costume-designer`：从全文人物理解和项目美术基准建立每角色穿衣风格圣经，再统筹款式、剪裁、配色、材质与饰品五专项形成逐状态具体服饰。剧本服装类别是约束，服饰设计要交前背结构、衣层连接、活动余量、材料行为、人物弧线与镜头焦点。两份新教程加强原创面部结构和逐状态妆造；保留 v0.2.5.1 的临时会话隔离。
-
-**阅读全文 → 理解和定位人物 → 解析设计相关细节 → 形成设计意图 → 路由 Skill 或 knowledge/reference → 整合为具体设计。**
-
-人物设计总控 `$character-design` 从全文中的行动、台词、关系、矛盾、变化和剧情作用理解人物，区分人物自述、他人评价与实际行为。全剧分析记录阅读覆盖并按来源版本复用；专项收到与任务有关的人物语境。剧本未写明的外观由总控主动设计，标明事实、推导与创作选择；普通痣、淡雀斑和轻微不对称可随整稿确认，重大身份或剧情新设定单独提出。
-
-总控按任务选择现有 13 个专项：常规项同轮执行对应规范，复杂结构或跨专业冲突独立会诊，并保存真实参与方式和设计成果。默认一套连贯推荐，重要分歧再给备选。用户先集中确认人物方向，再审当前阶段设计；要求“先看一版”时可先交首图候选，实际审图、设计对齐并确认后，同一张图可以转正继续使用。
-
-新项目的**常规人物**按 **头像 3:4 → 九宫格表情 → 全身模卡 9:16 → 每状态一张 9:16 竖版四格执行图** 推进。服饰设计先以文字快照批准，再由同一张执行图完成图像审查与批准。身份、身体、穿衣风格圣经和各状态服饰分别记录版本；后续补服装不会自动推翻头像。人物设计齐备后合成完整设计卡并保留来源。头像允许头肩至上胸取景，上胸入画使用对应白色中性背心；全身穿中性背心短裤、赤脚；服饰与执行图使用正式造型。图片按资产名、状态、阶段和短 SHA 命名。
-
-- [下载 character-assets-0.2.6.2.zip](dist/character-assets-0.2.6.2.zip)
-- [群演群像单图合同](character-assets/references/group-ensemble.md)
-- [v0.2.6.1 群演单图验证记录](research/v0.2.6.1-validation/README.md)
-- [人物理解与设计统筹](character-assets/references/director-understanding.md) · [分阶段设计与候选转正](character-assets/references/phased-design.md) · [接口](character-assets/references/interfaces.md)
-- [v0.2.6 真实调用与回归验证记录](research/v0.2.6-validation/README.md)
-
-### 使用入口
-
-完整资产项目提供标准剧本与资产表，场记可选；支持 JSON、Markdown、Excel 和顶层 `AssetProjectSnapshotV1`。只有剧本或人物小传时，也可单独调用人物设计总控，先得到人物理解、设计方向和专项任务，正式建资产时再映射角色 ID。
+## 仓库结构
 
 ```text
-$character-design 阅读这份完整剧本，理解并定位其中的 CHR-001。
-基于人物在全文中的言行、关系和变化给一套设计推荐，主动补足外观留白。
-先给人物定位和方向；常规项执行对应专项规范，复杂冲突独立会诊。
+ZiChan/
+├── character-assets/   角色资产插件 v0.2.6.2
+├── prop-assets/        道具资产插件 v0.2.0
+├── scene-assets/       场景资产插件 v1.0.0
+├── .agents/            三插件本地市场清单
+├── .gitignore
+└── README.md
 ```
 
-插件编写提示词，操作者在外部工具生成并回传图片。场景插件当前内置 `$sence-prompts`，交付静态场景设计、光影氛围／色卡、反打与局部修改提示词，不再提供旧 Harness 项目 CLI；道具插件交付逐件设计与完整提示词表，包含材质、配色、纹样符号、轮廓比例四个专项。
+主分支只保留当前插件。旧安装包、历史构建源码与验证研究可从[整理前提交](https://github.com/kaibaoxiang-studio/ZiChan/tree/60e04bf1b45763bacb88ffbdc2bd6f5a96666bed)和 Git 历史取回，不作为当前安装入口。三个插件各自的 README 是能力、输入和交付边界的详细说明。
 
-### 工作流
+## 安装与使用
+
+在本机克隆仓库，并从仓库根目录注册统一的本地市场；按需要安装其中一项或多项：
+
+```sh
+git clone https://github.com/kaibaoxiang-studio/ZiChan.git
+cd ZiChan
+codex plugin marketplace add "$PWD"
+codex plugin add character-assets@zichan-suite-local
+codex plugin add prop-assets@zichan-suite-local
+codex plugin add scene-assets@zichan-suite-local
+```
+
+若已有个人市场安装，先核对当前插件的市场和版本，再决定是否切换到统一市场。插件目录应完整保留，不能只复制单个 `SKILL.md`；尤其场景插件的知识、脚本和测试位于 `scene-assets/skills/sence-prompts/` 内。
+
+常用入口示例：
+
+```text
+$character-assets 根据完整剧本和角色资产表建立人物视觉资产项目。
+$prop-concept-design 根据剧本或道具资产表制作逐件设计与完整 Prompt 表。
+$sence-prompts 根据场景资产表和剧本设计静态场景提示词。
+```
+
+三项插件对来源事实与设计提案分别记录。需要同一角色、道具出现在场景中时，向场景插件提供已经确认的对应资产作为参考；它不会替另外两项插件重新批准设计。图片生成在外部工具进行，回图的实际审查和批准遵循各插件文档。
+
+## 工作流
 
 ```mermaid
-flowchart TD
-    A["剧本全文与资产表"] --> B["ScriptContextV1：阅读全文并跨场理解"]
-    B --> C["人物总控：定位人物、设计意图、专项路由"]
-    C --> X{"资产模式?"}
-    X -- "常规人物" --> D["身份快照 → 头像 3:4 → 九宫格"]
-    D --> E["身体快照 → 全身模卡 9:16"]
-    E --> F["服饰设计师：CostumeStyleBibleV1"]
-    F --> G["逐状态款式／剪裁／配色／材质必做，饰品可有理由不用"]
-    G --> H["逐状态服饰文字快照批准 → 合成设计卡"]
-    H --> I["每状态一张 9:16 竖版四格执行图"]
-    I --> J["实际审图 → 操作者批准一次 → 打包"]
-    X -- "无台词群像" --> Q["群像设计师：人数、排位、群内差异、获批风格"]
-    Q --> R["每状态一张完整全身群像图"]
-    R --> J
-    X -- "有台词群演" --> T["SpeakingExtraDesignV1：台词与完整造型"]
-    T --> U["每状态一张独立 9:16 四格执行图"]
-    U --> J
+flowchart LR
+    A["标准剧本、资产表与项目美术方向"] --> B{"选择资产领域"}
+    B --> C["角色：人物理解与分阶段设计"]
+    B --> D["道具：逐件概念与四专项设计"]
+    B --> E["场景：空间、光影与多角度设计"]
+    C --> F["各插件交付提示词或 Prompt 表"]
+    D --> F
+    E --> F
+    F --> G["操作者在外部工具出图"]
+    G --> H["按对应插件审图、修订与批准"]
+    H --> I["角色资产包／道具交付索引／场景结果"]
 ```
 
-新项目为 `pipeline_version:3`，旧 v1/v2 项目按原合同读取。可显式迁移没有已批准服饰或执行图的 v2 项目，保留已批准身份图。
-
-### 交互时序
+## 交互时序
 
 ```mermaid
 sequenceDiagram
     participant U as 操作者
-    participant P as 资产主控
-    participant D as 人物总控
-    participant W as 服饰设计师
-    participant S as 五服饰专项
-    participant C as 项目CLI
-    participant G as 外部生图工具
-    U->>P: 提供剧本、资产表与设计目标
-    P->>D: 全文理解、人物定位与视觉意图
-    P->>C: plan 判定 individual、speaking_extra 或 ensemble
-    alt 无指定台词群像
-        P->>C: 提交并批准 GroupEnsembleDesignV1
-        P->>G: 每状态一张全身群像执行图提示词
-        G-->>P: 一张群像图
-        P->>C: 审图、批准、打包 CharacterEnsemblePackV1
-    else 有台词群演
-        P->>C: 提交并批准 SpeakingExtraDesignV1
-        P->>G: 每状态一张独立 9:16 四格执行图提示词
-        G-->>P: 一张执行图
-        P->>C: 审图、批准、打包 CharacterSpeakingExtraPackV1
-    else 常规人物
-    D-->>U: 身份方向与阶段设计
-    U->>C: 确认身份与身体快照
-    P->>G: 头像、九宫格、全身模卡提示词
-    G-->>P: 回图逐张审查与批准
-    D->>W: 传人物方向、身份身体与状态证据
-    W->>S: 款式、剪裁、配色、材质、饰品任务
-    S-->>W: 具体部位成果与知识依据
-    W-->>U: 穿衣风格圣经与逐状态服饰文字稿
-    U->>C: 审阅并批准文字设计
-    C->>C: 合成状态设计卡
-    P->>G: 每状态一张 9:16 四格执行图提示词
-    G-->>P: 回图
-    P->>C: 实际审图并记录结果
-    U->>C: 批准本状态唯一服饰图
-    C-->>U: 打包 CharacterAssetPackV3
-    end
+    participant P as 对应资产插件
+    participant X as 外部出图工具
+    U->>P: 提供剧本、资产表及当前任务
+    P-->>U: 有依据的设计稿与待确认的关键选择
+    U->>P: 确认当前设计
+    P-->>U: 当前资产的完整提示词
+    U->>X: 使用提示词出图
+    X-->>U: 返回图片
+    U->>P: 回传图片及修改意见
+    P-->>U: 实际审查、修订或交付结果
 ```
 
-### 资产数据流
+## 数据流
 
 ```mermaid
-flowchart LR
-    A["剧本全文与来源 SHA"] --> B["ScriptContextV1"]
-    B --> C["DesignDirectionBriefV1"]
-    B --> Q["无台词群像 GroupEnsembleDesignV1"]
-    B --> T["有台词群演 SpeakingExtraDesignV1"]
-    D["视觉基准、群像比较、资产状态"] --> C
-    C --> E["身份与身体快照"]
-    C --> F["CostumeStyleBibleV1"]
-    E --> F
-    F --> G["各状态 CharacterStageDesignV1 costume"]
-    H["五专项应用结果与知识快照"] --> G
-    G --> I["机械合成 CharacterDesignCardV2.5"]
-    E --> I
-    E --> J["头像／九宫格／全身模卡"]
-    I --> K["design_basis：当前圣经＋状态快照＋设计卡"]
-    J --> K
-    K --> L["每状态一张 9:16 四格 execution 图片"]
-    L --> M["审图报告与批准"]
-    M --> N["CharacterAssetPackV3"]
-    I --> N
-    D --> Q
-    Q --> R["一张全身群像 execution 图"]
-    R --> S["审图批准 → CharacterEnsemblePackV1"]
-    D --> T
-    T --> U["一张 9:16 四格 execution 图"]
-    U --> V["审图批准 → CharacterSpeakingExtraPackV1"]
+flowchart TD
+    S["剧本事实与资产 ID"] --> R["角色插件：人物依据、状态与批准记录"]
+    S --> P["道具插件：逐件依据、设计与 Prompt 表"]
+    S --> C["场景插件：空间依据、静帧提示词与色卡"]
+    R --> RR["角色资产包与有设定图资产表"]
+    P --> PP["道具设计与交付索引"]
+    C --> CC["场景提示词／回图审查结果"]
+    RR -.->|已批准资产可作参考| C
+    PP -.->|已批准资产可作参考| C
 ```
 
-### 历史版本
-
-[v0.2.5 安装包](dist/character-assets-0.2.5.zip) · [v0.2.4.1 安装包](dist/character-assets-0.2.4.1.zip) · [v0.2.3 安装包](dist/character-assets-0.2.3.zip)。旧版设计与批准记录保持可读；升级不自动重做已批准角色。
-
-## 目录
-
-- `character-assets/`：可直接安装的独立插件，包含 Skills、知识快照、Python Harness 和本地项目 CLI。
-- `prop-assets/`：道具资产独立插件，包含主技能、四个专项技能和精炼参考，无生图 API 或 Harness 依赖。
-- `creator-src/`：角色插件的 Harness Creator 蓝图生成器与自编业务资源；角色插件后续更新先改这里，再审查同步到插件。道具插件直接维护 `prop-assets/`。
-- `scene-assets/`：场景资产插件 v0.1.0，当前由 `skills/sence-prompts/` 替换旧实现，提供静态场景设计、光影及反打提示词；使用与替换边界见其 README。
-- `scene-creator-src/`：旧场景 Harness 实现的历史源码，不再生成当前插件；当前直接维护 `scene-assets/skills/sence-prompts/`。
-- `scene-plugin-maintenance/`：当前场景插件的可复现打包、26 项测试及维护交接 harness；不进入插件安装包。
-- `.agents/plugins/marketplace.json`：场景插件本地市场入口，可在仓库根目录添加市场并安装 `scene-assets@scene-assets-local`；详见场景插件 README。
-- `dist/`：可下载的安装 ZIP。
-- `research/15-视觉故事待接入知识/`：视频提示词未来能力的候选规则，目前不改变已安装插件。
-
-原始课程 DOCX、ZIP、RAR、剧本与人物图片不随仓库发布。`character-assets/knowledge/index.md` 按使用情景定位精炼 reference，`knowledge/source-register.json` 和 `sources.lock.json` 保留来源版本与改写记录。历史服饰条目仅用于寻找线索，具体准确性需要另行查证。
-
-## 本地优先与团队交接
-
-角色插件当前版本为 **v0.2.6.2**，22 项能力包含人物设计总控、群像差异化、群演单图设计师与 13 个专项。新项目按资产模式分流；旧项目保留原有整卡、图像阶段和批准记录。团队可从私有 `kaibaoxiang-studio/ZiChan` 下载完整插件目录或安装 ZIP。结构与真实文字调用证据见[v0.2.6.1 验证记录](research/v0.2.6.1-validation/README.md)；本次增加的最终工作簿规则按[交付合同](character-assets/references/final-asset-table.md)核验。
+工作流表示协作顺序，不代表仓库已经提供跨插件自动调度或统一审批数据库。各插件的实际输入格式和完成条件以其目录内 README、Skill 与接口文件为准。

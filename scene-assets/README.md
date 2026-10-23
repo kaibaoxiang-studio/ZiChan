@@ -1,51 +1,36 @@
-# 场景资产插件 v0.1.0
+# 场景资产插件 v1.0.0
 
-本目录以 `sence-prompts` 替换原场景资产实现；插件名称仍为 `scene-assets`，内置技能入口为 [`$sence-prompts`](skills/sence-prompts/SKILL.md)。版本号按本次发布要求统一为 `0.1.0`，不是原同版本 Harness 实现的兼容升级，具体内容以 Git 提交区分。
+本插件包装了 [`$sence-prompts`](skills/sence-prompts/SKILL.md) 的完整 v1.0.0 方法。Skill 名称沿用作者原拼写；本目录的 260 个技能文件与[原上传分支](https://github.com/kaibaoxiang-studio/ZiChan/tree/feat/sence-prompts/sence-prompts)逐文件一致。仓库整理时将包装层与技能版本统一为 **1.0.0**。
 
-支持根据完整资产表及剧本设计中文静态场景提示词，第二步光影氛围与本地色卡，第三步反打／其他角度，以及局部修改和纹理修复。不提取资产、不生成视频分镜、不自动调用场景出图服务。
+## 能做什么
 
-## 使用与安装
+- 根据完整场景资产表和对应剧本，主动设计中文静态场景提示词；保留原资产 ID、名称与子场景粒度。
+- 在已有可靠场景基准上深化光影氛围并给色卡，或设计反打与其他角度。
+- 对已确定场景做局部修改和纹理修复，并守住空间布局、材料本色、光源及相机关系。
+- 区分剧本事实、已确认选择、设计提案与未知；同一场景不同状态和角度分别交付。
 
-仓库根目录现已提供本地市场入口，可在完整 checkout 根目录直接安装：
+插件不负责资产提取、视频分镜、自动生图或置景施工。第一步、第二步、第三步和局部修改的输入、知识加载与验收要求均在 [Skill 入口](skills/sence-prompts/SKILL.md)及其 `references/` 中。
+
+## 安装
+
+在 ZiChan 仓库根目录注册统一市场并安装：
 
 ```sh
 codex plugin marketplace add "$PWD"
-codex plugin add scene-assets@scene-assets-local
-codex plugin list
+codex plugin add scene-assets@zichan-suite-local
 ```
 
-添加市场会记录其来源，安装会写入 Codex 插件配置和缓存；若已有同名市场先核对来源，不自动覆盖。保留注册的本地目录。原个人 `sence-prompts` skill 不必删除；如选择器出现同名条目，选择场景资产插件下的技能。
+若只安装 Skill，也须完整复制 `skills/sence-prompts/`，不能只复制 `SKILL.md`。第二步色卡绘制需要 Python、Pillow 与可用的中文字体；纯文字提示词不依赖绘卡环境。
 
-插件安装保留完整 `scene-assets/`。使用仓库 [本地市场安装包](../dist/scene-assets-local-marketplace.zip)时，解压后沿用现有安装方式：
-
-```sh
-codex plugin marketplace add /absolute/path/to/scene-assets-local-marketplace
-codex plugin add scene-assets@scene-assets-local
-```
-
-仅安装 Skill 时，将整个 `skills/sence-prompts/` 目录复制到个人技能目录，不只复制 SKILL.md；也可下载 [插件目录压缩包](../dist/scene-assets-0.1.0.zip)。本包提供提示词，操作者在外部生成场景图；第二步色卡绘制需要 Python 与 Pillow，并有可用中文字体。
+## 使用示例
 
 ```text
-$sence-prompts 根据这份完整资产表与对应剧本，为指定场景生成一条完整中文静态场景提示词。
+$sence-prompts 依据这份场景资产表与剧本，按原资产 ID 设计静态场景提示词。
+先区分剧本事实与设计提案，再给每个场景的一稿完整提示词。
 ```
 
-已有可靠图／完整文字稿时可直接进入打光、反打或局部修改，不必重交全表；依赖原图的编辑任务仍须提供实际可访问图像。验证方法见 [验证规则](skills/sence-prompts/references/verification.md)。文件与文字检查不代表真实出图、像素保留或空间实测通过。
+已有可靠的场景图或文字基准时，可以直接要求光影深化、反打、多角度或局部调整，不必重做首稿。图片生成仍由操作者在外部工具完成；实际回图应作为下一轮审查依据。
 
-## 构建与验证
+## 维护与来源
 
-仓库根目录运行：
-
-```sh
-python3 -B scene-plugin-maintenance/package_plugin.py
-./scene-plugin-maintenance/init.sh
-```
-
-构建只替换 `dist/` 中两个场景 ZIP；维护 harness 不进入安装包。版本按用户要求保持 `0.1.0`，构建内容以 Git 提交及 ZIP SHA256 区分。
-2026-10-23：26 项单元测试通过；260 个技能文件、205 本地链接及 52 锚点通过；本地 CLI 安装显示 installed, enabled，安装缓存与源一致。新会话实际调用及真实场景出图尚未验证。
-详细边界见 [维护说明](../scene-plugin-maintenance/README.md)。
-
-## 替换边界
-
-原 `scene-assets`、`scene-design`、`scene-evidence`、`scene-image-prompt`、`scene-image-review` 五个技能及其 Harness／项目 CLI 已从当前插件移除，不再运行旧 bootstrap 或 harness.py；旧项目审批、设计卡和数据接口不会自动迁移。
-
-旧实现保留在 Git 历史与替换前备份。仓库 `scene-creator-src/` 保留历史源码，不是当前插件的生成来源；当前技能直接维护 `scene-assets/skills/sence-prompts/`。本次两个同名 ZIP 已重新打包为当前实现，历史安装包可从此前 Git 提交恢复。之前的 `feat/sence-prompts` 分支保留原上传版本，不作为当前 main 的发布入口。
+当前唯一正式技能目录为 `skills/sence-prompts/`。其 [`tests/index.md`](skills/sence-prompts/tests/index.md) 给出受影响范围的验证入口；脚本检查入口为 `skills/sence-prompts/scripts/check_skill_files.py`。旧场景 Harness 实现、历史构建脚本和旧 ZIP 保留在[整理前 Git 提交](https://github.com/kaibaoxiang-studio/ZiChan/tree/60e04bf1b45763bacb88ffbdc2bd6f5a96666bed)，不属于当前插件安装内容。

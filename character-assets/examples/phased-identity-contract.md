@@ -1,6 +1,6 @@
 # 最小身份合同：由真实运行时测试导出的结构样例
 
-这三份文件直接由 `creator-src/tests/test_v025_phased_runtime.py` 的 setup_brief、payloads、stage helper 在隔离临时项目导出，实际通过当前 submit 合同。使用同目录 sample-screenplay.json、sample-assets.json；仅演示精确结构和交接，不代表完整人物设计质量，也没有生成图片或批准用户资产。
+这三份文件直接由[整理前提交的 test_v025_phased_runtime.py](https://github.com/kaibaoxiang-studio/ZiChan/blob/60e04bf1b45763bacb88ffbdc2bd6f5a96666bed/creator-src/tests/test_v025_phased_runtime.py) 中的 setup_brief、payloads、stage helper 在隔离临时项目导出，实际通过当前 submit 合同。使用同目录 sample-screenplay.json、sample-assets.json；仅演示精确结构和交接，不代表完整人物设计质量，也没有生成图片或批准用户资产。
 
 - [ScriptContextV1](sample-script-context-v025.json)：全阅读单元和轻量全员索引。
 - [DesignDirectionBriefV1](sample-design-brief-v025.json)：asset_domain为character；understanding是含schema_version的对象；specialist_plan是十三项ID到工作对象的映射，不是列表。

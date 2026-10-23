@@ -1,10 +1,24 @@
 {
-  "name": "scene-assets-local",
-  "interface": {"displayName": "场景资产 Local"},
-  "plugins": [{
-    "name": "scene-assets",
-    "source": {"source": "local", "path": "./scene-assets"},
-    "policy": {"installation": "AVAILABLE", "authentication": "ON_INSTALL"},
-    "category": "Productivity"
-  }]
+  "name": "zichan-suite-local",
+  "interface": {"displayName": "ZiChan 资产插件"},
+  "plugins": [
+    {
+      "name": "character-assets",
+      "source": {"source": "local", "path": "./character-assets"},
+      "policy": {"installation": "AVAILABLE", "authentication": "ON_INSTALL"},
+      "category": "Productivity"
+    },
+    {
+      "name": "prop-assets",
+      "source": {"source": "local", "path": "./prop-assets"},
+      "policy": {"installation": "AVAILABLE", "authentication": "ON_INSTALL"},
+      "category": "Productivity"
+    },
+    {
+      "name": "scene-assets",
+      "source": {"source": "local", "path": "./scene-assets"},
+      "policy": {"installation": "AVAILABLE", "authentication": "ON_INSTALL"},
+      "category": "Productivity"
+    }
+  ]
 }
