@@ -14,3 +14,4 @@ description: "服饰剪裁设计：结构线、连接与活动余量"
 - [references/differentiation-framework.md](../../references/differentiation-framework.md)
 - [references/design-detail-standard.md](../../references/design-detail-standard.md)
 - [references/knowledge/character-costume-cut-design/costume-cut.md](../../references/knowledge/character-costume-cut-design/costume-cut.md)
+- [references/knowledge/character-costume-designer/costume-deep.md](../../references/knowledge/character-costume-designer/costume-deep.md)

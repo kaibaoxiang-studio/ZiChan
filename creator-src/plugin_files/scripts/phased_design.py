@@ -9,7 +9,7 @@ import copy
 import json
 from pathlib import Path
 
-KINDS = {"script-context", "design-brief", "stage-design"}
+KINDS = {"script-context", "design-brief", "costume-bible", "stage-design"}
 SCOPES = {"identity", "body", "costume"}
 UNDERSTANDING_FIELDS = ("role_in_story", "core_motivation", "central_tension",
                         "world_and_life", "relationships", "arc")
@@ -26,7 +26,7 @@ SCOPE_SPECIALISTS = {
 COMMON_PAYLOAD = {"facts", "inferences", "approved_choices", "recognition_axes", "world_influences", "morphology", "morphology_details"}
 SCOPE_PAYLOAD = {
     "identity": {"appearance", "feature_focus", "facial_surface", "differentiation_review", "execution_layout", "identity_invariants"},
-    "body": {"body_form"}, "costume": {"costume"},
+    "body": {"body_form"}, "costume": {"costume", "costume_direction"},
 }
 AXIS_SCOPES = {"face_structure": "identity", "hair_structure": "identity", "silhouette": "body",
                "body_posture": "body", "costume_color": "costume"}
@@ -41,6 +41,8 @@ def key(kind, character=None, variant="base", scope=None):
         return kind
     if kind == "design-brief":
         return f"design-brief:{character}:base"
+    if kind == "costume-bible":
+        return f"costume-bible:{character}:base"
     return f"stage-design:{scope}:{character}:{variant if scope == 'costume' else 'base'}"
 
 
@@ -104,10 +106,12 @@ def checked_dependencies(cp, root, state, record_key, data):
         source = state["inputs"]["screenplay"]
         cp.ensure(data["source_sha256"] == source["sha256"] == cp.digest(root / source["path"]),
                   "Script context is for another source version")
-    elif record_key.startswith(("design-brief:", "stage-design:")):
+    elif record_key.startswith(("design-brief:", "stage-design:", "costume-bible:")):
         parents(cp, root, state, data, approved=True)
         if record_key.startswith("stage-design:"):
             validate_execution(cp, root, data, state)
+        if record_key.startswith("costume-bible:"):
+            validate_bible(cp, root, state, data, data["character_id"])
     elif data.get("schema_version") == "CharacterDesignCardV2.5":
         for parent_key, sha in data["stage_receipts"].items():
             cp.ensure(cp._checked_record(root, state, parent_key)["sha256"] == sha,
@@ -307,12 +311,87 @@ def validate_execution(cp, root, data, state=None):
                               "Independent result is outside the specialist's domain")
 
 
+def validate_bible(cp, root, state, data, character):
+    cp.ensure(state.get("pipeline_version", 1) >= 3, "CostumeStyleBibleV1 belongs to pipeline 3")
+    cp.ensure(data.get("schema_version") == "CostumeStyleBibleV1" and
+              data.get("character_id") == character and data.get("variant_id", "base") == "base",
+              "Costume bible target or schema mismatch")
+    refs = data.get("parent_refs")
+    expected = {key("design-brief", character), key("stage-design", character, scope="identity"),
+                key("stage-design", character, scope="body")}
+    cp.ensure(isinstance(refs, dict) and set(refs) == expected,
+              "Costume bible must bind the approved direction and identity")
+    parents(cp, root, state, data)
+    cp.ensure(data.get("tier") in {"full", "compact", "group"}, "Unknown wardrobe bible tier")
+    roster_item = next(x for x in state["roster"] if x["id"] == character)
+    if roster_item.get("priority") == "deep":
+        cp.ensure(data["tier"] == "full", "Lead and important characters need a full wardrobe bible")
+    else:
+        cp.ensure(data["tier"] in {"compact", "group"}, "Ordinary characters use compact or group wardrobe rules")
+    for field in ("wearing_thesis", "world_translation", "signature_silhouette",
+                  "cut_grammar", "palette_grammar", "material_grammar", "recognition_anchor",
+                  "wearing_habits", "state_logic", "physical_and_camera_rules"):
+        cp.require_text(data, field)
+        cp.ensure(len(data[field].strip()) >= 16, f"Wardrobe rule too vague: {field}")
+    if data["tier"] == "full":
+        matrix = data.get("state_matrix")
+        cp.ensure(isinstance(matrix, list) and matrix, "Lead wardrobe bible needs a state_matrix")
+        expected_states = {x.get("id") for x in roster_item.get("states", [])} or {"base"}
+        cp.ensure({x.get("variant_id") for x in matrix} == expected_states,
+                  "Wardrobe state_matrix must cover every registered state")
+        for item in matrix:
+            for field in ("variant_id", "narrative_function", "silhouette_shift", "anchor_continuity"):
+                cp.require_text(item, field)
+    cp.ensure(data.get("new_lore_policy") in {"none", "pending_approval"},
+              "New family, religion or faction lore must be separately reviewed")
+    cp.require_list(data, "unresolved")
+    if data["new_lore_policy"] == "pending_approval":
+        cp.ensure(data["unresolved"], "Pending new lore must remain unresolved until separately approved")
+
+
+def validate_costume_direction(cp, root, state, data):
+    character, variant = data["character_id"], data["variant_id"]
+    bible_key = key("costume-bible", character)
+    cp.ensure(data["parent_refs"].get(bible_key) == cp._checked_record(root, state, bible_key)["sha256"],
+              "State costume must bind the current approved wardrobe bible")
+    direction = data["payload"].get("costume_direction")
+    cp.ensure(isinstance(direction, dict), "Pipeline 3 costume needs costume_direction")
+    for field in ("script_requirement", "narrative_function", "front_structure", "back_structure",
+                  "cut_and_fastening", "layering", "color_placement", "material_behavior",
+                  "recognition_focus", "mobility_and_camera", "state_continuity", "makeup_and_hair"):
+        cp.require_text(direction, field)
+        cp.ensure(len(direction[field].strip()) >= 16, f"Costume design too vague: {field}")
+    cp.ensure(direction.get("evidence_status") in {"script_fact", "inference", "creative_choice", "mixed"},
+              "Costume choices need an evidence boundary")
+    cp.require_list(direction, "script_refs")
+    cp.ensure(direction["script_refs"], "Costume requires script or direction evidence")
+    expected_fields = {
+        "character-costume-style-design": ("costume_direction.front_structure", "costume_direction.back_structure"),
+        "character-costume-cut-design": ("costume_direction.cut_and_fastening", "costume_direction.layering"),
+        "character-costume-color-design": ("costume_direction.color_placement",),
+        "character-costume-material-design": ("costume_direction.material_behavior", "visual_details.costume.material_drape_wear"),
+    }
+    for specialist, fields in expected_fields.items():
+        work = data["specialist_execution"].get(specialist, {})
+        cp.ensure(work.get("mode") in {"inline", "independent"},
+                  f"Mandatory costume specialist not applied: {specialist}")
+        if work["mode"] == "inline":
+            cp.ensure(any(result.get("field", "") in fields
+                          for result in work.get("results", [])),
+                      f"Costume specialist needs a mapped garment result: {specialist}")
+        else:
+            cp.ensure(any(mapping.get("field") in fields for mapping in work.get("applied_elements", [])),
+                      f"Independent costume proposal needs an applied garment field: {specialist}")
+
+
 def required_parents(state, character, scope, variant):
     result = [key("design-brief", character)]
     if scope in {"body", "costume"}:
         result.append(key("stage-design", character, scope="identity"))
     if scope == "costume":
         result.append(key("stage-design", character, scope="body"))
+        if state.get("pipeline_version", 1) >= 3:
+            result.append(key("costume-bible", character))
     return result
 
 
@@ -404,6 +483,8 @@ def validate_stage(cp, root, state, data, character, variant, scope):
         cp.ensure(isinstance(payload.get("costume"), dict) and payload["costume"], "Costume scope needs costume summary")
     cp.require_list(data, "deferred_dimensions")
     validate_execution(cp, root, data, state)
+    if scope == "costume" and state.get("pipeline_version", 1) >= 3:
+        validate_costume_direction(cp, root, state, data)
 
 
 def _store(cp, root, state, record_key, data, approval=None):
@@ -418,7 +499,8 @@ def _store(cp, root, state, record_key, data, approval=None):
 def invalidate(cp, state, character=None, scope="direction", variant="base"):
     """Invalidate only descendants of a design domain; keep immutable history files."""
     scopes = {"direction": SCOPES, "identity": SCOPES, "body": {"body", "costume"}, "costume": {"costume"}}[scope]
-    image_start = {"direction": "avatar", "identity": "avatar", "body": "full_body", "costume": "costume_design"}[scope]
+    image_start = {"direction": "avatar", "identity": "avatar", "body": "full_body",
+                   "costume": "execution" if state.get("pipeline_version", 1) >= 3 else "costume_design"}[scope]
     cp._invalidate(state, character, variant if scope == "costume" else None, image_start)
     for record_key, record in state["records"].items():
         parts = record_key.split(":")
@@ -426,10 +508,21 @@ def invalidate(cp, state, character=None, scope="direction", variant="base"):
         if not matches_character:
             continue
         selected = ((record_key.startswith("design-brief:") and scope == "direction") or
+                    (record_key.startswith("costume-bible:") and scope in {"direction", "identity", "body"}) or
                     (record_key.startswith("stage-design:") and parts[1] in scopes and
                      (scope != "costume" or parts[-1] == variant)) or
                     (record_key.startswith("design-card:") and (scope != "costume" or parts[-1] == variant)))
         if selected:
+            record.update(stale=True, approval=None)
+
+
+def invalidate_bible(cp, state, character):
+    """A changed wardrobe constitution requires review of every costume state."""
+    cp._invalidate(state, character, None, "execution")
+    for record_key, record in state["records"].items():
+        parts = record_key.split(":")
+        if character in parts and (record_key.startswith("stage-design:costume:") or
+                                   record_key.startswith("design-card:")):
             record.update(stale=True, approval=None)
 
 
@@ -447,6 +540,9 @@ def submit(cp, args, root, state):
         if args.kind == "design-brief":
             cp.ensure(variant == "base", "Direction brief belongs to base")
             validate_brief(cp, root, state, data, character)
+        elif args.kind == "costume-bible":
+            cp.ensure(variant == "base", "Costume bible belongs to base")
+            validate_bible(cp, root, state, data, character)
         else:
             validate_stage(cp, root, state, data, character, variant, scope)
     record_key = key(args.kind, character, variant, scope)
@@ -455,7 +551,10 @@ def submit(cp, args, root, state):
     if previous and previous["sha256"] == incoming and not previous.get("stale"):
         return {"key": record_key, "status": "unchanged", "sha256": incoming}
     if previous:
-        invalidate(cp, state, character, scope if args.kind == "stage-design" else "direction", variant)
+        if args.kind == "costume-bible":
+            invalidate_bible(cp, state, character)
+        else:
+            invalidate(cp, state, character, scope if args.kind == "stage-design" else "direction", variant)
     value = _store(cp, root, state, record_key, data)
     if args.kind == "script-context" and not data["unresolved"]:
         value["approval"] = {"operator": "system:context-contract-check", "at": cp.now(),
@@ -475,6 +574,8 @@ def approve(cp, args, root, state):
         validate_context(cp, root, state, data)
     elif args.kind == "design-brief":
         validate_brief(cp, root, state, data, args.character_id)
+    elif args.kind == "costume-bible":
+        validate_bible(cp, root, state, data, args.character_id)
     else:
         validate_stage(cp, root, state, data, args.character_id, args.variant_id or "base", args.scope)
         parents(cp, root, state, data, approved=True)
@@ -484,11 +585,13 @@ def approve(cp, args, root, state):
     return {"key": record_key, "approved": True, "sha256": value["sha256"]}
 
 
-def basis_keys(character, variant, stage):
+def basis_keys(character, variant, stage, state=None):
     result = [key("design-brief", character), key("stage-design", character, scope="identity")]
     if stage in {"full_body", "costume_design", "execution"}:
         result.append(key("stage-design", character, scope="body"))
     if stage in {"costume_design", "execution"}:
+        if state and state.get("pipeline_version", 1) >= 3:
+            result.append(key("costume-bible", character))
         result.append(key("stage-design", character, variant, "costume"))
     if stage == "execution":
         result.append(f"design-card:{character}:{variant}")
@@ -501,7 +604,7 @@ def resolve_basis(cp, root, state, package, character, variant, stage, force_app
     cp.ensure(not preview or stage == "avatar", "Only an avatar can be a fast preview")
     mode = package.get("preview_mode", "direction_first")
     cp.ensure(mode in {"direction_first", "image_first"}, "Unknown preview_mode")
-    expected_keys = basis_keys(character, variant, stage)
+    expected_keys = basis_keys(character, variant, stage, state)
     supplied = package.get("design_basis", {}).get("records")
     cp.ensure(isinstance(supplied, dict) and set(supplied) == set(expected_keys), "Prompt design_basis records do not match the stage")
     cp._checked_record(root, state, "script-context")
@@ -548,9 +651,12 @@ def compile_card(cp, args):
         character, variant = args.character_id, args.variant_id or "base"
         cp.require_known_variant(state, character, variant)
         scopes = [key("design-brief", character), key("stage-design", character, scope="identity"),
-                  key("stage-design", character, scope="body"), key("stage-design", character, variant, "costume")]
+                  key("stage-design", character, scope="body")]
+        if state.get("pipeline_version", 1) >= 3:
+            scopes.append(key("costume-bible", character))
+        scopes.append(key("stage-design", character, variant, "costume"))
         values = {record_key: cp._checked_record(root, state, record_key) for record_key in scopes}
-        stages = [cp.read_json(root / values[x]["path"]) for x in scopes[1:]]
+        stages = [cp.read_json(root / values[x]["path"]) for x in scopes[1:] if x.startswith("stage-design:")]
         card = merge_payloads(cp, [x["payload"] for x in stages])
         card.update(schema_version="CharacterDesignCardV2.5", character_id=character, variant_id=variant,
                     unresolved=[], stage_receipts={x: values[x]["sha256"] for x in scopes})

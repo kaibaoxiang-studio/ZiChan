@@ -1,12 +1,15 @@
-# 角色资产插件 v0.2.5.1
+# 角色资产插件 v0.2.6
+
+**0.2.6 小版本更新**：新项目采用四图链路：头像 3:4、表情九宫格、全身模卡 9:16、每状态一张 **9:16 竖版四格服饰执行图**。`$character-costume-designer` 是服饰阶段必经协调 Skill：人物总控交付全文理解和设计意图，它建立 `CostumeStyleBibleV1` 并统筹款式、剪裁、配色、材质与饰品五专项。前四项须留下服装部位成果；饰品可有理由不用。逐状态文字设计获批后直接出唯一执行图，审查批准一次并打包 `CharacterAssetPackV3`。新知识分别强化世界符号与纹样的叙事使用、原创脸部结构和逐状态妆造；70:25:5 为可选方法。已批准旧项目按原图像阶段和审批读取；无已批准服饰/执行图的 v2 项目可显式 `upgrade-pipeline`。
+
 
 **0.2.5.1 修补**：内部 dispatcher 每次使用 `ephemeral: true` 临时会话，服务未确认时直接失败，不降级持久聊天。Harness 的等待回答、恢复和重试依靠本地记录重建任务；旧 thread ID 仅作诊断，不执行 `thread/resume`。后台验收不再向“最近”写入 `Use $character-…` 任务。详见[内部调用隔离与恢复](references/dispatcher-isolation.md)。
 
-独立安装的 Codex 插件。主入口为 `$character-assets`；原有的证据、角色设计、提示词、回图审查和局部修图能力继续保留。v0.2.5 具备 **群像差异化总控**与 **13 个专项设计 Skill**，共 20 项能力。它们可单独调用，由人物设计总控依据全文中的人物定位与设计任务选用，常规项同轮执行规范，复杂冲突独立会诊。
+独立安装的 Codex 插件。主入口为 `$character-assets`；原有的证据、角色设计、提示词、回图审查和局部修图能力继续保留。v0.2.5 具备 **群像差异化总控**与 **13 个专项设计 Skill**，共 21 项能力。它们可单独调用，由人物设计总控依据全文中的人物定位与设计任务选用，常规项同轮执行规范，复杂冲突独立会诊。
 
 **0.2.5 小版本更新**：强化 `$character-design` 为人物设计总控：**阅读全文 → 理解和定位人物 → 解析设计相关细节 → 形成设计意图 → 路由 Skill 或 knowledge/reference → 整合为具体设计**。全剧分析记录阅读覆盖并按来源 SHA 复用；区分自述、他评与实际行为，综合人物目标、矛盾、关系、生活处境、弧线及观众信息。剧本未写外貌时主动设计，标明事实、推导和创作选择，重要身份或剧情新设定单独提出。
 
-新项目默认分阶段设计：先完成身份，再深化身体与各状态服饰，最后机械合成完整卡。默认一套推荐，重要分歧给备选；方向与当前阶段设计集中审阅。用户要求“先看一版”时，可从冻结草案交头像候选提示词；实际看图并确认后同图转正。专项保存真实的 inline 规范执行成果或 independent 会诊返回物。详见[人物理解与设计统筹](references/director-understanding.md)、[分阶段设计](references/phased-design.md)和[接口](references/interfaces.md)。
+新项目默认分阶段设计：先完成身份与身体，再建立每角色穿衣风格圣经、深化各状态服饰文字快照，最后机械合成完整卡。默认一套推荐，重要分歧给备选；方向与当前阶段设计集中审阅。用户要求“先看一版”时，可从冻结草案交头像候选提示词；实际看图并确认后同图转正。专项保存真实的 inline 规范执行成果或 independent 会诊返回物。详见[人物理解与设计统筹](references/director-understanding.md)、[分阶段设计](references/phased-design.md)和[接口](references/interfaces.md)。
 
 **0.2.4.1 更新（历史）**：新项目依次产出头像、九宫格表情、全身模卡、每状态服饰设计图和执行资产图。前三张图是角色共享的身份基准，服饰与执行逐状态制作；`plan` 可列单角色或全员批量任务，每张图仍独立审查和批准。图片文件名包含资产名、状态、阶段和短 SHA。新增环境与科技外貌、面部装饰与妆容两项按需专项；新重点人形卡使用 `CharacterDesignCardV2.4`。头像以脸为主体，可见完整头部、双肩和上胸；上胸入画可直接用中性白色背心，不强制裁到锁骨以上。九宫格沿用头像取景及着装。旧项目继续四阶段。详见[需求路由与整合](references/routing-and-integration.md)、[服饰图阶段](references/costume-design-stage.md)、[参考图职责](examples/reference-images.md)。
 
@@ -28,9 +31,79 @@
 
 总控先保留剧本事实与已批准选择，再以剪影、脸部结构、体型体态、头发块面、服装色块五轴比较最易混淆的角色。普通相貌、年龄和生活痕迹是完整设计，不通过默认丑化配角制造差异。专项只提出待审方案，操作者确认后才写入正式设计卡。背景仍须有明确批准依据。
 
+### 工作流
+
+```mermaid
+flowchart TD
+    A["剧本全文与资产表"] --> B["ScriptContextV1：阅读全文并跨场理解"]
+    B --> C["人物总控：定位人物、设计意图、专项路由"]
+    C --> D["身份快照 → 头像 3:4 → 九宫格"]
+    D --> E["身体快照 → 全身模卡 9:16"]
+    E --> F["服饰设计师：CostumeStyleBibleV1"]
+    F --> G["逐状态款式／剪裁／配色／材质必做，饰品可有理由不用"]
+    G --> H["逐状态服饰文字快照批准 → 合成设计卡"]
+    H --> I["每状态一张 9:16 竖版四格执行图"]
+    I --> J["实际审图 → 操作者批准一次 → 打包"]
+```
+
+新项目为 `pipeline_version:3`，旧 v1/v2 项目按原合同读取。可显式迁移没有已批准服饰或执行图的 v2 项目，保留已批准身份图。
+
+### 交互时序
+
+```mermaid
+sequenceDiagram
+    participant U as 操作者
+    participant P as 资产主控
+    participant D as 人物总控
+    participant W as 服饰设计师
+    participant S as 五服饰专项
+    participant C as 项目CLI
+    participant G as 外部生图工具
+    U->>P: 提供剧本、资产表与设计目标
+    P->>D: 全文理解、人物定位与视觉意图
+    D-->>U: 身份方向与阶段设计
+    U->>C: 确认身份与身体快照
+    P->>G: 头像、九宫格、全身模卡提示词
+    G-->>P: 回图逐张审查与批准
+    D->>W: 传人物方向、身份身体与状态证据
+    W->>S: 款式、剪裁、配色、材质、饰品任务
+    S-->>W: 具体部位成果与知识依据
+    W-->>U: 穿衣风格圣经与逐状态服饰文字稿
+    U->>C: 审阅并批准文字设计
+    C->>C: 合成状态设计卡
+    P->>G: 每状态一张 9:16 四格执行图提示词
+    G-->>P: 回图
+    P->>C: 实际审图并记录结果
+    U->>C: 批准本状态唯一服饰图
+    C-->>U: 打包 CharacterAssetPackV3
+```
+
+### 资产数据流
+
+```mermaid
+flowchart LR
+    A["剧本全文与来源 SHA"] --> B["ScriptContextV1"]
+    B --> C["DesignDirectionBriefV1"]
+    D["视觉基准、群像比较、资产状态"] --> C
+    C --> E["身份与身体快照"]
+    C --> F["CostumeStyleBibleV1"]
+    E --> F
+    F --> G["各状态 CharacterStageDesignV1 costume"]
+    H["五专项应用结果与知识快照"] --> G
+    G --> I["机械合成 CharacterDesignCardV2.5"]
+    E --> I
+    E --> J["头像／九宫格／全身模卡"]
+    I --> K["design_basis：当前圣经＋状态快照＋设计卡"]
+    J --> K
+    K --> L["每状态一张 9:16 四格 execution 图片"]
+    L --> M["审图报告与批准"]
+    M --> N["CharacterAssetPackV3"]
+    I --> N
+```
+
 ## 输入与产物
 
-正式资产项目需要标准化剧本和资产表，场记表可选；只有剧本或人物小传时，也可独立调用 `$character-design` 先分析设计，注明材料覆盖范围，正式建资产时再映射角色 ID。支持 JSON、Markdown、Excel，优先使用 JSON；也可用顶层 `AssetProjectSnapshotV1` 初始化。文件可以作为聊天附件提供，也可以给绝对路径。项目工作目录保留原件副本、SHA、设计卡、提示词、回流图片、审查与审批。新项目最终 `CharacterAssetPackV2` 包含该状态已定稿的五阶段材料；旧项目的 `CharacterAssetPackV1` 仍可读取与打包。
+正式资产项目需要标准化剧本和资产表，场记表可选；只有剧本或人物小传时，也可独立调用 `$character-design` 先分析设计，注明材料覆盖范围，正式建资产时再映射角色 ID。支持 JSON、Markdown、Excel，优先使用 JSON；也可用顶层 `AssetProjectSnapshotV1` 初始化。文件可以作为聊天附件提供，也可以给绝对路径。项目工作目录保留原件副本、SHA、设计卡、提示词、回流图片、审查与审批。新项目最终 `CharacterAssetPackV3` 包含该状态已定稿的四类图片和设计来源；旧项目的 `CharacterAssetPackV1/V2` 仍可读取与打包。
 
 新项目使用 `ScriptContextV1` 保存全文理解与覆盖，`DesignDirectionBriefV1` 保存人物定位、设计意图和专项任务，`CharacterStageDesignV1` 分别保存身份、身体及状态服饰快照。阶段提示词按 `design_basis` 绑定来源；全部设计完成后合成 `CharacterDesignCardV2.5`。`CastPlanV2` 继续记录群像比较。旧项目的 V1/V2/V2.1 记录继续可读，已批准角色不因升级自动重设计。`scripts/cast_diff_audit.py` 能列出文本字段重复与待补轴；实际撞脸、真实度和皮肤质感仍需看回流图并排判断。
 
@@ -66,7 +139,7 @@ $character-design 请阅读全文，结合人物前后言行、关系和变化�
 
 主入口会按 [工作流](references/workflow.md) 使用 `scripts/character_project.py`。想单独审查已有图，可调用 `$character-image-review` 并给出项目目录和图片。需要局部修图提示词，可调用 `$character-image-edit`。结构化 JSON 格式见 [接口](references/interfaces.md)；知识按 [索引](knowledge/index.md) 加载。
 
-13 个专项的输入/输出见 [专项交接](references/specialist-contract.md)，群像审查方法见 [差异化框架](references/differentiation-framework.md)。可对草案运行：
+服饰统筹见 [服饰设计师](references/costume-designer.md)，13 个专项的输入/输出见 [专项交接](references/specialist-contract.md)，群像审查方法见 [差异化框架](references/differentiation-framework.md)。可对草案运行：
 
 ```sh
 python3 scripts/cast_diff_audit.py --cast-plan /absolute/cast-plan.json --output /absolute/cast-audit.json

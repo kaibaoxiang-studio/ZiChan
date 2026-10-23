@@ -14,5 +14,6 @@ description: "服饰材质设计：重量、光泽、垂坠与磨损"
 - [references/differentiation-framework.md](../../references/differentiation-framework.md)
 - [references/design-detail-standard.md](../../references/design-detail-standard.md)
 - [references/knowledge/character-costume-material-design/costume-material.md](../../references/knowledge/character-costume-material-design/costume-material.md)
+- [references/knowledge/character-costume-designer/costume-deep.md](../../references/knowledge/character-costume-designer/costume-deep.md)
 - [references/render-texture-standard.md](../../references/render-texture-standard.md)
 - [references/knowledge/character-costume-material-design/anti-stereotype-texture.md](../../references/knowledge/character-costume-material-design/anti-stereotype-texture.md)

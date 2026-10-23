@@ -138,6 +138,7 @@
         "references/director-understanding.md",
         "references/phased-design.md",
         "references/costume-design-stage.md",
+        "references/costume-designer.md",
         "references/model-card-baseline.md",
         "references/evidence.md",
         "references/source-notes.md",
@@ -352,6 +353,7 @@
         "references/character-design.md",
         "references/director-understanding.md",
         "references/phased-design.md",
+        "references/costume-designer.md",
         "references/costume-and-morphology.md",
         "references/interfaces.md",
         "references/differentiation-framework.md",
@@ -360,9 +362,120 @@
         "references/feature-focus-and-body-form.md",
         "references/routing-and-integration.md",
         "references/knowledge/character-world-appearance-design/world-appearance.md",
+        "references/knowledge/character-face-design/original-face.md",
         "references/knowledge/character-face-decoration-design/face-decoration.md",
+        "references/knowledge/character-costume-designer/state-makeup.md",
         "references/knowledge/character-design/feature-focus-design.md",
         "references/knowledge/character-design/anti-stereotype-texture.md"
+      ],
+      "explicit_only": true
+    },
+    {
+      "id": "character-costume-designer",
+      "skill_name": "character-costume-designer",
+      "description": "服饰设计师：从人物弧线与世界规则建立穿衣风格圣经和状态服饰",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "project_root": {
+            "type": "string",
+            "minLength": 1
+          },
+          "character_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "variant_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "request": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "script_context_path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "direction_brief_path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "scope": {
+            "type": "string",
+            "minLength": 1
+          },
+          "review_mode": {
+            "type": "string",
+            "enum": [
+              "direction_first",
+              "image_first"
+            ]
+          },
+          "execution_mode": {
+            "type": "string",
+            "enum": [
+              "inline",
+              "independent"
+            ]
+          }
+        },
+        "required": [
+          "request"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "artifact_path": {
+            "type": "string",
+            "description": "Main output path relative to artifact_dir, for example design.md; never an absolute path."
+          },
+          "summary": {
+            "type": "string"
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "status",
+          "artifact_path",
+          "summary",
+          "questions"
+        ],
+        "additionalProperties": false
+      },
+      "execution": {
+        "kind": "agent",
+        "access": "workspace-write",
+        "network": false
+      },
+      "knowledge_refs": [
+        "knowledge/index.md",
+        "references/costume-designer.md",
+        "references/phased-design.md",
+        "references/knowledge/character-costume-designer/costume-deep.md",
+        "references/knowledge/character-costume-designer/state-makeup.md",
+        "references/knowledge/character-costume-style-design/costume-style.md",
+        "references/knowledge/character-costume-cut-design/costume-cut.md",
+        "references/knowledge/character-costume-color-design/costume-color.md",
+        "references/knowledge/character-costume-material-design/costume-material.md",
+        "references/knowledge/character-costume-accessory-design/costume-accessory.md"
       ],
       "explicit_only": true
     },
@@ -483,6 +596,7 @@
         "references/costume-design-stage.md",
         "references/interfaces.md",
         "references/phased-design.md",
+        "references/knowledge/character-costume-designer/state-makeup.md",
         "references/design-detail-standard.md",
         "references/render-texture-standard.md",
         "references/knowledge/character-image-prompt/feature-focus-prompt.md",
@@ -612,6 +726,7 @@
         "references/interfaces.md",
         "references/render-texture-standard.md",
         "references/costume-design-stage.md",
+        "references/knowledge/character-costume-designer/state-makeup.md",
         "references/knowledge/character-image-review/feature-focus-review.md",
         "references/knowledge/character-image-review/anti-stereotype-texture.md"
       ],
@@ -1368,7 +1483,8 @@
         "references/specialist-contract.md",
         "references/differentiation-framework.md",
         "references/design-detail-standard.md",
-        "references/knowledge/character-face-design/face.md"
+        "references/knowledge/character-face-design/face.md",
+        "references/knowledge/character-face-design/original-face.md"
       ],
       "explicit_only": true
     },
@@ -1576,7 +1692,8 @@
         "references/specialist-contract.md",
         "references/differentiation-framework.md",
         "references/design-detail-standard.md",
-        "references/knowledge/character-face-decoration-design/face-decoration.md"
+        "references/knowledge/character-face-decoration-design/face-decoration.md",
+        "references/knowledge/character-costume-designer/state-makeup.md"
       ],
       "explicit_only": true
     },
@@ -1786,7 +1903,8 @@
         "references/specialist-contract.md",
         "references/differentiation-framework.md",
         "references/design-detail-standard.md",
-        "references/knowledge/character-costume-style-design/costume-style.md"
+        "references/knowledge/character-costume-style-design/costume-style.md",
+        "references/knowledge/character-costume-designer/costume-deep.md"
       ],
       "explicit_only": true
     },
@@ -1890,7 +2008,8 @@
         "references/specialist-contract.md",
         "references/differentiation-framework.md",
         "references/design-detail-standard.md",
-        "references/knowledge/character-costume-cut-design/costume-cut.md"
+        "references/knowledge/character-costume-cut-design/costume-cut.md",
+        "references/knowledge/character-costume-designer/costume-deep.md"
       ],
       "explicit_only": true
     },
@@ -1994,7 +2113,8 @@
         "references/specialist-contract.md",
         "references/differentiation-framework.md",
         "references/design-detail-standard.md",
-        "references/knowledge/character-costume-color-design/costume-color.md"
+        "references/knowledge/character-costume-color-design/costume-color.md",
+        "references/knowledge/character-costume-designer/costume-deep.md"
       ],
       "explicit_only": true
     },
@@ -2099,6 +2219,7 @@
         "references/differentiation-framework.md",
         "references/design-detail-standard.md",
         "references/knowledge/character-costume-material-design/costume-material.md",
+        "references/knowledge/character-costume-designer/costume-deep.md",
         "references/render-texture-standard.md",
         "references/knowledge/character-costume-material-design/anti-stereotype-texture.md"
       ],
@@ -2204,7 +2325,8 @@
         "references/specialist-contract.md",
         "references/differentiation-framework.md",
         "references/design-detail-standard.md",
-        "references/knowledge/character-costume-accessory-design/costume-accessory.md"
+        "references/knowledge/character-costume-accessory-design/costume-accessory.md",
+        "references/knowledge/character-costume-designer/costume-deep.md"
       ],
       "explicit_only": true
     }

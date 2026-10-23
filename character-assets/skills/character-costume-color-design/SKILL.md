@@ -14,3 +14,4 @@ description: "服饰配色设计：明度、饱和度与群像色块"
 - [references/differentiation-framework.md](../../references/differentiation-framework.md)
 - [references/design-detail-standard.md](../../references/design-detail-standard.md)
 - [references/knowledge/character-costume-color-design/costume-color.md](../../references/knowledge/character-costume-color-design/costume-color.md)
+- [references/knowledge/character-costume-designer/costume-deep.md](../../references/knowledge/character-costume-designer/costume-deep.md)

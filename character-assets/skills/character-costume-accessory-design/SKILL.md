@@ -14,3 +14,4 @@ description: "服饰饰品设计：衣身、腰、手与随身穿戴物"
 - [references/differentiation-framework.md](../../references/differentiation-framework.md)
 - [references/design-detail-standard.md](../../references/design-detail-standard.md)
 - [references/knowledge/character-costume-accessory-design/costume-accessory.md](../../references/knowledge/character-costume-accessory-design/costume-accessory.md)
+- [references/knowledge/character-costume-designer/costume-deep.md](../../references/knowledge/character-costume-designer/costume-deep.md)

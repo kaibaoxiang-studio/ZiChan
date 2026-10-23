@@ -36,6 +36,8 @@ class V024PipelineTests(unittest.TestCase):
                        asset_table=str(examples / "sample-assets.json"),
                        scene_log=None, snapshot=None, design_progression="complete"))
         self.state = cp.read_json(self.root / "project.json")
+        self.state["pipeline_version"] = 2  # Historical V2 regression fixture.
+        cp.write_json(self.root / "project.json", self.state)
         self.character = self.state["roster"][0]
 
     def save(self, name, data):

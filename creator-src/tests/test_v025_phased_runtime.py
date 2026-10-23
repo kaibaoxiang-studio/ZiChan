@@ -28,6 +28,9 @@ class PhasedRuntimeTests(unittest.TestCase):
         cp.cmd_init(NS(project_root=str(self.root), project_id="phased-test", snapshot=None,
                        screenplay=str(examples / "sample-screenplay.json"),
                        asset_table=str(examples / "sample-assets.json"), scene_log=None))
+        state = cp.read_json(self.root / "project.json")
+        state["pipeline_version"] = 2  # Historical V2 regression fixture.
+        cp.write_json(self.root / "project.json", state)
         self.character = "CHR-001"
         self.seq = 0
 

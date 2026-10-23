@@ -1,5 +1,10 @@
 # 分阶段设计、首图预览与同图转正 v0.2.5
 
+## v0.2.6 / pipeline_version 3 优先规则
+
+新项目为四图链路：avatar → expression → full_body → execution。身份、身体之后必先由服饰设计师提交并批准 `CostumeStyleBibleV1`，再提交并批准每状态 `stage-design:costume` 文字快照。执行提示词的 design_basis 顺序为 brief、identity、body、costume-bible、当前状态 costume、机械合成 design-card；执行图锚点为获批 avatar/expression/full_body，不再有 `costume_design` 图片或批准门槛。服饰文字设计及图片审查分别批准，图片每状态一次。v2 与 v1 规则见下文，仅旧项目使用。`upgrade-pipeline --project-root PROJECT --operator OPERATOR` 接受未批准服饰/执行图的 v2 项目，保留获批前三类身份图；旧服饰草案失效后重建圣经与文字设计。历史 complete 项目转 phased 后须补齐全文 context、方向、身份与身体快照并经审阅；旧身份图仍绑定迁移时的已批准整卡和原提示词 SHA，不自动改写为新设计依据。
+
+
 新项目默认 `design_progression:phased`：先理解全剧并确认人物方向，身份阶段看头像，身体与状态服饰按需深化。`init --design-progression complete` 保留先整卡后出图；旧 `project.json` 无此字段按 complete，不自动迁移批准记录。
 
 ## 1. 可复用的阅读与人物方向
@@ -40,7 +45,7 @@ python scripts/character_project.py submit --project-root /work/role-project --k
 
 独立首稿中的类型标称不是生产合同：人物理解可能只是可读摘要；正式submit时须补齐完整对象、十三项对象式specialist_plan和准确parent_refs。参照 [最小身份合同样例](../examples/phased-identity-contract.md)，不要把独立草案原封不动提交。
 
-## 3. 正式设计依据
+## 3. 正式设计依据（下表为 v2；v3 见顶部优先规则）
 
 phased 的 `CharacterPromptPackageV1` 使用 `design_basis:{records:{记录键:sha}}`，省略 `design_card_sha256`。各阶段最低依据：
 
@@ -71,7 +76,7 @@ python scripts/character_project.py promote-candidate --project-root /work/role-
 
 ## 5. 后续深化、合成与兼容
 
-头像正式后制作九宫格；身体快照确认后制作9:16全身模卡；每状态服饰快照确认后制作服饰图。execution 前运行：
+头像正式后制作九宫格；身体快照确认后制作9:16全身模卡；v3 每状态服饰快照确认后直接准备 9:16 四格 execution 图；v2 才另制作服饰图。execution 前运行：
 
 ```sh
 python scripts/character_project.py compile-design-card --project-root /work/role-project --character-id CHR-001 --variant-id STATE_ID

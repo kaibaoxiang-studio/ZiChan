@@ -208,6 +208,21 @@
       "origin": "local:面部装饰与妆容设计知识库.zip",
       "revision": "sha256:a31967bcbd94e527da59d9201dfc0ed4cdd8ec8710ce2669b91cb585b3279ec2",
       "adaptation": "用户课程方法精炼为 character-face-decoration-design 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"
+    },
+    {
+      "origin": "local:服饰深层设计知识库.zip",
+      "revision": "sha256:220689dec20a399e873dfba45ee8dca69594391c0d5a188d98dd26d1ebb8d72b",
+      "adaptation": "用户课程方法精炼为 character-costume-designer 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"
+    },
+    {
+      "origin": "local:原创AI角色捏脸_不用参考图_完整教程.docx",
+      "revision": "sha256:f66b749300ee08834ec21f4559563073fd6aa543b2747be473bf0aea383544dd",
+      "adaptation": "用户课程方法精炼为 character-face-design 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"
+    },
+    {
+      "origin": "local:AI角色妆造_提升角色质感_完整教程.docx",
+      "revision": "sha256:484972e5c1e4daa03208aa2df737a76aa4cd223640084cff7484043d5427ee2c",
+      "adaptation": "用户课程方法精炼为 character-costume-designer 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"
     }
   ]
 }

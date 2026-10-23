@@ -2785,6 +2785,171 @@
           "bytes": 9750
         }
       ]
+    },
+    {
+      "id": "costume-deep",
+      "archive": "服饰深层设计知识库.zip",
+      "archive_sha256": "220689dec20a399e873dfba45ee8dca69594391c0d5a188d98dd26d1ebb8d72b",
+      "ingested_sha256": "e103945647dd96c3c2a38bae4144e9ba3b897391da381909c9f95e3f7fc2a07d",
+      "capability": "character-costume-designer",
+      "rules": "knowledge-rules/costume-deep.md",
+      "members": [
+        {
+          "path": "服饰深层设计知识库/00-课程导论.md",
+          "sha256": "28ad89fa3a97c8f2fc8ffb0d3161eb2f8a12e1408779fd4e78fa40d7661d0d3b",
+          "bytes": 7816
+        },
+        {
+          "path": "服饰深层设计知识库/README.md",
+          "sha256": "bd4e68e3cec50d7318932b89842148f8ce6f3c797e3eff16dd7cf915329cc1ab",
+          "bytes": 5075
+        },
+        {
+          "path": "服饰深层设计知识库/模块1-世界观符号的抽象与解构/1-1-符号解构与几何化.md",
+          "sha256": "7bd67c3117b2a4068910664a22848191c6f97a71c701636e0c7e55a849e054c9",
+          "bytes": 8702
+        },
+        {
+          "path": "服饰深层设计知识库/模块1-世界观符号的抽象与解构/1-2-去语境化与重组.md",
+          "sha256": "0e7d5d7596967da76690ec8fef24e728ce3302ff0345d10e1dc5395a2870e72c",
+          "bytes": 8753
+        },
+        {
+          "path": "服饰深层设计知识库/模块1-世界观符号的抽象与解构/1-3-数字化与科技感重构.md",
+          "sha256": "35efbf1f072616b0b75eb33edb6e0d087281f54f77b7ffea295970c2fdbe1af1",
+          "bytes": 8461
+        },
+        {
+          "path": "服饰深层设计知识库/模块2-服饰纹样设计/2-1-专属纹样与图腾隐喻.md",
+          "sha256": "814c9d2f2d8084b36559d078ef835930bd7be946f83958cee88781bab16b7efd",
+          "bytes": 7781
+        },
+        {
+          "path": "服饰深层设计知识库/模块2-服饰纹样设计/2-2-文字与密码隐藏.md",
+          "sha256": "54bf686c18c89f8a0ff8c6da56df7b229e7d4235842e3f28def2d692cf78e832",
+          "bytes": 7500
+        },
+        {
+          "path": "服饰深层设计知识库/模块2-服饰纹样设计/2-3-材质隐喻与工艺结合.md",
+          "sha256": "f486620b60106ec68e5ed548b1836c681b6e2b2d1acd10bae7d30d90df2fd998",
+          "bytes": 8565
+        },
+        {
+          "path": "服饰深层设计知识库/模块3-视觉锚点与记忆点打造/3-1-核心视觉锚点.md",
+          "sha256": "06f19a75a84bb30a35a136dea26661fb355b61d54bce60dec1ae27b043e06b41",
+          "bytes": 7454
+        },
+        {
+          "path": "服饰深层设计知识库/模块3-视觉锚点与记忆点打造/3-2-色彩强对比与符号化配色.md",
+          "sha256": "57c5cabda6beb9ffb68be6b05301d6e24626d35675a6b62948e93f2660ccb102",
+          "bytes": 7959
+        },
+        {
+          "path": "服饰深层设计知识库/模块3-视觉锚点与记忆点打造/3-3-动态记忆点.md",
+          "sha256": "ebaa9ef07295051c295170f1566bae47040c3c9f4c68229c7c62798f53072d2e",
+          "bytes": 7346
+        },
+        {
+          "path": "服饰深层设计知识库/模块4-穿衣风格圣经/4-1-核心气质与关键词.md",
+          "sha256": "6a368b7b414988f35a6223d1eb0846b8537a8d92c842d80a3e2fee748d9c4498",
+          "bytes": 7127
+        },
+        {
+          "path": "服饰深层设计知识库/模块4-穿衣风格圣经/4-2-色彩与材质库.md",
+          "sha256": "bf874a4ba12edc1430ed2b9b03c662272c851d6c075463ccb46b1740c5b9a782",
+          "bytes": 7399
+        },
+        {
+          "path": "服饰深层设计知识库/模块4-穿衣风格圣经/4-3-标志性廓形与剪裁.md",
+          "sha256": "821b066794402306184927f8aa255c59b11ae8db13e75e4c855de9f8a9c2b9b6",
+          "bytes": 7245
+        },
+        {
+          "path": "服饰深层设计知识库/模块4-穿衣风格圣经/4-4-专属配饰与习惯.md",
+          "sha256": "2b49c945c2f8b8c34fb54900095a508969c14165550172efadbb7673f1b42cba",
+          "bytes": 7289
+        },
+        {
+          "path": "服饰深层设计知识库/模块4-穿衣风格圣经/4-5-场景化穿搭矩阵.md",
+          "sha256": "4b8074c2c8f88f95a23ef7ff50ca6fa30761c21ec3e29c9599960c33ea319435",
+          "bytes": 7287
+        },
+        {
+          "path": "服饰深层设计知识库/模块5-穿搭技巧与视觉冲突/5-1-材质硬软与光哑对冲.md",
+          "sha256": "bcfa72b2ef1b30109e5c794c927c1f295cf079a651b98ec07d8a2b65bbf3446c",
+          "bytes": 6468
+        },
+        {
+          "path": "服饰深层设计知识库/模块5-穿搭技巧与视觉冲突/5-2-三明治叠穿法则.md",
+          "sha256": "7a4d2fb68774c17584e80261cae58aef1b1bd654af550c42ad4dc843493fbe17",
+          "bytes": 7055
+        },
+        {
+          "path": "服饰深层设计知识库/模块5-穿搭技巧与视觉冲突/5-3-70-25-5配色法则.md",
+          "sha256": "d657265bb2104366eb9df62e712cfc4e656fda4b573f5f9292c0d32dc2091923",
+          "bytes": 6598
+        },
+        {
+          "path": "服饰深层设计知识库/模块5-穿搭技巧与视觉冲突/5-4-局部破损与修补逻辑.md",
+          "sha256": "f246705e976040d9fdadb649034b363a092a814e6be9e2a4714cf97c5527add5",
+          "bytes": 7054
+        },
+        {
+          "path": "服饰深层设计知识库/模块6-实操避坑与验证清单/6-1-避免细节堆砌.md",
+          "sha256": "7275c3566e891a0cee1dc70c6f2ba8443dbf6d3e169e810b087c709d7ad82d23",
+          "bytes": 7036
+        },
+        {
+          "path": "服饰深层设计知识库/模块6-实操避坑与验证清单/6-2-重力与物理逻辑.md",
+          "sha256": "eac5cd198d1525811314980d79f9f02acd3b598678f031b7865e27c74868fe95",
+          "bytes": 6282
+        },
+        {
+          "path": "服饰深层设计知识库/模块6-实操避坑与验证清单/6-3-剪影测试.md",
+          "sha256": "fda6c54ab8ed01661dbd5215f006ef6c6582db6c858a477832107f806b3fa366",
+          "bytes": 6223
+        },
+        {
+          "path": "服饰深层设计知识库/模块6-实操避坑与验证清单/6-4-功能逻辑.md",
+          "sha256": "98621addd2291033dc19c3f87e2281ab617c094938302e6f87452c671c2fc589",
+          "bytes": 7676
+        },
+        {
+          "path": "服饰深层设计知识库/附录-AI辅助生成提示词框架.md",
+          "sha256": "c1d26c498ec7bd4fb3c3281e0bd789e8dedaea149923776c7e0bda5af7f47a60",
+          "bytes": 7610
+        }
+      ]
+    },
+    {
+      "id": "original-face",
+      "archive": "原创AI角色捏脸_不用参考图_完整教程.docx",
+      "archive_sha256": "f66b749300ee08834ec21f4559563073fd6aa543b2747be473bf0aea383544dd",
+      "ingested_sha256": "6fd0169437d5608c32986512ccd247ecd5b3b3b30be73c0f243806f31feb7638",
+      "capability": "character-face-design",
+      "rules": "knowledge-rules/original-face.md",
+      "members": [
+        {
+          "path": "word/document.xml",
+          "sha256": "e8234520c84dae983d53252c8deaf82507ddaf3784571e1b2aa66683e7178e71",
+          "bytes": 53452
+        }
+      ]
+    },
+    {
+      "id": "state-makeup",
+      "archive": "AI角色妆造_提升角色质感_完整教程.docx",
+      "archive_sha256": "484972e5c1e4daa03208aa2df737a76aa4cd223640084cff7484043d5427ee2c",
+      "ingested_sha256": "928694ac242b7b63c02a5b033070e70ae6ca702f2ed290340f0ad4f054469aa8",
+      "capability": "character-costume-designer",
+      "rules": "knowledge-rules/state-makeup.md",
+      "members": [
+        {
+          "path": "word/document.xml",
+          "sha256": "b2747d818bac6cd6728bd3f831261ddc4f2a942ac6a73410e98961582a138532",
+          "bytes": 50846
+        }
+      ]
     }
   ]
 }

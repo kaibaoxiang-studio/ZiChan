@@ -40,11 +40,11 @@ SPECIALISTS = [
     ("character-body-design", "形体体态设计：年龄比例、骨架、重心与动作习惯", "body",
      "区分骨架、体重分布、比例和重心；先定测量姿态，再给头高/全高的约数及肩胯、同一端点体系的上段/下段、肘腕、膝踝的数值或骨点参照。身高体重和‘修长’不能代替比例；写颅胸盆体块与前侧背一致性，以剧本动作检验关节及衣装余量。"),
     ("character-face-design", "五官面部设计：原创骨相、比例与非模板面孔", "face",
-     "组合脸长宽、颧颌、眉眼距、鼻口比例，提出可画且原创的面孔；与比较组并排防撞脸，不用五官推断人格。"),
+     "按原创脸型轮廓→面部比例→五官主次→自然肤质顺序提出可画面孔；固定正面与45°身份结构，与比较组并排防撞脸。不复制单张真人全脸，不用五官推断人格。"),
     ("character-face-signature-design", "面部记忆点与锁骨以上饰品设计", "face-memory",
      "先用已有结构识别，再考虑面部记号、发饰、耳饰和颈饰；写固定点与连续性，新增伤痕纹身必须待批准。"),
     ("character-face-decoration-design", "面部装饰与妆容设计：稳定、施加与临时状态", "face-decoration",
-     "按稳定原生痕迹、主动施加的妆面和临时状态分层；每项写位置、形态、叙事依据和起止状态，无需求可不设计。"),
+     "按稳定原生痕迹、主动施加的妆面和临时状态分层；每项写位置、形态、叙事依据和起止状态，无需求可不设计。逐状态妆造不得改变已批准脸型和五官比例，不采用性别固定妆面套路。"),
     ("character-skin-design", "皮肤肌理设计：年龄、环境与真实表面", "skin",
      "写自然毛孔、局部光泽、纹理、色沉及有依据的生活痕迹；区分稳定肌理与临时污损，避免磨皮。"),
     ("character-costume-style-design", "服饰款式设计：衣装品类、长度和层次", "costume-style",
@@ -87,7 +87,7 @@ def blueprint():
             "从角色清单做第 -1 阶段视觉基准和全员轻规划；用群像差异化总控建立比较组与五轴矩阵，"
             "由人物设计总控先阅读全文，建立按来源版本复用的 ScriptContextV1，再形成 DesignDirectionBriefV1：人物定位、言行与关系、目标矛盾、人物弧线、观众信息、设计意图和专项任务。"
             "按 [人物理解与设计统筹](../../references/director-understanding.md) 从人物需要路由 Skill 或 knowledge/reference；未写外观不等于不需设计。常规问题同轮执行专项规范，复杂冲突独立会诊，保存真实参与方式和可见成果。"
-            "新项目默认按 [分阶段设计](../../references/phased-design.md) 提交身份、身体与各状态服饰快照，当前画幅做实后再推进；头像前不强迫补齐全部衣装。身体阶段仍须有五组比例锚点；全部完成后机械合成完整卡。"
+            "新项目默认按 [分阶段设计](../../references/phased-design.md) 提交身份、身体、穿衣风格圣经与各状态服饰文字快照。服饰设计师 Skill 必经，接收人物总控理解与方向，协调五个服饰专项；当前画幅做实后再推进。身体阶段仍须有五组比例锚点；全部完成后机械合成完整卡。"
             "默认一套连贯推荐，关键分歧给备选；先集中确认人物方向，再审当前阶段设计，不为微参数反复采访。用户要求先看一版时使用 preview 候选流程，实际审图和明确确认后同图转正。普通角色分层处理；已批准角色不因新方法自动重做。"
             "每轮只推进一个已授权且依赖已批准的阶段；及时提交结构化 JSON 并通过 CLI 记录批准、图片、审查和来源。"
             "本插件只写 GPT Image 2.5 提示词，不调用生图工具。用户回图后必须实际查看图片，"
@@ -95,10 +95,10 @@ def blueprint():
             "头像默认 3:4 竖版，全身图默认 9:16 竖版，只有操作者明确要求才更改。"
             "人形头像与表情以脸为主体，可取完整头部、双肩及上胸，不固定裁到锁骨以上；服装不入画用 face_only，上胸入画用对应白色背心，整组模式一致；"
             "全身图用白色背心、短裤、赤脚作模卡参考，执行资产表恢复已批准正式服装。"
-            "新项目依次完成头像、九宫格、全身模卡、每状态服饰设计图、执行资产图；每张图按资产名命名，逐图通过后才打包。旧项目沿用原四阶段。运行中报告实际文件路径、未解决疑点与下一步；不虚报成图质量。",
+            "新项目依次完成头像、九宫格、全身模卡、每状态一张 9:16 竖版四格服饰执行图；文字设计先批准，图像每张审查批准一次，按资产名命名后打包。旧项目沿用原链路；仅显式 upgrade-pipeline 可迁移合格旧项目。运行中报告实际文件路径、未解决疑点与下一步；不虚报成图质量。",
             ["knowledge/index.md", "references/workflow.md", "references/interfaces.md",
              "references/routing-and-integration.md", "references/director-understanding.md",
-             "references/phased-design.md", "references/costume-design-stage.md",
+             "references/phased-design.md", "references/costume-design-stage.md", "references/costume-designer.md",
              "references/model-card-baseline.md",
              "references/evidence.md", "references/source-notes.md",
              "references/differentiation-framework.md", "references/specialist-contract.md",
@@ -129,19 +129,36 @@ def blueprint():
             "从理解中提炼设计意图、约束、可画结果与真正需要专项解决的问题。生活因果与自由外观选择分别标记；主动补足剧本留白，不能用无外貌原文作为跳过理由。普通痣、淡雀斑和微不对称可随首稿整体确认，重大身份或剧情新设定单独提出。"
             "正式项目依据世界规则提出视觉基准并建立全员比较组；依 [专项交接](../../references/specialist-contract.md) 逐项选择 inline、independent、defer 或 not_needed。常规项实际读相应 Skill/知识并执行，复杂结构或跨专业冲突独立会诊；每项保留任务、知识来源和具体成果，不把知识加载写成独立调用。"
             "默认一套完整推荐，只有重要分歧才给备选。总控合成、取舍和核对成果是否服务同一个人，再由群像总控检查近邻撞型；避免全员美型和为差异强加疤痕。"
-            "依 [分阶段规则](../../references/phased-design.md) 保存 DesignDirectionBriefV1 和 CharacterStageDesignV1，身份先于身体和状态服饰，最后合成 CharacterDesignCardV2.5。当前阶段必须具体，后续内容明确延后而非伪填为无；身体阶段写五组比例锚点。"
+            "依 [分阶段规则](../../references/phased-design.md) 保存 DesignDirectionBriefV1 和 CharacterStageDesignV1，身份先于身体；服饰阶段必须调用 [服饰设计师](../../references/costume-designer.md) 建立 CostumeStyleBibleV1 后深化各状态，再合成完整卡。当前阶段必须具体，后续内容明确延后而非伪填为无；身体阶段写五组比例锚点。"
             "默认方向先确认；用户要求先看一版时保存冻结草案并交 preview 提示词，回图确认后可原图转正。已批准旧项目继续原流程。"
             "只有 project_root 内存在 project.json 才是已建正式项目；只有一个目录路径仍按独立设计处理。没有项目时可从 sources 或 request 中的剧本/小传独立分析设计，使用明确的草案角色标识，标明材料覆盖范围；建正式资产时再映射标准 ID，不凭空新增剧本人物。未指定阶段时默认只深化 identity/头像：交人物定位、当前身份设计和关键路由；身体与衣装只留方向和约束，不提前完成其详细合同。独立首稿不强制建项目、全员详设或准备整套生产JSON；输出简洁可读推荐与必要的依据草案，正式登记时再按接口写全。普通任务一次合成，只有具体未解问题才再次会诊，不为展示过程重复分析全文。不调用生图工具。",
             ["knowledge/index.md", "references/character-design.md",
-             "references/director-understanding.md", "references/phased-design.md",
+             "references/director-understanding.md", "references/phased-design.md", "references/costume-designer.md",
              "references/costume-and-morphology.md", "references/interfaces.md",
              "references/differentiation-framework.md", "references/specialist-contract.md",
              "references/design-detail-standard.md", "references/feature-focus-and-body-form.md",
              "references/routing-and-integration.md",
              "references/knowledge/character-world-appearance-design/world-appearance.md",
+             "references/knowledge/character-face-design/original-face.md",
              "references/knowledge/character-face-decoration-design/face-decoration.md",
+             "references/knowledge/character-costume-designer/state-makeup.md",
              "references/knowledge/character-design/feature-focus-design.md",
              "references/knowledge/character-design/anti-stereotype-texture.md"],
+            common, ("request",)),
+        capability(
+            "character-costume-designer", "服饰设计师：从人物弧线与世界规则建立穿衣风格圣经和状态服饰",
+            "# 服饰设计师\n\n读取 [服饰设计师合同](../../references/costume-designer.md) 与 [深层服饰方法](../../references/knowledge/character-costume-designer/costume-deep.md)。"
+            "接收总控已验证的全文理解、人物方向、项目美术基准和状态证据；优先核对来源SHA与服饰相关原文，不在服饰阶段重复阅读全文。若全文理解缺失或来源变更，交回人物总控补读；不把剧本的服装类别当作设计终点。先建立每角色 CostumeStyleBibleV1，重要角色完整状态矩阵，普通角色简版，群像可共用组基准。"
+            "按状态统筹款式、剪裁、配色、材质四项必做成果，饰品可有理由不用。推荐稿具体写正背结构、衣层连接、活动余量、材质行为、镜头焦点、人物弧线、跨状态延续与妆面发饰；每项区分原文、推导和创作选择。"
+            "任何新增家族、宗教、阵营含义单独待确认；不得强加世界符号或预设配色公式。常规问题同轮整合一稿，不为每项专项反复开启会诊。独立文字验收或单状态试稿默认只交一份约 2000–3000 汉字的具体设计；没有正式项目时不生成生产 JSON。正式项目则按已批准记录合同写结构化快照。不在此阶段产出横版服饰设计图。",
+            ["knowledge/index.md", "references/costume-designer.md", "references/phased-design.md",
+             "references/knowledge/character-costume-designer/costume-deep.md",
+             "references/knowledge/character-costume-designer/state-makeup.md",
+             "references/knowledge/character-costume-style-design/costume-style.md",
+             "references/knowledge/character-costume-cut-design/costume-cut.md",
+             "references/knowledge/character-costume-color-design/costume-color.md",
+             "references/knowledge/character-costume-material-design/costume-material.md",
+             "references/knowledge/character-costume-accessory-design/costume-accessory.md"],
             common, ("request",)),
         capability(
             "character-image-prompt", "把已批准设计转成 GPT Image 2.5 分阶段提示词",
@@ -154,11 +171,12 @@ def blueprint():
             "头像默认 3:4 竖版且每条提示词写明比例，只有操作者明确指定才覆盖；新分阶段项目默认一条推荐提示词，重要分歧再给备选；旧项目保留其候选合同；"
             "人形头像与表情以脸为主体，可取完整头部、双肩及上胸，不固定裁到锁骨以上；服装不入画用 face_only，上胸入画用对应白色背心，整组模式一致；新项目默认九宫格并写中文标签，16 格须有用户明确要求；"
             "全身图默认 9:16 竖版，每条提示词与验收项写明比例，穿对应白色背心、短裤并赤脚，头到双脚完整并留边界，逐条继承已批准身体快照（旧项目为设计卡）中的头身、肩胯与腿身关系并核对；"
-            "九宫格和全身模卡批准后，每个状态先做独立服饰设计图并批准；执行表必须引用该状态服饰图，按上正脸/45°半侧脸、下无头放大正面服装/完整背面四格。"
+            "九宫格和全身模卡批准后，每状态从已批准的穿衣风格圣经和服饰文字快照直接产出一张 9:16 竖版四格执行图：上正脸/45°半侧脸、下无头放大正面服装/完整背面。单图审查批准后直接打包；不得回退成横版服饰双视图。"
             "非人使用已批准替代布局。输出 CharacterPromptPackageV1 与检查点，经 CLI 合同校验后交操作者外部出图。",
             ["knowledge/index.md", "references/prompting.md", "references/model-card-baseline.md", "references/expression.md",
              "references/execution-sheet.md", "references/costume-design-stage.md", "references/interfaces.md",
              "references/phased-design.md",
+             "references/knowledge/character-costume-designer/state-makeup.md",
              "references/design-detail-standard.md", "references/render-texture-standard.md",
              "references/knowledge/character-image-prompt/feature-focus-prompt.md",
              "references/knowledge/character-image-prompt/hedgehog-2d3d.md",
@@ -171,13 +189,14 @@ def blueprint():
             "# 回图审查\n\n" + refs + "\n\n"
             "必须实际打开目标图片、已定稿头像及设计卡，读取 [审查规则](../../references/review.md)。"
             "分别检查原文事实、身份不变量、体型/服装/配饰、格位、中文标签、裁切与背景依据。"
-            "头像查默认 3:4，全身图查最终像素比例 9:16 与完整头手脚；服饰设计图逐状态核对衣装结构与妆面连续性，执行图核对同状态服饰锚点。"
+            "头像查默认 3:4，全身图查最终像素比例 9:16 与完整头手脚；新项目逐状态执行图查最终像素 9:16、衣装结构与妆面连续性；旧项目按原合同检查服饰设计图和执行图。"
             "按当前视角检查批准的主锚点与三维比例，分辨设计卡空泛与回图失真，查看油光、自然肌理、材质层次与伪影。"
             "人形执行表左下有嘴唇/头发残留就是错误；右上约 45°，右下完整背面。"
             "写 CharacterImageReviewV1，列阻断、待修与可采纳提案；无法看清即 uncertain。"
             "提交报告后由操作者明确选图批准，技能不能替代批准。",
             ["knowledge/index.md", "references/review.md", "references/model-card-baseline.md", "references/execution-sheet.md",
              "references/interfaces.md", "references/render-texture-standard.md", "references/costume-design-stage.md",
+             "references/knowledge/character-costume-designer/state-makeup.md",
              "references/knowledge/character-image-review/feature-focus-review.md",
              "references/knowledge/character-image-review/anti-stereotype-texture.md"],
             {**common, "image_path": text_field(), "stage": {"type": "string", "enum": list(("avatar", "expression", "full_body", "costume_design", "execution"))}},
@@ -222,6 +241,14 @@ def blueprint():
             specialist_refs.append("references/knowledge/character-body-design/body-proportion-3d.md")
         if ident == "character-feature-focus":
             specialist_refs.append("references/feature-focus-and-body-form.md")
+        if ident == "character-face-design":
+            specialist_refs.append("references/knowledge/character-face-design/original-face.md")
+        if ident == "character-face-decoration-design":
+            specialist_refs.append("references/knowledge/character-costume-designer/state-makeup.md")
+        if ident in {"character-costume-style-design", "character-costume-cut-design",
+                     "character-costume-color-design", "character-costume-material-design",
+                     "character-costume-accessory-design"}:
+            specialist_refs.append("references/knowledge/character-costume-designer/costume-deep.md")
         capabilities.append(capability(
             ident, description,
             "# " + description + "\n\n读取 [专项交接](../../references/specialist-contract.md)、"
@@ -277,7 +304,7 @@ def blueprint():
                  " 的独立规则；未打包原文，原始成员哈希见 knowledge/archive-manifest.json"}
                 for item in adoption["sources"]]
     return {"schema_version": "HarnessBlueprintV1",
-            "plugin": {"name": "character-assets", "version": "0.2.5.1",
+            "plugin": {"name": "character-assets", "version": "0.2.6",
                        "description": "从剧本依据建设可追溯的角色视觉资产包与 GPT Image 2.5 提示词",
                        "author": {"name": "开宝箱工作室"}},
             "goal": "独立运行的角色资产子插件：设计、提示词、回图审查与可复用资产包",
@@ -289,7 +316,7 @@ def blueprint():
                                     "首图候选经实际审图和明确确认可同图转正，未确认候选不能充当正式锚点",
                                     "头像默认 3:4、全身图默认 9:16，且仅明确用户要求可覆盖",
                                     "人形头像以脸为主体，允许头肩至上胸取景；服装不入画用 face_only，上胸入画用对应白色背心，表情继承模式；全身图采用背心短裤赤脚模卡，执行表恢复正式服装",
-                                    "五阶段单张和批量任务按资产状态、依赖和批准流转，图片文件名包含资产名",
+                                    "新项目四图链路、服饰文字快照与逐状态 9:16 四格执行图；旧项目保留旧链路，显式升级保留合格身份图",
                                     "去油与噪点修复区分设计和渲染证据"],
             "open_questions": [], "capabilities": capabilities, "files": files,
             "workflows": [], "sources": sources}
@@ -363,7 +390,8 @@ def finalize_output(output):
     names = {"character-assets": "角色资产主控", "character-evidence": "角色证据核对",
              "character-design": "人物设计总控", "character-image-prompt": "角色出图提示词",
              "character-image-review": "角色回图审查", "character-image-edit": "角色精确修图",
-             "character-cast-differentiation": "角色群像差异化"}
+             "character-cast-differentiation": "角色群像差异化",
+             "character-costume-designer": "角色服饰设计师"}
     names.update({ident: description.split("：", 1)[0]
                   for ident, description, _, _ in SPECIALISTS})
     for slug, display in names.items():

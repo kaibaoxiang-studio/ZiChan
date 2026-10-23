@@ -1,12 +1,17 @@
 # 接口与文件契约 v0.2.5
 
+## v0.2.6 / pipeline_version 3 接口覆盖
+
+新项目默认 `pipeline_version:3`，图像阶段为 `avatar,expression,full_body,execution`；旧 v2 仍是五图、v1 四图。新增记录 `CostumeStyleBibleV1`，键 `costume-bible:CHR:base`，须绑定获批 brief/identity/body SHA，含完整穿衣规则与重点角色状态矩阵。每状态 `CharacterStageDesignV1(scope:costume)` 的 `parent_refs` 再引用当前风格圣经；`payload.costume_direction` 须写剧本约束、剧情作用、前后结构、裁剪闭合、衣层、色块、材料行为、视觉焦点、行动/镜头、状态延续、妆面发饰、来源性质与原文引用。款式、剪裁、配色、材质四专项必须有实际应用结果；饰品可有理由不用。`execution` 提示词 `design_basis` 含 brief、identity、body、costume-bible、当前状态 costume、合成 design-card；图片锚点只含 avatar/expression/full_body。人形四格图默认 9:16 竖版，`aspect_ratio`、每条提示词、验收项都写比例；改画幅须明确用户要求。`variant_name` 与资产表一致。逐状态只有一张执行图，批准一次后打包 `CharacterAssetPackV3`。`upgrade-pipeline` 用于无已批准服饰/执行图的 v2 项目，旧项目仍按原合同。下文 v2 五阶段字段只适用历史项目。
+
+
 文件为 UTF-8 JSON，含 `schema_version`，角色/状态 ID 沿用资产表。`source_refs` 使用标准剧本位置、JSON 集场 ID 或保留的 `文件名:L行号`、`文件名:工作表!R行号`。合同校验不证明人物理解或画面质量。
 
 ## 输入与项目兼容
 
 可以独立接剧本、片段或小传先分析；声明范围和来源。受管理的正式项目使用剧本、资产表，可选场记，或 `init --snapshot` 的 `AssetProjectSnapshotV1`。快照至少含 `project_id`、`sources.screenplay` 与 `sources.asset_table` 的 `{path,sha256}`；scene_log 可选。可选 `visual_bible` 为 `{path,sha256,approval:{operator,at,sha256}}`，相对路径基于快照所在目录。
 
-`init --design-progression phased|complete` 新默认 phased；旧状态无字段按 complete。五阶段链路与设计深化方式是两个不同设置；旧四阶段不自动改为五阶段。
+`init --design-progression phased|complete` 新默认 phased；旧状态无字段按 complete。默认 phased 初始化为 v3 四图链路；显式 complete 初始化为历史 v2 五图模式。旧四阶段不自动升级。
 
 ## 项目基准与阅读
 
@@ -48,7 +53,7 @@ complete 模式填写已批准的 `design_card_sha256`。phased 模式省略该�
 
 头像预览填 `purpose:preview`、`preview_mode:direction_first|image_first`。direction_first 需要已批 brief、冻结 identity；image_first 仅在明确先图后确认需求时允许未批但冻结的 brief/identity。script-context须ready，visual-bible、cast-plan仍先批准。预览不是正式锚点。`promote-candidate --image-id ID --operator NAME` 在原依据已批、SHA一致且回图pass时同图转正；明确合并确认可用 `--approve-design-basis`。未决项、意外新增细节和不一致须先解决。
 
-新五阶段前三图用 base，后两图用当前状态。图片锚点：头像空，九宫格含头像，全身含头像和九宫格，服饰含三张基础图，执行再含本状态服饰图。phased头像1–3条，默认一套推荐；complete沿用2–3条。九宫格 labels 长9且各含中文；16格要求 `grid_explicit_user_override:true` 和 `grid_override_basis`。全身加 `head_visible:true,feet_visible:true`；服饰加资产表一致的 `variant_name`。
+v2 历史五阶段前三图用 base，后两图用当前状态；v3 前三图也用 base，execution 用当前状态。图片锚点：头像空，九宫格含头像，全身含头像和九宫格，服饰含三张基础图，执行再含本状态服饰图。phased头像1–3条，默认一套推荐；complete沿用2–3条。九宫格 labels 长9且各含中文；16格要求 `grid_explicit_user_override:true` 和 `grid_override_basis`。全身加 `head_visible:true,feet_visible:true`；服饰加资产表一致的 `variant_name`。
 
 头像 `aspect_ratio:3:4`，全身 `aspect_ratio:9:16`，每条写对应比例，全身验收也核比例。明确用户改比例时填 `aspect_ratio_explicit_user_override:true` 和 `aspect_ratio_basis`。人形基础图带 `reference_attire`：头像/表情 `face_only|white_tank|white_sports_tank`，全身 `white_tank_shorts_barefoot|white_sports_tank_black_shorts_barefoot`。头像可取双肩与上胸，不强制锁骨以上；上胸入画可直接白背心，不生成裸体躯干。从 face_only 头像切背心表情须 `reference_attire_basis`。例外用 `approved_exception`，附 basis 和 description。模卡衣装不是剧情状态，执行图恢复正式衣装。
 

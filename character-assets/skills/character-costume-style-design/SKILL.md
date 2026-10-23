@@ -14,3 +14,4 @@ description: "服饰款式设计：衣装品类、长度和层次"
 - [references/differentiation-framework.md](../../references/differentiation-framework.md)
 - [references/design-detail-standard.md](../../references/design-detail-standard.md)
 - [references/knowledge/character-costume-style-design/costume-style.md](../../references/knowledge/character-costume-style-design/costume-style.md)
+- [references/knowledge/character-costume-designer/costume-deep.md](../../references/knowledge/character-costume-designer/costume-deep.md)

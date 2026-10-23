@@ -290,6 +290,36 @@
       "capability_ids": [
         "character-face-decoration-design"
       ]
+    },
+    {
+      "source_id": "costume-deep",
+      "source_sha256": "e103945647dd96c3c2a38bae4144e9ba3b897391da381909c9f95e3f7fc2a07d",
+      "origin": "local:服饰深层设计知识库.zip",
+      "path": "references/knowledge/character-costume-designer/costume-deep.md",
+      "rules_sha256": "7591016c764114f3b512b76e1602e20d4fd12f6fc807e91bc6d01956860de282",
+      "capability_ids": [
+        "character-costume-designer"
+      ]
+    },
+    {
+      "source_id": "original-face",
+      "source_sha256": "6fd0169437d5608c32986512ccd247ecd5b3b3b30be73c0f243806f31feb7638",
+      "origin": "local:原创AI角色捏脸_不用参考图_完整教程.docx",
+      "path": "references/knowledge/character-face-design/original-face.md",
+      "rules_sha256": "791f79fac516716ee5579829f7311db4ba3ba27894fcc6402eadbd0581f19286",
+      "capability_ids": [
+        "character-face-design"
+      ]
+    },
+    {
+      "source_id": "state-makeup",
+      "source_sha256": "928694ac242b7b63c02a5b033070e70ae6ca702f2ed290340f0ad4f054469aa8",
+      "origin": "local:AI角色妆造_提升角色质感_完整教程.docx",
+      "path": "references/knowledge/character-costume-designer/state-makeup.md",
+      "rules_sha256": "9622296ebe1fc023305c1e38675be85b46089c091ff13954cd79ed76ee6c70a0",
+      "capability_ids": [
+        "character-costume-designer"
+      ]
     }
   ]
 }

@@ -34,3 +34,10 @@
 0.2.2 新增两份原始归档的 SHA、成员 SHA 和目标能力映射；共 15 份不同的用户归档、24 条能力映射和 27 份精炼快照（含 3 份历史刺猬素材快照）。新原文留在忽略的 `.harness/library/character-assets-0.2.2/`，仓库只提交重写规则与哈希收据。
 
 0.2.4.1 增加两份用户归档及各自独立的知识快照；来源成员与 SHA 见 `knowledge/archive-manifest.json`。原 ZIP 的私有副本与校验收据留在忽略的 `.harness/library/character-assets-0.2.4/`。三张用户给定的图像只用于模卡版式职责记录，不打包图像本体。新增方法按当前角色项目边界独立实现。
+
+## v0.2.6 服饰与妆造增补
+
+- 《服饰深层设计知识库.zip》：提炼世界符号抽象、纹样叙事、镜头记忆点、穿衣风格圣经、受控视觉冲突与物理/拍摄检验，落地 `character-costume-designer/costume-deep.md`。22 节课程及导论/附录的成员 SHA 记录于 `knowledge/archive-manifest.json`；未把 70:25:5、三层叠穿当硬规则，未经核实的例子不成为人物事实。
+- 《原创AI角色捏脸_不用参考图_完整教程.docx》：提炼原创脸型→面部比例→五官主次→身份锁定，落地 `character-face-design/original-face.md`。未采用男女、性格与脸型的固定映射，局部参考不等于复制真人脸。
+- 《AI角色妆造_提升角色质感_完整教程.docx》：提炼身份稳定与状态施加层、妆面/发饰/衣装连续性，落地 `character-costume-designer/state-makeup.md`。教程的男女妆造定式、贵妃/侠客例子和剧情背景均未成为插件默认设定。
+- 学术参考只支持方法边界，不证明任何固定服饰公式。可核对 [Itti、Koch、Niebur 的视觉显著性模型](https://hasler.ece.gatech.edu/Courses/MachineLearning/FoundationalPapers/Itti_Koch_Neiber1998.pdf)、[Entwistle 的服饰与身体社会实践](https://www.wiley.com/en-ie/the-fashioned-body-fashion-dress-and-modern-social-theory-3rd-edition-p-9781509547906)、[Baraff 与 Witkin 的布料模拟](https://www.cs.cmu.edu/~baraff/papers/sig98.pdf)。这些来源用于解释注意力、社会语境和材质物理，不作为具体角色服装的剧本证据。

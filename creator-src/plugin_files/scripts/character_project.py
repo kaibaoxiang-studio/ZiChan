@@ -26,10 +26,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import phased_design as phased
 
 SCHEMA = "CharacterProjectV1"
-PLUGIN_VERSION = "0.2.5"
+PLUGIN_VERSION = "0.2.6"
 IDENTITY_STAGES = ("avatar", "expression", "full_body")
 STAGES = (*IDENTITY_STAGES, "costume_design", "execution")
 LEGACY_STAGES = (*IDENTITY_STAGES, "execution")
+V3_STAGES = (*IDENTITY_STAGES, "execution")
 HEAVY_TIERS = {"主角", "重要角色"}
 SUPPORTED_INPUTS = {".json", ".md", ".markdown", ".txt", ".xlsx"}
 IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp"}
@@ -148,7 +149,23 @@ def safe_asset_label(value):
 
 
 def pipeline_stages(state):
-    return STAGES if state.get("pipeline_version", 1) >= 2 else LEGACY_STAGES
+    version = state.get("pipeline_version", 1)
+    return V3_STAGES if version >= 3 else STAGES if version == 2 else LEGACY_STAGES
+
+
+def image_predecessors(state, stage):
+    version = state.get("pipeline_version", 1)
+    if version >= 3:
+        return {"avatar": (), "expression": ("avatar",),
+                "full_body": ("avatar", "expression"),
+                "execution": IDENTITY_STAGES}[stage]
+    if version == 2:
+        return {"avatar": (), "expression": ("avatar",),
+                "full_body": ("avatar", "expression"),
+                "costume_design": IDENTITY_STAGES,
+                "execution": (*IDENTITY_STAGES, "costume_design")}[stage]
+    return {"avatar": (), "expression": ("avatar",),
+            "full_body": ("avatar",), "execution": IDENTITY_STAGES}[stage]
 
 
 def variant_name(state, character_id, variant_id):
@@ -670,7 +687,14 @@ def _checked_image(root, state, stage, character_id, variant_id):
         "prompt-package", character_id, variant_id, stage))
     ensure(image["prompt_sha256"] == prompt["sha256"],
            f"Image was generated from another prompt version: {image['id']}")
-    if phased.enabled(state):
+    if phased.enabled(state) and image.get("migration_legacy_identity"):
+        legacy = image["migration_legacy_identity"]
+        card = _checked_record(root, state, legacy["card_key"])
+        package = read_json(root / prompt["path"])
+        ensure(card["sha256"] == legacy["card_sha256"] == package.get("design_card_sha256"),
+               "Migrated identity image lost its historical approved card")
+        ensure(image.get("purpose", "production") == "production", "Preview candidates cannot be migrated identity anchors")
+    elif phased.enabled(state):
         package = read_json(root / prompt["path"])
         phased.resolve_basis(_runtime(), root, state, package, character_id, variant_id, stage, force_approved=True)
         ensure(image.get("purpose", "production") == "production", "Preview candidates cannot be downstream anchors")
@@ -700,7 +724,7 @@ def _invalidate(state, character_id=None, variant_id=None, start="visual-bible")
     affected = downstream[start]
     if phased.enabled(state) and start in {"visual-bible", "cast-plan", "design-card"}:
         for key, value in state["records"].items():
-            if key.startswith(("design-brief:", "stage-design:")) and (not character_id or character_id in key.split(":")):
+            if key.startswith(("design-brief:", "stage-design:", "costume-bible:")) and (not character_id or character_id in key.split(":")):
                 value.update(stale=True, approval=None)
     for key, value in state["records"].items():
         parts = key.split(":")
@@ -859,6 +883,23 @@ def _validate_record(kind, data, state, character_id=None, variant_id=None, stag
                    "Costume design must name its exact asset-table variant")
             ensure(any("服饰" in x or "服装" in x for x in data["acceptance_checks"]),
                    "Costume design checks must cover visible garment structure")
+        if stage == "execution" and state.get("pipeline_version", 1) >= 3:
+            ratio = data.get("aspect_ratio")
+            ensure(isinstance(ratio, str) and re.fullmatch(r"[1-9][0-9]*:[1-9][0-9]*", ratio),
+                   "V3 costume execution sheet needs aspect_ratio; default is 9:16")
+            if ratio != "9:16":
+                require_text(data, "aspect_ratio_basis")
+                ensure(data.get("aspect_ratio_explicit_user_override") is True,
+                       "V3 costume execution ratio may differ from 9:16 only by explicit user override")
+            ensure(all(ratio in prompt["text"] for prompt in data["prompts"]),
+                   "Each costume execution prompt must state its canvas ratio")
+            ensure(any(ratio in check for check in data["acceptance_checks"]),
+                   "Costume execution review must verify the canvas ratio")
+            ensure(any("服饰" in check or "服装" in check for check in data["acceptance_checks"]),
+                   "Costume execution review must check garment structure")
+            require_text(data, "variant_name")
+            ensure(data["variant_name"] == variant_name(state, character_id, variant_id),
+                   "Costume execution must use the asset-table state name")
         if stage == "execution" and data.get("morphology") == "human":
             layout = data.get("layout") or {}
             ensure(layout.get("top_left") == "front_face" and
@@ -928,8 +969,9 @@ def cmd_init(args):
     for kind, value in data.items():
         if not (isinstance(value, dict) and kind == "asset_table" and "characters" in value):
             write_json(root / "inputs" / f"rev-001/{kind}.normalized.json", value)
-    state = {"schema_version": SCHEMA, "pipeline_version": 2,
-             "design_progression": getattr(args, "design_progression", "phased"),
+    progression = getattr(args, "design_progression", "phased")
+    state = {"schema_version": SCHEMA, "pipeline_version": 3 if progression == "phased" else 2,
+             "design_progression": progression,
              "project_id": args.project_id, "created_at": now(),
              "revision": 1, "inputs": inputs, "roster": roster, "records": {},
              "images": [], "reviews": {}, "references": [], "pending_impact": None,
@@ -950,6 +992,7 @@ def cmd_init(args):
     write_json(root / "project.json", state)
     return {"project_root": str(root), "characters": len(roster),
             "design_progression": state["design_progression"],
+            "pipeline_version": state["pipeline_version"],
             "deep_design": [row["id"] for row in roster if row["priority"] == "deep"],
             "scene_log_present": bool(args.scene_log)}
 
@@ -969,10 +1012,56 @@ def cmd_status(args):
             "pending_impact": state["pending_impact"]}
 
 
+def cmd_upgrade_pipeline(args):
+    """Explicit V2→V3 migration; preserve approved identity pictures and history."""
+    with locked_project(args.project_root) as (root, state):
+        ensure(state.get("pipeline_version", 1) == 2,
+               "Only pipeline 2 projects can use this migration")
+        ensure(not state.get("pending_impact"), "Resolve source impact before migration")
+        approved_garments = [x["id"] for x in state["images"] if x["stage"] in {"costume_design", "execution"}
+                             and x.get("approval") and not x.get("stale")]
+        ensure(not approved_garments, f"Approved garment images require the original pipeline: {approved_garments}")
+        require_text({"operator": args.operator}, "operator")
+        was_phased = phased.enabled(state)
+        preserved_images = [x for x in state["images"] if x["stage"] in IDENTITY_STAGES
+                            and x.get("approval") and not x.get("stale")]
+        for image in preserved_images:
+            _checked_image(root, state, image["stage"], image["character_id"], image["variant_id"])
+            if not was_phased:
+                prompt_key = _record_key("prompt-package", image["character_id"], image["variant_id"], image["stage"])
+                package = read_json(root / state["records"][prompt_key]["path"])
+                card_key = _record_key("design-card", image["character_id"], image["variant_id"])
+                card = _checked_record(root, state, card_key)
+                ensure(package.get("design_card_sha256") == card["sha256"], "Historical identity basis changed")
+                migration_key = f"migration-design-card:{image['character_id']}:{image['variant_id']}"
+                state["records"][migration_key] = copy.deepcopy(card)
+                image["migration_legacy_identity"] = {"card_key": migration_key,
+                                                       "card_sha256": card["sha256"]}
+        preserved = [x["id"] for x in preserved_images]
+        for record_key, record in state["records"].items():
+            if record_key.startswith(("stage-design:costume:", "design-card:", "prompt-package:costume_design:",
+                                      "prompt-package:execution:")):
+                record.update(stale=True, approval=None)
+        for image in state["images"]:
+            if image["stage"] in {"costume_design", "execution"}:
+                image.update(stale=True, approval=None)
+        state["pipeline_version"] = 3
+        state["design_progression"] = "phased"
+        state["decisions"].append({"kind": "upgrade-pipeline", "from": 2, "to": 3,
+                                   "operator": args.operator, "at": now(), "preserved_image_ids": preserved,
+                                   "from_design_progression": "phased" if was_phased else "complete"})
+        return {"pipeline_version": 3, "preserved_approved_identity_images": preserved,
+                "requires": (["CostumeStyleBibleV1", "new state costume snapshots", "execution 9:16"]
+                             if was_phased else ["ScriptContextV1", "DesignDirectionBriefV1", "approved identity/body backfill",
+                                                 "CostumeStyleBibleV1", "new state costume snapshots", "execution 9:16"])}
+
+
 def cmd_plan(args):
     """Read-only single or batch queue; each image remains separately reviewed and approved."""
     root = Path(args.project_root).expanduser().resolve()
     state = read_json(root / "project.json")
+    ensure(not args.stage or args.stage in pipeline_stages(state),
+           "Requested stage is not available in this project pipeline")
     modern = state.get("pipeline_version", 1) >= 2
     requested = ([args.character_id] if isinstance(args.character_id, str)
                  else list(args.character_id or []))
@@ -990,7 +1079,8 @@ def cmd_plan(args):
         variants = [x["id"] for x in person.get("states", []) if x.get("id")]
         variants = variants or ["base"]
         targets = ([(stage, "base") for stage in IDENTITY_STAGES] +
-                   [(stage, variant) for variant in variants for stage in ("costume_design", "execution")]
+                   [(stage, variant) for variant in variants
+                    for stage in pipeline_stages(state) if stage not in IDENTITY_STAGES]
                    if modern else [(stage, variant) for variant in variants for stage in LEGACY_STAGES])
         for stage, variant in targets:
             if args.stage and stage != args.stage:
@@ -1001,20 +1091,14 @@ def cmd_plan(args):
             if state.get("pending_impact"):
                 blockers.append("Unresolved upstream impact")
             card_variant = variant
-            design_dependencies = (phased.basis_keys(person["id"], variant, stage) if phased.enabled(state)
+            design_dependencies = (phased.basis_keys(person["id"], variant, stage, state) if phased.enabled(state)
                                    else [_record_key("design-card", person["id"], card_variant)])
             for key in ("visual-bible", "cast-plan", *design_dependencies):
                 try:
                     _checked_record(root, state, key)
                 except (ValueError, KeyError) as exc:
                     blockers.append(str(exc))
-            predecessors = ({"avatar": (), "expression": ("avatar",),
-                             "full_body": ("avatar", "expression"),
-                             "costume_design": IDENTITY_STAGES,
-                             "execution": (*IDENTITY_STAGES, "costume_design")}[stage]
-                            if modern else {"avatar": (), "expression": ("avatar",),
-                                            "full_body": ("avatar",),
-                                            "execution": IDENTITY_STAGES}[stage])
+            predecessors = image_predecessors(state, stage)
             for prior in predecessors:
                 anchor_variant = "base" if modern and prior in IDENTITY_STAGES else variant
                 try:
@@ -1042,7 +1126,7 @@ def cmd_plan(args):
             tasks.append(task)
     return {"mode": "single" if len(requested) == 1 else "batch",
             "design_progression": state.get("design_progression", "complete"),
-            "pipeline_version": 2 if modern else 1,
+            "pipeline_version": state.get("pipeline_version", 1),
             "tasks": tasks}
 
 
@@ -1081,10 +1165,7 @@ def cmd_submit(args):
                 card_record = _checked_record(root, state, card_key)
             anchors = {}
             if modern:
-                predecessors = {"avatar": (), "expression": ("avatar",),
-                                "full_body": ("avatar", "expression"),
-                                "costume_design": IDENTITY_STAGES,
-                                "execution": (*IDENTITY_STAGES, "costume_design")}[args.stage]
+                predecessors = image_predecessors(state, args.stage)
                 for anchor_stage in predecessors:
                     anchor_variant = "base" if anchor_stage in IDENTITY_STAGES else variant_id
                     anchors[anchor_stage] = _checked_image(
@@ -1205,11 +1286,11 @@ def cmd_import_reference(args):
 
 
 def cmd_import_image(args):
-    ensure(args.stage in STAGES, "Invalid image stage")
     source = Path(args.path).expanduser().resolve()
     ensure(source.is_file() and source.suffix.lower() in IMAGE_SUFFIXES,
            "Image must be PNG, JPG or WebP")
     with locked_project(args.project_root) as (root, state):
+        ensure(args.stage in pipeline_stages(state), "Image stage is unavailable in this project pipeline")
         ensure(not state["pending_impact"], "Resolve upstream impact first")
         variant_id = args.variant_id or "base"
         key = _record_key("prompt-package", args.character_id, variant_id, args.stage)
@@ -1305,7 +1386,7 @@ def cmd_approve_image(args):
             modern = state.get("pipeline_version", 1) >= 2
             if modern and image["stage"] in IDENTITY_STAGES:
                 following = {"avatar": "expression", "expression": "full_body",
-                             "full_body": "costume_design"}[image["stage"]]
+                             "full_body": "execution" if state.get("pipeline_version", 1) >= 3 else "costume_design"}[image["stage"]]
                 _invalidate(state, image["character_id"], None, following)
             elif image["stage"] == "avatar":
                 _invalidate(state, image["character_id"], image["variant_id"], "expression")
@@ -1398,13 +1479,16 @@ def cmd_package(args):
                for v in card_variants]
     phase_keys = []
     if phased.enabled(state):
-        phase_keys = ["script-context", *phased.basis_keys(ident, variant, "execution")[:-1]]
+        phase_keys = ["script-context", *phased.basis_keys(ident, variant, "execution", state)[:-1]]
         records.extend(_checked_record(root, state, item) for item in phase_keys)
     images = []
     for stage in pipeline_stages(state):
         stage_variant = "base" if modern and stage in IDENTITY_STAGES else variant
         records.append(_checked_record(root, state, _record_key("prompt-package", ident, stage_variant, stage)))
         images.append(_checked_image(root, state, stage, ident, stage_variant))
+    legacy_identity_keys = sorted({x["migration_legacy_identity"]["card_key"] for x in images
+                                   if x.get("migration_legacy_identity")})
+    records.extend(_checked_record(root, state, item) for item in legacy_identity_keys)
     out = Path(args.output).expanduser().resolve()
     ensure(not out.exists(), f"Output already exists: {out}")
     out.mkdir(parents=True)
@@ -1478,15 +1562,19 @@ def cmd_package(args):
     image_ids = {x["id"] for x in images}
     record_keys = {"visual-bible", "cast-plan"}
     record_keys.update(phase_keys)
+    record_keys.update(legacy_identity_keys)
     record_keys.update(_record_key("design-card", ident, v) for v in card_variants)
     record_keys.update(_record_key("prompt-package", ident,
                                    "base" if modern and stage in IDENTITY_STAGES else variant, stage)
                        for stage in pipeline_stages(state))
-    manifest = {"schema_version": "CharacterAssetPackV2" if modern else "CharacterAssetPackV1",
+    manifest = {"schema_version": "CharacterAssetPackV3" if state.get("pipeline_version", 1) >= 3 else
+                               "CharacterAssetPackV2" if modern else "CharacterAssetPackV1",
                 "plugin_version": PLUGIN_VERSION,
                 "project_id": state["project_id"],
                 "character_id": ident, "asset_name": next(x["name"] for x in state["roster"] if x["id"] == ident),
                 "variant_id": variant, "variant_name": variant_name(state, ident, variant),
+                "legacy_identity_basis": {x["stage"]: x["migration_legacy_identity"] for x in images
+                                          if x.get("migration_legacy_identity")},
                 "created_at": now(),
                 "input_sources": state["inputs"],
                 "approved_images": {x["stage"]: {"path": x["path"], "sha256": x["sha256"],
@@ -1530,6 +1618,9 @@ def build_parser():
     context.add_argument("--output")
     status = sub.add_parser("status")
     status.add_argument("--project-root", required=True)
+    upgrade = sub.add_parser("upgrade-pipeline", help="Explicitly migrate an eligible phased V2 project to the four-image V3 pipeline")
+    upgrade.add_argument("--project-root", required=True)
+    upgrade.add_argument("--operator", required=True)
     plan = sub.add_parser("plan", help="Read-only stage queue for one character or the full roster")
     plan.add_argument("--project-root", required=True)
     plan.add_argument("--character-id", action="append", help="Repeat to plan a selected batch; omit for all")
@@ -1599,7 +1690,8 @@ def build_parser():
 
 def main():
     args = build_parser().parse_args()
-    actions = {"init": cmd_init, "status": cmd_status, "plan": cmd_plan, "submit": cmd_submit,
+    actions = {"init": cmd_init, "status": cmd_status, "upgrade-pipeline": cmd_upgrade_pipeline,
+               "plan": cmd_plan, "submit": cmd_submit,
                "context-units": lambda args: phased.context_units(_runtime(), args),
                "compile-design-card": lambda args: phased.compile_card(_runtime(), args),
                "promote-candidate": lambda args: phased.promote(_runtime(), args),
