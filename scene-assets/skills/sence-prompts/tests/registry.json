@@ -74,6 +74,9 @@
     {"id": "UX-I", "input": "tests/onboarding-start-input.md", "assertions": "tests/onboarding-assertions.md", "rules": ["user-guidance", "provenance"], "level": "text"},
     {"id": "UX-N", "input": "tests/onboarding-ready-input.md", "assertions": "tests/onboarding-assertions.md", "rules": ["user-guidance", "scope", "delivery"], "level": "text"},
     {"id": "UX-S", "input": "tests/onboarding-explain-input.md", "assertions": "tests/onboarding-assertions.md", "rules": ["user-guidance"], "level": "text"},
-    {"id": "UX-P", "input": "tests/onboarding-prompt-only-input.md", "assertions": "tests/onboarding-assertions.md", "rules": ["user-guidance", "delivery", "handoff", "local-change"], "level": "text"}
+    {"id": "UX-P", "input": "tests/onboarding-prompt-only-input.md", "assertions": "tests/onboarding-assertions.md", "rules": ["user-guidance", "delivery", "handoff", "local-change"], "level": "text"},
+    {"id": "RF-S", "input": "tests/design-search-input.md", "assertions": "tests/design-method-assertions.md", "rules": ["design-reference", "design-closure", "first-step-light", "provenance", "delivery"], "level": "text"},
+    {"id": "RF-M", "input": "tests/design-mixed-input.md", "assertions": "tests/design-method-assertions.md", "rules": ["design-reference", "design-closure", "first-step-light", "delivery"], "level": "text"},
+    {"id": "UX-D", "input": "tests/onboarding-direct-angle-input.md", "assertions": "tests/design-method-assertions.md", "rules": ["user-guidance", "handoff", "local-change", "delivery"], "level": "text"}
   ]
 }
