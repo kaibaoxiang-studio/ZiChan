@@ -4,7 +4,7 @@ ZiChan 收录三项平行、可独立安装的资产插件。剧本与资产表�
 
 | 插件 | 当前版本 | 维护来源 | 主要交付 |
 | --- | --- | --- | --- |
-| [角色资产插件](character-assets/README.md) | **v0.2.6.4-local** | 项目维护者 | 全文人物理解、完整头像设计与按需预览、回图审查、逐状态资产包与有设定图资产表规则 |
+| [角色资产插件](character-assets/README.md) | **v0.2.13** | 项目维护者 | 全文人物理解、逐状态妆发饰需求、服饰部件设计、执行提示词细节校验与资产交付 |
 | [道具资产插件](prop-assets/README.md) | **v0.2.5** | [18571635839-a11y](https://github.com/18571635839-a11y) | 道具概念与材质、配色、纹样、轮廓专项；逐件设计及完整 Prompt 表 |
 | [场景资产插件](scene-assets/README.md) | **v0.9.5** | [runningg0301-prog](https://github.com/runningg0301-prog) | 静态场景设计、光影氛围与色卡、反打／多角度及局部修改提示词 |
 
@@ -16,7 +16,7 @@ ZiChan 收录三项平行、可独立安装的资产插件。剧本与资产表�
 
 ```text
 ZiChan/
-├── character-assets/   角色资产插件 v0.2.6.4-local
+├── character-assets/   角色资产插件 v0.2.13
 ├── prop-assets/        道具资产插件 v0.2.5
 ├── scene-assets/       场景资产插件与技能 v0.9.5
 ├── .agents/            三插件本地市场清单
