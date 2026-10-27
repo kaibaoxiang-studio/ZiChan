@@ -6,9 +6,9 @@ ZiChan 收录三项平行、可独立安装的资产插件。剧本与资产表�
 | --- | --- | --- | --- |
 | [角色资产插件](character-assets/README.md) | **v0.2.6.2** | 项目维护者 | 全文人物理解、角色设计、分阶段提示词、回图审查、逐状态资产包与有设定图资产表规则 |
 | [道具资产插件](prop-assets/README.md) | **v0.2.5** | [18571635839-a11y](https://github.com/18571635839-a11y) | 道具概念与材质、配色、纹样、轮廓专项；逐件设计及完整 Prompt 表 |
-| [场景资产插件](scene-assets/README.md) | **v1.0.1** | [runningg0301-prog](https://github.com/runningg0301-prog) | 静态场景设计、光影氛围与色卡、反打／多角度及局部修改提示词 |
+| [场景资产插件](scene-assets/README.md) | **v0.9.5** | [runningg0301-prog](https://github.com/runningg0301-prog) | 静态场景设计、光影氛围与色卡、反打／多角度及局部修改提示词 |
 
-插件版本以各目录的 `.codex-plugin/plugin.json` 为准。角色插件另有 `plugin.json` 与项目 CLI；场景插件内置的 Skill 名称保留原拼写 `$sence-prompts`，当前技能源码版本为 v0.9.5，与插件包装版本分别记录，详见[场景插件说明](scene-assets/README.md)。道具插件入口为 `$prop-concept-design`。
+插件版本以各目录的 `.codex-plugin/plugin.json` 为准。角色插件另有 `plugin.json` 与项目 CLI；场景插件内置的 Skill 名称保留原拼写 `$sence-prompts`，插件包与技能包版本统一为 v0.9.5，详见[场景插件说明](scene-assets/README.md)。道具插件入口为 `$prop-concept-design`。
 
 道具插件 v0.2.5 新增五份设计参考：形体与体积、特殊材质与光学、分品类常见失败、方向发散、呈现／挂载／状态推进。相关知识按需接入概念、主视觉、审核与扩展节点，保持独立专项的范围及用户确认规则；详见[道具插件更新说明](prop-assets/README.md#参考资料)。
 
@@ -18,7 +18,7 @@ ZiChan 收录三项平行、可独立安装的资产插件。剧本与资产表�
 ZiChan/
 ├── character-assets/   角色资产插件 v0.2.6.2
 ├── prop-assets/        道具资产插件 v0.2.5
-├── scene-assets/       场景资产插件 v1.0.1（技能 v0.9.5）
+├── scene-assets/       场景资产插件与技能 v0.9.5
 ├── .agents/            三插件本地市场清单
 ├── .gitignore
 └── README.md
