@@ -19,5 +19,4 @@ description: "发型设计：发流、体积、轮廓与跨视角连续性"
 - [references/design-detail-standard.md](../../references/design-detail-standard.md)
 - [references/knowledge/character-hair-design/hair.md](../../references/knowledge/character-hair-design/hair.md)
 - [references/scene-styling-needs.md](../../references/scene-styling-needs.md)
-
-Read [avatar-hair-names-07](../../references/knowledge/character-hair-design/avatar-hair-names-07.md) when this capability needs the supplied knowledge.
+- [references/knowledge/character-hair-design/avatar-hair-names-07.md](../../references/knowledge/character-hair-design/avatar-hair-names-07.md)

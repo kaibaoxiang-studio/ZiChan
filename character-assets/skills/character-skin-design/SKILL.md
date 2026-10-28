@@ -18,7 +18,5 @@ description: "皮肤肌理设计：年龄、环境与真实表面"
 - [references/knowledge/character-skin-design/skin.md](../../references/knowledge/character-skin-design/skin.md)
 - [references/render-texture-standard.md](../../references/render-texture-standard.md)
 - [references/knowledge/character-skin-design/anti-stereotype-texture.md](../../references/knowledge/character-skin-design/anti-stereotype-texture.md)
-
-Read [avatar-skin-material-14](../../references/knowledge/character-skin-design/avatar-skin-material-14.md) when this capability needs the supplied knowledge.
-
-Read [avatar-facial-hair-15](../../references/knowledge/character-skin-design/avatar-facial-hair-15.md) when this capability needs the supplied knowledge.
+- [references/knowledge/character-skin-design/avatar-skin-material-14.md](../../references/knowledge/character-skin-design/avatar-skin-material-14.md)
+- [references/knowledge/character-skin-design/avatar-facial-hair-15.md](../../references/knowledge/character-skin-design/avatar-facial-hair-15.md)

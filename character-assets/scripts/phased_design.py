@@ -8,6 +8,7 @@ from __future__ import annotations
 import copy
 import json
 from pathlib import Path
+import re
 
 KINDS = {"script-context", "design-brief", "costume-bible", "stage-design"}
 SCOPES = {"identity", "body", "costume"}
@@ -32,11 +33,111 @@ STATE_STYLING_SPECIALISTS = {
 SCENE_NEED_NAMES = (*STATE_STYLING_SPECIALISTS, "garment")
 COMMON_PAYLOAD = {"facts", "inferences", "approved_choices", "recognition_axes", "world_influences", "morphology", "morphology_details"}
 SCOPE_PAYLOAD = {
-    "identity": {"appearance", "feature_focus", "facial_surface", "differentiation_review", "execution_layout", "identity_invariants"},
-    "body": {"body_form"}, "costume": {"costume", "costume_direction"},
+    "identity": {"appearance", "feature_focus", "facial_surface", "differentiation_review", "execution_layout", "identity_invariants", "prompt_detail_contract"},
+    "body": {"body_form"}, "costume": {"costume", "costume_direction", "prompt_detail_contract"},
 }
 AXIS_SCOPES = {"face_structure": "identity", "hair_structure": "identity", "silhouette": "body",
                "body_posture": "body", "costume_color": "costume"}
+
+# Every selected, visible design cue survives the design-to-prompt handoff.
+# These are information dimensions, not prescribed character features or word counts.
+PROMPT_DETAIL_FIELDS = {
+    "face": {"type", "forehead_cheekbone", "jaw_chin", "turning"},
+    "hair": {"type_length", "hairline_part", "left_right", "back_flow", "surface_control"},
+    "brow": {"shape_placement"},
+    "eye": {"shape_placement", "lid_iris"},
+    "ear": {"shape_visibility"},
+    "nose": {"bridge_tip_wings"},
+    "lip": {"width_shape_corners"},
+    "skin": {"tone_distribution", "finish_artifact_control"},
+    "makeup": {"base", "brow", "eye", "cheek", "lip"},
+    "adornment": {"name_shape_scale", "body_side_position", "attachment_visibility", "material_state"},
+    "identity": {"face_body_anchor", "reference_roles", "cross_panel"},
+    "garment": {"name_silhouette", "placement_scale", "panels", "overlap_fastening",
+                "material_color", "front_side_back", "mobility"},
+    "focus_component": {"outline_scale", "pieces", "anchor_overlap_fastening",
+                        "surface", "front_side_back", "motion"},
+    "surface_pattern": {"carrier", "motif_scale", "placement_density", "technique_visibility"},
+    "footwear": {"toe_opening", "upper_fastening", "heel_sole", "material_color", "front_back"},
+    "framing": {"canvas_crop", "attire_or_panels", "background_light"},
+}
+PROMPT_DETAIL_REQUIRED = {
+    "avatar": {"face", "hair", "brow", "eye", "ear", "nose", "lip", "skin", "framing"},
+    "execution": {"identity", "hair", "skin", "garment", "footwear", "framing"},
+}
+PROMPT_DETAIL_ALLOWED = {
+    "avatar": PROMPT_DETAIL_REQUIRED["avatar"] | {"makeup", "adornment"},
+    "execution": PROMPT_DETAIL_REQUIRED["execution"] |
+                 {"makeup", "adornment", "focus_component", "surface_pattern"},
+}
+
+
+def validate_prompt_detail_contract(cp, data):
+    """Validate the approved visual inventory before any new avatar/execution prompt."""
+    scope = data["scope"]
+    expected_stage = "avatar" if scope == "identity" else "execution"
+    contract = data["payload"].get("prompt_detail_contract")
+    cp.ensure(isinstance(contract, dict) and contract.get("schema_version") == "PromptDetailContractV1",
+              "V1.2 identity/costume needs PromptDetailContractV1")
+    cp.ensure(contract.get("stage") == expected_stage, "Prompt detail stage mismatch")
+    cp.ensure(contract.get("complexity") in {"ordinary", "featured"},
+              "Prompt detail complexity must be ordinary or featured")
+    items = contract.get("items")
+    cp.ensure(isinstance(items, list) and items, "Prompt detail contract needs visible items")
+    ids, kinds = set(), set()
+    for item in items:
+        cp.ensure(isinstance(item, dict), "Prompt detail item must be an object")
+        cp.require_text(item, "id")
+        cp.ensure(item["id"] not in ids, "Prompt detail item IDs must be unique")
+        ids.add(item["id"])
+        kind = item.get("kind")
+        cp.ensure(kind in PROMPT_DETAIL_ALLOWED[expected_stage], f"Invalid {expected_stage} detail kind: {kind}")
+        kinds.add(kind)
+        refs = item.get("source_refs")
+        cp.ensure(isinstance(refs, list) and refs and all(isinstance(x, str) and x.strip() for x in refs),
+                  f"Prompt detail item {item['id']} needs source_refs")
+        cues = item.get("cues")
+        required = PROMPT_DETAIL_FIELDS[kind]
+        cp.ensure(isinstance(cues, dict) and set(cues) == required,
+                  f"Prompt detail item {item['id']} needs exactly {sorted(required)}")
+        cp.ensure(all(isinstance(value, str) and len(value.strip()) >= 6 for value in cues.values()),
+                  f"Prompt detail item {item['id']} has empty or generic cues")
+        cp.ensure(len(set(cues.values())) == len(cues),
+                  f"Prompt detail item {item['id']} repeats a summary across dimensions")
+    cp.ensure(PROMPT_DETAIL_REQUIRED[expected_stage] <= kinds,
+              f"Missing required {expected_stage} detail kinds: {sorted(PROMPT_DETAIL_REQUIRED[expected_stage] - kinds)}")
+    if expected_stage == "execution":
+        cp.ensure(contract["complexity"] != "featured" or "focus_component" in kinds,
+                  "Featured costume needs a drawable focus_component")
+        requirements = data["payload"]["costume_direction"]["scene_needs"]["requirements"]
+        for need, kind in (("makeup", "makeup"), ("head_ear_neck", "adornment"),
+                           ("wearable_accessories", "adornment")):
+            if requirements[need]["decision"] == "design":
+                cp.ensure(kind in kinds, f"Designed {need} missing from prompt detail contract")
+
+
+def validate_prompt_detail_coverage(cp, root, state, package, character, variant, stage):
+    """Reject prompt summaries that drop any cue frozen in the approved stage."""
+    scope = "identity" if stage == "avatar" else "costume"
+    record_key = key("stage-design", character, variant, scope)
+    record = (draft(cp, root, state, record_key) if package.get("purpose") == "preview"
+              else cp._checked_record(root, state, record_key))
+    design = cp.read_json(root / record["path"])
+    cp.ensure(design.get("schema_version") == "CharacterStageDesignV1.2",
+              f"New {stage} prompts require a V1.2 {scope} design; deepen legacy summaries first")
+    contract = design["payload"]["prompt_detail_contract"]
+    checks = "\n".join(package["acceptance_checks"])
+    for prompt in package["prompts"]:
+        body = prompt["text"]
+        cp.ensure(not re.search(r"(?:^|[。；\n])\s*(?:脸型|发型|皮肤|妆容|款式|剪裁|材质|饰品)\s*[:：]", body),
+                  f"Prompt {prompt['id']} contains section headings")
+        for item in contract["items"]:
+            for field, cue in item["cues"].items():
+                cp.ensure(cue in body,
+                          f"Prompt {prompt['id']} dropped {item['id']}.{field}: {cue}")
+    for item in contract["items"]:
+        cp.ensure(any(cue in checks for cue in item["cues"].values()),
+                  f"Acceptance checks do not inspect detail item {item['id']}")
 
 
 def enabled(state):
@@ -270,7 +371,7 @@ def validate_execution(cp, root, data, state=None):
             planned = brief["specialist_plan"][specialist]
             state_activation = (data["scope"] == "costume" and
                                 specialist in {pair[0] for pair in STATE_STYLING_SPECIALISTS.values()} and
-                                data.get("schema_version") == "CharacterStageDesignV1.1")
+                                data.get("schema_version") in {"CharacterStageDesignV1.1", "CharacterStageDesignV1.2"})
             if planned["status"] == "not_needed" and state_activation:
                 _task(cp, work.get("task"))
                 cp.require_text(work, "state_activation_reason")
@@ -396,7 +497,7 @@ def validate_costume_direction(cp, root, state, data):
         else:
             cp.ensure(any(mapping.get("field") in fields for mapping in work.get("applied_elements", [])),
                       f"Independent costume proposal needs an applied garment field: {specialist}")
-    if data["schema_version"] == "CharacterStageDesignV1.1":
+    if data["schema_version"] in {"CharacterStageDesignV1.1", "CharacterStageDesignV1.2"}:
         validate_scene_needs(cp, data)
 
 
@@ -457,7 +558,7 @@ def validate_scene_prompt_coverage(cp, root, state, package, character, variant)
     """Guard the design-to-prompt handoff for V1.1 state work."""
     record = cp._checked_record(root, state, key("stage-design", character, variant, "costume"))
     stage = cp.read_json(root / record["path"])
-    if stage.get("schema_version") != "CharacterStageDesignV1.1":
+    if stage.get("schema_version") not in {"CharacterStageDesignV1.1", "CharacterStageDesignV1.2"}:
         return
     requirements = stage["payload"]["costume_direction"]["scene_needs"]["requirements"]
     checks = "\n".join(package["acceptance_checks"])
@@ -484,8 +585,8 @@ def required_parents(state, character, scope, variant):
 
 
 def validate_stage(cp, root, state, data, character, variant, scope):
-    cp.ensure(scope in SCOPES and data.get("schema_version") in {"CharacterStageDesignV1", "CharacterStageDesignV1.1"},
-              "Expected CharacterStageDesignV1/V1.1 and a design scope")
+    cp.ensure(scope in SCOPES and data.get("schema_version") in {"CharacterStageDesignV1", "CharacterStageDesignV1.1", "CharacterStageDesignV1.2"},
+              "Expected CharacterStageDesignV1/V1.1/V1.2 and a design scope")
     cp.ensure(data.get("character_id") == character and data.get("scope") == scope and data.get("variant_id") == variant,
               "Stage design target mismatch")
     cp.ensure(variant == "base" or scope == "costume", "Identity and body scopes belong to base")
@@ -574,6 +675,8 @@ def validate_stage(cp, root, state, data, character, variant, scope):
     validate_execution(cp, root, data, state)
     if scope == "costume" and state.get("pipeline_version", 1) >= 3:
         validate_costume_direction(cp, root, state, data)
+    if data["schema_version"] == "CharacterStageDesignV1.2" and scope in {"identity", "costume"}:
+        validate_prompt_detail_contract(cp, data)
 
 
 def _store(cp, root, state, record_key, data, approval=None):
@@ -635,9 +738,16 @@ def submit(cp, args, root, state):
             cp.ensure(variant == "base", "Costume bible belongs to base")
             validate_bible(cp, root, state, data, character)
         else:
-            if scope == "costume" and state.get("pipeline_version", 1) >= 3:
-                cp.ensure(data.get("schema_version") == "CharacterStageDesignV1.1",
-                          "New pipeline 3 costume submissions require CharacterStageDesignV1.1 scene needs")
+            if scope in {"identity", "costume"} and state.get("pipeline_version", 1) >= 3:
+                if scope == "identity":
+                    human = data.get("payload", {}).get("morphology") in {"human", "humanoid"}
+                else:
+                    identity_key = key("stage-design", character, scope="identity")
+                    identity = cp.read_json(root / cp._checked_record(root, state, identity_key)["path"])
+                    human = identity.get("payload", {}).get("morphology") in {"human", "humanoid"}
+                if human:
+                    cp.ensure(data.get("schema_version") == "CharacterStageDesignV1.2",
+                              "New human identity/costume submissions require CharacterStageDesignV1.2 prompt details")
             validate_stage(cp, root, state, data, character, variant, scope)
     record_key = key(args.kind, character, variant, scope)
     incoming = cp.digest(data)

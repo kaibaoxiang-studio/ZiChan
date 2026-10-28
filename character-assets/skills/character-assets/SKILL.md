@@ -7,6 +7,12 @@ description: "角色资产主控：从剧本依据到可复用角色资产包"
 
 先读 [知识索引](../../knowledge/index.md)，按情景只加载本轮需要的 reference。
 
+提示词固定双份交付：JSON 保留结构、依据和验收项；TXT 从 JSON 的 `prompts[].text` 机械导出，供操作者直接复制，不能二次改写成摘要。隔离 Harness 任务交 `prompt-package.json` 与 `提示词.txt`；正式项目提交通过后 CLI 同时保存提示词 TXT 路径及哈希。
+
+头像与逐状态服饰执行图必须遵守 [提示词硬输出合同](../../references/prompt-detail-contract.md)：主控先完成真实专项设计，把每个已选且入画的细节冻结在 `CharacterStageDesignV1.2.payload.prompt_detail_contract`，再交提示词专项逐 cue 合成。读过 Skill、给出造型摘要或写了四格版式均不等于完成设计。新提交的头像/执行提示词必须通过程序覆盖检查；旧已批准记录仍可读，新提示词若依据旧简版状态先回阶段设计补齐。正文无部位标题、无固定字数上限；按实际物件达到宋也 S03 执行图与程婉清头像示例的信息密度，不复制两人的具体外观。
+
+项目运行先固定用户指定的交付根目录和角色工程子目录，阶段稿、标准化提示词、预览/正式图片、审查、逐状态包与最终资产表按 [硬输出合同中的路径映射](../../references/prompt-detail-contract.md) 落盘；对话展示的提示词必须与保存的 `prompts[].text` 逐字一致，生图使用同一正文。不能把插件源码、临时目录或对话摘要当成交付物。
+
 人形基础头像的脸型、发型、五官、皮肤和妆饰深化，按 [头像命名与颗粒度规则](../../references/avatar-identity-granularity.md) 由主控确定方向、指定专项、处理跨部位冲突并汇总已确认细节；词表名称不能代替可画结构。提示词正文不写板块标题，临时无发灰模测试不成为正式工作流。
 
 服饰阶段先按 [服饰与穿戴部位拆解](../../references/costume-wearable-zones.md) 把人物方向、剧本硬约束、主衣物件、已批身份/身体和状态交给服饰设计师。总控指定当前画幅需判断的头面颈、上身、腰背四肢、下身与鞋履部位；17–31 号目录不构成加物件配额。连衣裙等跨部位主衣保持单一物件，头耳颈、彩绘、特殊下肢与衣装饰件由各自唯一主责处理；配色和面料沿当前已确认方案，直到对应专项另行更新。
@@ -32,6 +38,8 @@ description: "角色资产主控：从剧本依据到可复用角色资产包"
 - [references/costume-wearable-zones.md](../../references/costume-wearable-zones.md)
 - [references/costume-component-design.md](../../references/costume-component-design.md)
 - [references/scene-styling-needs.md](../../references/scene-styling-needs.md)
+- [references/prompt-detail-contract.md](../../references/prompt-detail-contract.md)
+- [references/prompt-density-example-su.md](../../references/prompt-density-example-su.md)
 - [references/model-card-baseline.md](../../references/model-card-baseline.md)
 - [references/evidence.md](../../references/evidence.md)
 - [references/source-notes.md](../../references/source-notes.md)

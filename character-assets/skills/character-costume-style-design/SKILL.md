@@ -21,13 +21,8 @@ description: "服饰款式设计：主衣、外套、内层、下装、袜鞋品
 - [references/knowledge/character-costume-designer/costume-deep.md](../../references/knowledge/character-costume-designer/costume-deep.md)
 - [references/costume-wearable-zones.md](../../references/costume-wearable-zones.md)
 - [references/costume-component-design.md](../../references/costume-component-design.md)
-
-Read [wearable-upper-21](../../references/knowledge/character-costume-style-design/wearable-upper-21.md) when this capability needs the supplied knowledge.
-
-Read [wearable-close-chest-26](../../references/knowledge/character-costume-style-design/wearable-close-chest-26.md) when this capability needs the supplied knowledge.
-
-Read [wearable-lower-main-27](../../references/knowledge/character-costume-style-design/wearable-lower-main-27.md) when this capability needs the supplied knowledge.
-
-Read [wearable-knee-sock-29](../../references/knowledge/character-costume-style-design/wearable-knee-sock-29.md) when this capability needs the supplied knowledge.
-
-Read [wearable-footwear-30](../../references/knowledge/character-costume-style-design/wearable-footwear-30.md) when this capability needs the supplied knowledge.
+- [references/knowledge/character-costume-style-design/wearable-upper-21.md](../../references/knowledge/character-costume-style-design/wearable-upper-21.md)
+- [references/knowledge/character-costume-style-design/wearable-close-chest-26.md](../../references/knowledge/character-costume-style-design/wearable-close-chest-26.md)
+- [references/knowledge/character-costume-style-design/wearable-lower-main-27.md](../../references/knowledge/character-costume-style-design/wearable-lower-main-27.md)
+- [references/knowledge/character-costume-style-design/wearable-knee-sock-29.md](../../references/knowledge/character-costume-style-design/wearable-knee-sock-29.md)
+- [references/knowledge/character-costume-style-design/wearable-footwear-30.md](../../references/knowledge/character-costume-style-design/wearable-footwear-30.md)

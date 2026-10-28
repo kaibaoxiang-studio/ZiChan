@@ -6,7 +6,7 @@ ZiChan 收录三项平行、可独立安装的资产插件。剧本与资产表�
 
 | 插件 | 当前版本 | 维护来源 | 主要交付 |
 | --- | --- | --- | --- |
-| [角色资产插件](character-assets/README.md) | **v0.2.13** | 项目维护者 | 全文人物理解、逐状态妆发饰需求、服饰部件设计、执行提示词细节校验与资产交付 |
+| [角色资产插件](character-assets/README.md) | **v0.2.14** | 项目维护者 | 全文人物理解、头像与服饰执行提示词 V1.2 硬合同、JSON＋自动导出 TXT 双交付、四阶段案例与资产交付 |
 | [道具资产插件](prop-assets/README.md) | **v0.2.5** | [18571635839-a11y](https://github.com/18571635839-a11y) | 道具概念与材质、配色、纹样、轮廓专项；逐件设计及完整 Prompt 表 |
 | [场景资产插件](scene-assets/README.md) | **v0.10.1** | [runningg0301-prog](https://github.com/runningg0301-prog) | 静态场景设计、光影氛围与色卡、反打／多角度及局部修改提示词 |
 
@@ -14,11 +14,13 @@ ZiChan 收录三项平行、可独立安装的资产插件。剧本与资产表�
 
 道具插件 v0.2.5 新增五份设计参考：形体与体积、特殊材质与光学、分品类常见失败、方向发散、呈现／挂载／状态推进。相关知识按需接入概念、主视觉、审核与扩展节点，保持独立专项的范围及用户确认规则；详见[道具插件更新说明](prop-assets/README.md#参考资料)。
 
+角色 v0.2.14 的[硬输出合同](character-assets/references/prompt-detail-contract.md)与[苏老太四阶段案例](character-assets/references/prompt-density-example-su.md)随完整插件分发，安装包见[正式发布页](https://github.com/kaibaoxiang-studio/ZiChan/releases/tag/character-assets-v0.2.14)。本次未发布 Windows 兼容修复。
+
 ## 仓库结构
 
 ```text
 ZiChan/
-├── character-assets/   角色资产插件 v0.2.13
+├── character-assets/   角色资产插件 v0.2.14
 ├── prop-assets/        道具资产插件 v0.2.5
 ├── scene-assets/       场景资产插件与技能 v0.10.1
 ├── .agents/            三插件本地市场清单

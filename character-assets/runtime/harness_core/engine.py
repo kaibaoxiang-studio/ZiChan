@@ -30,7 +30,7 @@ def input_files(value):
     visit(value)
     return found
 
-def verify_result(result, capability, artifact_dir):
+def verify_result(result, capability, artifact_dir, task_inputs=None, plugin_root=None):
     validate_data(result,envelope_schema(capability['output_schema']))
     artifacts=[]
     if result['status']=='succeeded':
@@ -43,6 +43,37 @@ def verify_result(result, capability, artifact_dir):
         for required in capability.get('required_artifacts',[]):
             if required not in result['artifacts']:
                 raise ValueError(f'Required artifact not declared: {required}')
+        if capability.get('artifact_contract')=='character-prompt-package-v1':
+            if result['result'].get('artifact_path')!='prompt-package.json':
+                raise ValueError('Prompt result artifact_path must identify prompt-package.json')
+            package=read_json(inside(artifact_dir,'prompt-package.json'))
+            if not isinstance(package,dict) or package.get('schema_version')!='CharacterPromptPackageV1':
+                raise ValueError('Prompt output must be CharacterPromptPackageV1 JSON')
+            if package.get('stage') not in {'avatar','expression','full_body','costume_design','execution'}:
+                raise ValueError('Prompt package has no valid image stage')
+            prompts=package.get('prompts')
+            if not isinstance(prompts,list) or not prompts or any(
+                not isinstance(item,dict) or not isinstance(item.get('text'),str) or not item['text'].strip()
+                for item in prompts):
+                raise ValueError('Prompt package needs nonempty prompts[].text')
+            if not isinstance(package.get('acceptance_checks'),list) or not package['acceptance_checks']:
+                raise ValueError('Prompt package needs acceptance_checks')
+            if '提示词.txt' not in result['artifacts']:
+                raise ValueError('Required artifact not declared: 提示词.txt')
+            text_path=inside(artifact_dir,'提示词.txt')
+            expected_text=('\n\n'.join(item['text'] for item in prompts)+'\n').encode('utf-8')
+            if text_path.read_bytes()!=expected_text:
+                raise ValueError('提示词.txt must be the exact UTF-8 export of prompts[].text')
+            if not isinstance(task_inputs,dict):
+                raise ValueError('Prompt delivery needs the actual task inputs and project basis')
+            root=Path(plugin_root or Path(__file__).resolve().parents[2]).resolve()
+            helper=inside(root,'scripts/verify_prompt_delivery.py')
+            checked=subprocess.run([sys.executable,str(helper),'--package',
+                                    str(inside(artifact_dir,'prompt-package.json'))],
+                                   input=json.dumps(task_inputs,ensure_ascii=False),
+                                   capture_output=True,text=True,encoding='utf-8',timeout=30)
+            if checked.returncode:
+                raise ValueError('Prompt delivery contract failed: '+(checked.stderr or checked.stdout).strip())
     return artifacts
 
 class Executor:
@@ -144,7 +175,10 @@ class Engine:
         for node_id,prior in list(state['nodes'].items()):
             if prior['status']=='succeeded':
                 recorded=verify_result(prior['output'],self.capabilities[nodes[node_id]['capability']],
-                                       base/node_id/f'attempt-{prior["attempt"]}')
+                                       base/node_id/f'attempt-{prior["attempt"]}',
+                                       bind_inputs(nodes[node_id],state['inputs'],{
+                                           key:value['output']['result'] for key,value in state['nodes'].items()
+                                           if value.get('status')=='succeeded'}),self.root)
                 if recorded!=prior.get('artifacts',[]):
                     raise ValueError('Completed artifact changed; create a new run')
             if prior['status']=='running':
@@ -202,7 +236,7 @@ class Engine:
                         self.store.append(run_id,'node',{**record,'thread_id':thread_id})
                     future=pool.submit(self.executor,self.capabilities[node['capability']],task,node,canceled,
                                        prior.get('thread_id'),remember)
-                    futures[future]=(node_id,attempt,directory)
+                    futures[future]=(node_id,attempt,directory,inputs)
                 if not futures:
                     blocked=[value for value in state['nodes'].values() if value['status']=='blocked']
                     status='awaiting_input' if blocked else 'failed'
@@ -211,12 +245,13 @@ class Engine:
                     break
                 done,_=wait(futures,timeout=0.2,return_when=FIRST_COMPLETED)
                 for future in done:
-                    node_id,attempt,directory=futures.pop(future)
+                    node_id,attempt,directory,task_inputs=futures.pop(future)
                     if self.store.get(run_id)['status']=='canceled': continue
                     prior=self.store.get(run_id)['nodes'][node_id]
                     try:
                         output,thread_id=future.result()
-                        artifacts=verify_result(output,self.capabilities[nodes[node_id]['capability']],directory)
+                        artifacts=verify_result(output,self.capabilities[nodes[node_id]['capability']],directory,
+                                                task_inputs,self.root)
                         status=output['status']
                         if status=='failed': raise ValueError(output.get('error') or 'Node returned failed')
                         self.store.append(run_id,'node',{**prior,'status':status,'output':output,

@@ -139,19 +139,22 @@
         "references/phased-design.md",
         "references/costume-design-stage.md",
         "references/costume-designer.md",
+        "references/costume-wearable-zones.md",
+        "references/costume-component-design.md",
+        "references/scene-styling-needs.md",
+        "references/prompt-detail-contract.md",
+        "references/prompt-density-example-su.md",
         "references/model-card-baseline.md",
         "references/evidence.md",
         "references/source-notes.md",
         "references/differentiation-framework.md",
         "references/specialist-contract.md",
         "references/design-detail-standard.md",
+        "references/avatar-identity-granularity.md",
         "references/render-texture-standard.md",
         "references/feature-focus-and-body-form.md",
         "references/group-ensemble.md",
-        "references/final-asset-table.md",
-        "references/costume-wearable-zones.md",
-        "references/costume-component-design.md",
-        "references/scene-styling-needs.md"
+        "references/final-asset-table.md"
       ],
       "explicit_only": true
     },
@@ -359,6 +362,8 @@
         "references/director-understanding.md",
         "references/phased-design.md",
         "references/costume-designer.md",
+        "references/costume-wearable-zones.md",
+        "references/scene-styling-needs.md",
         "references/costume-and-morphology.md",
         "references/interfaces.md",
         "references/differentiation-framework.md",
@@ -371,9 +376,7 @@
         "references/knowledge/character-face-decoration-design/face-decoration.md",
         "references/knowledge/character-costume-designer/state-makeup.md",
         "references/knowledge/character-design/feature-focus-design.md",
-        "references/knowledge/character-design/anti-stereotype-texture.md",
-        "references/costume-wearable-zones.md",
-        "references/scene-styling-needs.md"
+        "references/knowledge/character-design/anti-stereotype-texture.md"
       ],
       "explicit_only": true
     },
@@ -475,6 +478,9 @@
       "knowledge_refs": [
         "knowledge/index.md",
         "references/costume-designer.md",
+        "references/costume-wearable-zones.md",
+        "references/costume-component-design.md",
+        "references/scene-styling-needs.md",
         "references/phased-design.md",
         "references/knowledge/character-costume-designer/costume-deep.md",
         "references/knowledge/character-costume-designer/state-makeup.md",
@@ -482,10 +488,7 @@
         "references/knowledge/character-costume-cut-design/costume-cut.md",
         "references/knowledge/character-costume-color-design/costume-color.md",
         "references/knowledge/character-costume-material-design/costume-material.md",
-        "references/knowledge/character-costume-accessory-design/costume-accessory.md",
-        "references/costume-wearable-zones.md",
-        "references/costume-component-design.md",
-        "references/scene-styling-needs.md"
+        "references/knowledge/character-costume-accessory-design/costume-accessory.md"
       ],
       "explicit_only": true
     },
@@ -572,7 +575,7 @@
           },
           "artifact_path": {
             "type": "string",
-            "description": "Main output path relative to artifact_dir, for example design.md; never an absolute path."
+            "description": "Main output is prompt-package.json; also declare mechanically exported 提示词.txt."
           },
           "summary": {
             "type": "string"
@@ -609,16 +612,23 @@
         "references/phased-design.md",
         "references/knowledge/character-costume-designer/state-makeup.md",
         "references/design-detail-standard.md",
+        "references/costume-wearable-zones.md",
+        "references/costume-component-design.md",
+        "references/scene-styling-needs.md",
+        "references/prompt-detail-contract.md",
+        "references/prompt-density-example-su.md",
         "references/render-texture-standard.md",
         "references/knowledge/character-image-prompt/feature-focus-prompt.md",
         "references/knowledge/character-image-prompt/hedgehog-2d3d.md",
         "references/knowledge/character-image-prompt/hedgehog-general-image-skill.md",
-        "references/knowledge/character-image-prompt/anti-stereotype-texture.md",
-        "references/costume-wearable-zones.md",
-        "references/costume-component-design.md",
-        "references/scene-styling-needs.md"
+        "references/knowledge/character-image-prompt/anti-stereotype-texture.md"
       ],
-      "explicit_only": true
+      "explicit_only": true,
+      "required_artifacts": [
+        "prompt-package.json",
+        "提示词.txt"
+      ],
+      "artifact_contract": "character-prompt-package-v1"
     },
     {
       "id": "character-image-review",
@@ -739,11 +749,12 @@
         "references/execution-sheet.md",
         "references/interfaces.md",
         "references/render-texture-standard.md",
+        "references/avatar-identity-granularity.md",
+        "references/scene-styling-needs.md",
         "references/costume-design-stage.md",
         "references/knowledge/character-costume-designer/state-makeup.md",
         "references/knowledge/character-image-review/feature-focus-review.md",
-        "references/knowledge/character-image-review/anti-stereotype-texture.md",
-        "references/scene-styling-needs.md"
+        "references/knowledge/character-image-review/anti-stereotype-texture.md"
       ],
       "explicit_only": true
     },
@@ -1395,8 +1406,8 @@
         "references/differentiation-framework.md",
         "references/design-detail-standard.md",
         "references/knowledge/character-hair-design/hair.md",
-        "references/knowledge/character-hair-design/avatar-hair-names-07.md",
-        "references/scene-styling-needs.md"
+        "references/scene-styling-needs.md",
+        "references/knowledge/character-hair-design/avatar-hair-names-07.md"
       ],
       "explicit_only": true
     },
@@ -1502,8 +1513,8 @@
         "references/design-detail-standard.md",
         "references/knowledge/character-body-design/body.md",
         "references/knowledge/character-body-design/body-proportion-3d.md",
-        "references/knowledge/character-body-design/wearable-lower-morphology-31.md",
-        "references/costume-wearable-zones.md"
+        "references/costume-wearable-zones.md",
+        "references/knowledge/character-body-design/wearable-lower-morphology-31.md"
       ],
       "explicit_only": true
     },
@@ -1719,13 +1730,13 @@
         "references/differentiation-framework.md",
         "references/design-detail-standard.md",
         "references/knowledge/character-face-signature-design/face-memory.md",
+        "references/costume-wearable-zones.md",
+        "references/costume-component-design.md",
+        "references/scene-styling-needs.md",
         "references/knowledge/character-face-signature-design/avatar-head-ear-neck-16.md",
         "references/knowledge/character-face-signature-design/wearable-headwear-17.md",
         "references/knowledge/character-face-signature-design/wearable-face-jewelry-18.md",
-        "references/knowledge/character-face-signature-design/wearable-neck-20.md",
-        "references/costume-wearable-zones.md",
-        "references/costume-component-design.md",
-        "references/scene-styling-needs.md"
+        "references/knowledge/character-face-signature-design/wearable-neck-20.md"
       ],
       "explicit_only": true
     },
@@ -1830,11 +1841,11 @@
         "references/differentiation-framework.md",
         "references/design-detail-standard.md",
         "references/knowledge/character-face-decoration-design/face-decoration.md",
+        "references/costume-wearable-zones.md",
+        "references/scene-styling-needs.md",
         "references/knowledge/character-costume-designer/state-makeup.md",
         "references/knowledge/character-face-decoration-design/avatar-makeup-13.md",
-        "references/knowledge/character-face-decoration-design/wearable-face-paint-19.md",
-        "references/costume-wearable-zones.md",
-        "references/scene-styling-needs.md"
+        "references/knowledge/character-face-decoration-design/wearable-face-paint-19.md"
       ],
       "explicit_only": true
     },
@@ -2048,13 +2059,13 @@
         "references/design-detail-standard.md",
         "references/knowledge/character-costume-style-design/costume-style.md",
         "references/knowledge/character-costume-designer/costume-deep.md",
+        "references/costume-wearable-zones.md",
+        "references/costume-component-design.md",
         "references/knowledge/character-costume-style-design/wearable-upper-21.md",
         "references/knowledge/character-costume-style-design/wearable-close-chest-26.md",
         "references/knowledge/character-costume-style-design/wearable-lower-main-27.md",
         "references/knowledge/character-costume-style-design/wearable-knee-sock-29.md",
-        "references/knowledge/character-costume-style-design/wearable-footwear-30.md",
-        "references/costume-wearable-zones.md",
-        "references/costume-component-design.md"
+        "references/knowledge/character-costume-style-design/wearable-footwear-30.md"
       ],
       "explicit_only": true
     },
@@ -2373,8 +2384,8 @@
         "references/knowledge/character-costume-material-design/costume-material.md",
         "references/knowledge/character-costume-designer/costume-deep.md",
         "references/render-texture-standard.md",
-        "references/knowledge/character-costume-material-design/anti-stereotype-texture.md",
-        "references/costume-component-design.md"
+        "references/costume-component-design.md",
+        "references/knowledge/character-costume-material-design/anti-stereotype-texture.md"
       ],
       "explicit_only": true
     },
@@ -2480,13 +2491,13 @@
         "references/design-detail-standard.md",
         "references/knowledge/character-costume-accessory-design/costume-accessory.md",
         "references/knowledge/character-costume-designer/costume-deep.md",
+        "references/costume-wearable-zones.md",
+        "references/costume-component-design.md",
         "references/knowledge/character-costume-accessory-design/wearable-hand-wrist-22.md",
         "references/knowledge/character-costume-accessory-design/wearable-waist-23.md",
         "references/knowledge/character-costume-accessory-design/wearable-arm-24.md",
         "references/knowledge/character-costume-accessory-design/wearable-back-25.md",
-        "references/knowledge/character-costume-accessory-design/wearable-leg-mount-28.md",
-        "references/costume-wearable-zones.md",
-        "references/costume-component-design.md"
+        "references/knowledge/character-costume-accessory-design/wearable-leg-mount-28.md"
       ],
       "explicit_only": true
     }

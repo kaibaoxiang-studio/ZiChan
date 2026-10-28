@@ -1,5 +1,7 @@
 # 角色资产项目工作流 v0.2.6.2
 
+新头像和服饰执行图按 [提示词硬输出合同](prompt-detail-contract.md) 交付：专项成果先写入 `CharacterStageDesignV1.2` 并获批或为头像预览冻结，再生成标准化 `prompts[].text`，先在对话展示同一全文；预览/正式出图、审查和打包依同一提示词包 SHA。项目根目录与各产出子目录以用户给定交付根为准，具体路径映射见合同。旧记录不自动改写；新提示词依据旧简版设计时先重开设计阶段。
+
 ## 无台词群演群像分支
 
 先运行 `plan` 查看 `asset_mode`。`ensemble` 按[群像单图合同](group-ensemble.md)从标准剧本人数、动作、道具与已批视觉基准形成 `GroupEnsembleDesignV1`，文字稿获批后每状态只生成一张完整全身群像 `execution` 图，再审图、批准和打包。有指定台词的群演走 `speaking_extra`：以原文台词和获批风格设计 `SpeakingExtraDesignV1`，每状态只产一张独立 9:16 四格执行资产，跳过前三张身份图。旧项目已批准记录不自动迁移。

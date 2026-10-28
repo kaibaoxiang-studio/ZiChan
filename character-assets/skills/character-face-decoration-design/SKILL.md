@@ -23,7 +23,5 @@ description: "面部装饰与妆容设计：稳定、施加与临时状态"
 - [references/costume-wearable-zones.md](../../references/costume-wearable-zones.md)
 - [references/scene-styling-needs.md](../../references/scene-styling-needs.md)
 - [references/knowledge/character-costume-designer/state-makeup.md](../../references/knowledge/character-costume-designer/state-makeup.md)
-
-Read [avatar-makeup-13](../../references/knowledge/character-face-decoration-design/avatar-makeup-13.md) when this capability needs the supplied knowledge.
-
-Read [wearable-face-paint-19](../../references/knowledge/character-face-decoration-design/wearable-face-paint-19.md) when this capability needs the supplied knowledge.
+- [references/knowledge/character-face-decoration-design/avatar-makeup-13.md](../../references/knowledge/character-face-decoration-design/avatar-makeup-13.md)
+- [references/knowledge/character-face-decoration-design/wearable-face-paint-19.md](../../references/knowledge/character-face-decoration-design/wearable-face-paint-19.md)

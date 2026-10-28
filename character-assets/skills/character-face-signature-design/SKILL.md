@@ -27,11 +27,7 @@ description: "面部记忆点与锁骨以上饰品设计"
 - [references/costume-wearable-zones.md](../../references/costume-wearable-zones.md)
 - [references/costume-component-design.md](../../references/costume-component-design.md)
 - [references/scene-styling-needs.md](../../references/scene-styling-needs.md)
-
-Read [avatar-head-ear-neck-16](../../references/knowledge/character-face-signature-design/avatar-head-ear-neck-16.md) when this capability needs the supplied knowledge.
-
-Read [wearable-headwear-17](../../references/knowledge/character-face-signature-design/wearable-headwear-17.md) when this capability needs the supplied knowledge.
-
-Read [wearable-face-jewelry-18](../../references/knowledge/character-face-signature-design/wearable-face-jewelry-18.md) when this capability needs the supplied knowledge.
-
-Read [wearable-neck-20](../../references/knowledge/character-face-signature-design/wearable-neck-20.md) when this capability needs the supplied knowledge.
+- [references/knowledge/character-face-signature-design/avatar-head-ear-neck-16.md](../../references/knowledge/character-face-signature-design/avatar-head-ear-neck-16.md)
+- [references/knowledge/character-face-signature-design/wearable-headwear-17.md](../../references/knowledge/character-face-signature-design/wearable-headwear-17.md)
+- [references/knowledge/character-face-signature-design/wearable-face-jewelry-18.md](../../references/knowledge/character-face-signature-design/wearable-face-jewelry-18.md)
+- [references/knowledge/character-face-signature-design/wearable-neck-20.md](../../references/knowledge/character-face-signature-design/wearable-neck-20.md)

@@ -19,15 +19,9 @@ description: "五官面部设计：原创骨相、比例与非模板面孔"
 - [references/design-detail-standard.md](../../references/design-detail-standard.md)
 - [references/knowledge/character-face-design/face.md](../../references/knowledge/character-face-design/face.md)
 - [references/knowledge/character-face-design/original-face.md](../../references/knowledge/character-face-design/original-face.md)
-
-Read [avatar-face-shapes-06](../../references/knowledge/character-face-design/avatar-face-shapes-06.md) when this capability needs the supplied knowledge.
-
-Read [avatar-brows-08](../../references/knowledge/character-face-design/avatar-brows-08.md) when this capability needs the supplied knowledge.
-
-Read [avatar-eyes-09](../../references/knowledge/character-face-design/avatar-eyes-09.md) when this capability needs the supplied knowledge.
-
-Read [avatar-ears-10](../../references/knowledge/character-face-design/avatar-ears-10.md) when this capability needs the supplied knowledge.
-
-Read [avatar-noses-11](../../references/knowledge/character-face-design/avatar-noses-11.md) when this capability needs the supplied knowledge.
-
-Read [avatar-lips-12](../../references/knowledge/character-face-design/avatar-lips-12.md) when this capability needs the supplied knowledge.
+- [references/knowledge/character-face-design/avatar-face-shapes-06.md](../../references/knowledge/character-face-design/avatar-face-shapes-06.md)
+- [references/knowledge/character-face-design/avatar-brows-08.md](../../references/knowledge/character-face-design/avatar-brows-08.md)
+- [references/knowledge/character-face-design/avatar-eyes-09.md](../../references/knowledge/character-face-design/avatar-eyes-09.md)
+- [references/knowledge/character-face-design/avatar-ears-10.md](../../references/knowledge/character-face-design/avatar-ears-10.md)
+- [references/knowledge/character-face-design/avatar-noses-11.md](../../references/knowledge/character-face-design/avatar-noses-11.md)
+- [references/knowledge/character-face-design/avatar-lips-12.md](../../references/knowledge/character-face-design/avatar-lips-12.md)

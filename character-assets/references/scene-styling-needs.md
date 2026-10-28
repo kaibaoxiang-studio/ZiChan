@@ -12,7 +12,7 @@
 
 ## 新状态合同与兼容
 
-新写的服饰阶段稿使用 `CharacterStageDesignV1.1`；旧 `CharacterStageDesignV1` 保持可读，不追溯改写。`payload.costume_direction.scene_needs` 包含 `occasion`、`shot_and_action`、`constraint_scope` 和 `requirements`。`requirements` 恰有 `makeup`、`hair`、`head_ear_neck`、`garment`、`wearable_accessories` 五项；每项有 `decision`、不少于一句具体理由的 `reason`、非空 `source_refs`。`design` 再附非空 `prompt_cues`，只放将实际入画、能逐字转录的短语。一个关键部件可用多个 cue，分别固定轮廓与连接；无须把内部设计理由放进词中。
+新写的服饰阶段稿使用 `CharacterStageDesignV1.2`，同时遵守 [提示词硬输出合同](prompt-detail-contract.md)；旧 `CharacterStageDesignV1/V1.1` 保持可读，不追溯改写。新执行提示词若基于旧简版状态，须先补为 V1.2。`payload.costume_direction.scene_needs` 包含 `occasion`、`shot_and_action`、`constraint_scope` 和 `requirements`。`requirements` 恰有 `makeup`、`hair`、`head_ear_neck`、`garment`、`wearable_accessories` 五项；每项有 `decision`、不少于一句具体理由的 `reason`、非空 `source_refs`。`design` 再附非空 `prompt_cues`，只放将实际入画、能逐字转录的短语。一个关键部件可用多个 cue，分别固定轮廓与连接；无须把内部设计理由放进词中。
 
 `design` 的妆、发、头耳颈、其他穿戴分别激活面部装饰、发型、面部记忆点、服饰饰品专项。妆、发、头耳颈、穿戴的结果各映射到 `costume_direction.state_makeup`、`state_hair`、`head_ear_neck`、`wearable_accessories`；既有 `makeup_and_hair` 仍概述状态，不可代替四项细化。服装仍有款式、剪裁、配色、材质四项实际结果。若基础 brief 的专项是 `not_needed`，仅在状态稿用 `work.task` 和 `state_activation_reason` 激活上述专项，不重写基础身份方向；若原为 `defer`，仍按原合同提供 `task` 和 `activation_reason`。骨相、原生皮肤和身份标记只继承，不以状态激活为借口更改。
 

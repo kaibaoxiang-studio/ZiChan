@@ -23,13 +23,8 @@ description: "服饰附加物设计：肩胸背、臂手腕腰腿的装饰与挂
 - [references/knowledge/character-costume-designer/costume-deep.md](../../references/knowledge/character-costume-designer/costume-deep.md)
 - [references/costume-wearable-zones.md](../../references/costume-wearable-zones.md)
 - [references/costume-component-design.md](../../references/costume-component-design.md)
-
-Read [wearable-hand-wrist-22](../../references/knowledge/character-costume-accessory-design/wearable-hand-wrist-22.md) when this capability needs the supplied knowledge.
-
-Read [wearable-waist-23](../../references/knowledge/character-costume-accessory-design/wearable-waist-23.md) when this capability needs the supplied knowledge.
-
-Read [wearable-arm-24](../../references/knowledge/character-costume-accessory-design/wearable-arm-24.md) when this capability needs the supplied knowledge.
-
-Read [wearable-back-25](../../references/knowledge/character-costume-accessory-design/wearable-back-25.md) when this capability needs the supplied knowledge.
-
-Read [wearable-leg-mount-28](../../references/knowledge/character-costume-accessory-design/wearable-leg-mount-28.md) when this capability needs the supplied knowledge.
+- [references/knowledge/character-costume-accessory-design/wearable-hand-wrist-22.md](../../references/knowledge/character-costume-accessory-design/wearable-hand-wrist-22.md)
+- [references/knowledge/character-costume-accessory-design/wearable-waist-23.md](../../references/knowledge/character-costume-accessory-design/wearable-waist-23.md)
+- [references/knowledge/character-costume-accessory-design/wearable-arm-24.md](../../references/knowledge/character-costume-accessory-design/wearable-arm-24.md)
+- [references/knowledge/character-costume-accessory-design/wearable-back-25.md](../../references/knowledge/character-costume-accessory-design/wearable-back-25.md)
+- [references/knowledge/character-costume-accessory-design/wearable-leg-mount-28.md](../../references/knowledge/character-costume-accessory-design/wearable-leg-mount-28.md)

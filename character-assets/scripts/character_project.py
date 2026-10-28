@@ -25,6 +25,7 @@ import zipfile
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import phased_design as phased
 import ensemble_assets as ensemble
+from export_prompt_text import write_prompt_text
 
 SCHEMA = "CharacterProjectV1"
 PLUGIN_VERSION = json.loads((Path(__file__).resolve().parents[1] / ".codex-plugin/plugin.json").read_text(encoding="utf-8"))["version"]
@@ -147,6 +148,15 @@ def safe_asset_label(value):
     label = re.sub(r'[\\/:*?"<>|\x00-\x1f]+', "_", str(value or ""))
     label = re.sub(r"\s+", "_", label).strip(" ._")[:60]
     return label or "未命名资产"
+
+
+def export_project_prompt_text(root, state, content, character, variant, stage, incoming):
+    """The readable delivery is always generated from the validated JSON body."""
+    person = next((row for row in state["roster"] if row["id"] == character), {})
+    label = safe_asset_label(person.get("name") or character)
+    relative = Path("提示词") / f"{safe_asset_label(character)}_{label}_{safe_asset_label(variant)}_{stage}_{incoming[:12]}.txt"
+    result = write_prompt_text(content, root / relative)
+    return {"text_path": relative.as_posix(), "text_sha256": result["sha256"]}
 
 
 def pipeline_stages(state):
@@ -1228,6 +1238,11 @@ def cmd_submit(args):
                     _record_key("design-card", character_id, variant_id)]["path"])
             if asset_mode not in {"ensemble", "speaking_extra"}:
                 validate_model_card_attire(content, card)
+            if (asset_mode == "individual" and phased.enabled(state) and
+                    state.get("pipeline_version", 1) >= 3 and card.get("morphology") in {"human", "humanoid"} and
+                    args.stage in {"avatar", "execution"}):
+                phased.validate_prompt_detail_coverage(
+                    _runtime(), root, state, content, character_id, variant_id, args.stage)
             if asset_mode == "individual" and args.stage == "expression" and card.get("morphology") in {"human", "humanoid"}:
                 avatar_record = state["records"][_record_key(
                     "prompt-package", character_id, "base" if modern else variant_id, "avatar")]
@@ -1249,7 +1264,10 @@ def cmd_submit(args):
         incoming = digest(content)
         prior = state["records"].get(key)
         if prior and prior["sha256"] == incoming and not prior.get("stale"):
-            return {"key": key, "status": "unchanged", "sha256": incoming}
+            text_delivery = (export_project_prompt_text(root, state, content, character_id, variant_id, args.stage, incoming)
+                             if args.kind == "prompt-package" else {})
+            prior.update(text_delivery)
+            return {"key": key, "status": "unchanged", "sha256": incoming, **text_delivery}
         if prior:
             level = args.stage if args.kind == "prompt-package" else args.kind
             scope_variant = (None if modern and variant_id == "base" and
@@ -1264,8 +1282,12 @@ def cmd_submit(args):
         if args.kind == "prompt-package":
             state["records"][key]["approval"] = {"operator": "system:contract-check",
                                                     "at": now(), "sha256": incoming}
+            state["records"][key].update(export_project_prompt_text(
+                root, state, content, character_id, variant_id, args.stage, incoming))
         return {"key": key, "sha256": incoming,
-                "status": "ready" if args.kind == "prompt-package" else "awaiting-approval"}
+                "status": "ready" if args.kind == "prompt-package" else "awaiting-approval",
+                **({name: state["records"][key][name] for name in ("text_path", "text_sha256")}
+                   if args.kind == "prompt-package" else {})}
 
 
 def cmd_approve_record(args):

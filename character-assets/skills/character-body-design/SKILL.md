@@ -18,5 +18,4 @@ description: "形体体态设计：年龄比例、骨架、重心与动作习惯
 - [references/knowledge/character-body-design/body.md](../../references/knowledge/character-body-design/body.md)
 - [references/knowledge/character-body-design/body-proportion-3d.md](../../references/knowledge/character-body-design/body-proportion-3d.md)
 - [references/costume-wearable-zones.md](../../references/costume-wearable-zones.md)
-
-Read [wearable-lower-morphology-31](../../references/knowledge/character-body-design/wearable-lower-morphology-31.md) when this capability needs the supplied knowledge.
+- [references/knowledge/character-body-design/wearable-lower-morphology-31.md](../../references/knowledge/character-body-design/wearable-lower-morphology-31.md)
