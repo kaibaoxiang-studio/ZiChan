@@ -58,8 +58,12 @@ class DesignQueueTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
             state, _, _ = make_avatar_project(root)
-            self.assertEqual(self.queue(root, state, ("execution",), "speaking_extra"), [])
-            self.assertEqual(self.queue(root, state, ("execution",), "ensemble"), [])
+            for mode, kind in (("speaking_extra", "extra-design"), ("ensemble", "ensemble-design")):
+                tasks = self.queue(root, state, ("execution",), mode)
+                self.assertEqual(len(tasks), 1)
+                self.assertEqual((tasks[0]["kind"], tasks[0]["scope"], tasks[0]["status"]),
+                                 (kind, "single_image", "needs_design"))
+                self.assertEqual(tasks[0]["capability"], "character-ensemble-designer")
 
     def test_complete_legacy_workflow_keeps_its_contract(self):
         with tempfile.TemporaryDirectory() as folder:

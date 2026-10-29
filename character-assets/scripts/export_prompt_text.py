@@ -3,7 +3,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
+import tempfile
 
 
 def render_prompt_text(package):
@@ -24,7 +26,22 @@ def write_prompt_text(package, output):
     output = Path(output)
     data = render_prompt_text(package).encode('utf-8')
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_bytes(data)
+    if output.is_symlink():
+        raise ValueError('Prompt text output must not replace a symlink target')
+    # Atomic replacement keeps the current internal TXT intact on partial writes.
+    with tempfile.NamedTemporaryFile(dir=output.parent, prefix='.prompt-text-', delete=False) as stream:
+        temporary = Path(stream.name)
+        try:
+            stream.write(data)
+            stream.flush()
+            os.fsync(stream.fileno())
+        except BaseException:
+            temporary.unlink(missing_ok=True)
+            raise
+    try:
+        os.replace(temporary, output)
+    finally:
+        temporary.unlink(missing_ok=True)
     return {'path': str(output.resolve()), 'sha256': hashlib.sha256(data).hexdigest(),
             'source': 'prompts[].text', 'encoding': 'utf-8'}
 

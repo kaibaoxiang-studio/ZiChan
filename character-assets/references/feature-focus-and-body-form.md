@@ -4,7 +4,7 @@
 
 ## 当前路由与分阶段执行
 
-先完成全文理解、人物定位和方向稿，再规划十三项 `inline|independent|defer|not_needed`。特征聚焦与身份一起解决，身体比例、颅胸盆体块和动作在 body 阶段深化。常规主控真实执行规范，复杂冲突独立会诊；用 [专项合同](specialist-contract.md) 记录实际成果，不能以写已调用模拟执行。尚未开始身体不等于无需身体设计。
+先完成或复用有效人物理解与设计意图，按本次所需域实际执行专项；十三项规划仅属于正式方向稿合同，不是普通请求前置。特征聚焦与身份一起解决，身体比例、颅胸盆体块和动作在 body 阶段深化。常规主控真实执行规范，复杂冲突独立会诊；用 [专项合同](specialist-contract.md) 记录实际成果，不能以写已调用模拟执行。尚未开始身体不等于无需身体设计。
 
 ## 身份阶段的焦点
 
@@ -18,7 +18,7 @@
 
 `proportion_anchors` 的 `measurement_frame` 写姿态、鞋履和测量端点；`head_body,shoulder_hip,torso_legs,arm_segments,leg_segments` 各为 `{mode:numeric|landmark,reference_points:[至少两个明确部位],relation,basis}`。head_body 给约数或范围的头高/全高；其余可用数值或可定位骨点。上段/下段可用第7颈椎至臀纹与臀纹至足底，也可选另一体系，但端点必须一致。relation 逐字包含 reference_points，便于交接。
 
-`visual_details.body.frame_proportions` 呈现头身、肩胯与躯腿；`body_form.proportions` 各组同步。全身提示词逐字继承前三组关系，验收至少核对头身与躯腿。165cm/48kg只记录事实，不能据此推算头身比或长腿。例子数值不成为全剧默认。
+`visual_details.body.frame_proportions` 呈现头身、肩胯与躯腿；`body_form.proportions` 各组同步。全身提示词保持前三组比例含义和测量端点，验收至少核对头身与躯腿；旧无新保真标记包继续原逐字规则。165cm/48kg只记录事实，不能据此推算头身比或长腿。例子数值不成为全剧默认。
 
 头像阶段可以留下后续形体方向与稳定身份约束，但不强制提前完成这五组数值；进入 full_body 前 body 快照须完整确认。非人按实际部件适配，不能强套人体。
 

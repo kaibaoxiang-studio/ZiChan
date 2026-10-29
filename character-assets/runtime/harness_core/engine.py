@@ -14,6 +14,49 @@ from .appserver import AppServer, envelope_schema
 from .common import inside, fingerprint, sha, read_json, write_json, now, redact
 from .contracts import graph_order, bind_inputs, validate_data
 from .store import Store
+from .delivery import completion_mode, verify_text, verify_main_file
+
+
+def _scheduler_pid_alive(pid):
+    """Probe a scheduler without sending Windows' terminating ``kill(pid, 0)``.
+
+    Unknown/denied Windows state raises so the existing lock remains intact.
+    The minimum SYNCHRONIZE right permits a zero-time process-handle wait.
+    """
+    if os.name != 'nt':
+        try:
+            os.kill(pid, 0)
+        except ProcessLookupError:
+            return False
+        return True
+    if not 0 < pid <= 0xffffffff:
+        raise ValueError('Scheduler lock has an invalid Windows process ID')
+    import ctypes
+    from ctypes import wintypes
+    kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
+    kernel32.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+    kernel32.OpenProcess.restype = wintypes.HANDLE
+    kernel32.WaitForSingleObject.argtypes = [wintypes.HANDLE, wintypes.DWORD]
+    kernel32.WaitForSingleObject.restype = wintypes.DWORD
+    kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
+    kernel32.CloseHandle.restype = wintypes.BOOL
+    handle = kernel32.OpenProcess(0x00100000, False, pid)  # SYNCHRONIZE only
+    if not handle:
+        error = ctypes.get_last_error()
+        if error == 87:  # ERROR_INVALID_PARAMETER: no process for this valid PID
+            return False
+        raise OSError(error, 'Cannot establish scheduler process state; lock preserved')
+    try:
+        result = kernel32.WaitForSingleObject(handle, 0)
+        if result == 0:  # WAIT_OBJECT_0: the process has terminated
+            return False
+        if result == 0x00000102:  # WAIT_TIMEOUT: still running
+            return True
+        raise OSError(ctypes.get_last_error(), 'Cannot wait on scheduler process; lock preserved')
+    finally:
+        if not kernel32.CloseHandle(handle):
+            raise OSError(ctypes.get_last_error(), 'Cannot close scheduler process handle; lock preserved')
+
 
 def input_files(value):
     found={}
@@ -35,11 +78,26 @@ def verify_result(result, capability, artifact_dir, task_inputs=None, plugin_roo
     artifacts=[]
     if result['status']=='succeeded':
         validate_data(result['result'],capability['output_schema'])
+        character_task = capability.get('id', '').startswith('character-')
+        mode = completion_mode(capability, task_inputs, result['result']) if character_task else 'files'
         for relative in result['artifacts']:
             path=inside(artifact_dir,relative)
             if not path.is_file() or path.is_symlink():
                 raise ValueError(f'Missing or invalid artifact: {relative}')
             artifacts.append({'path':str(path.resolve()),'sha256':sha(path)})
+        if character_task and mode != 'files':
+            verify_text(result['result'])
+            if capability.get('id') == 'character-image-prompt':
+                root=Path(plugin_root or Path(__file__).resolve().parents[2]).resolve()
+                helper=inside(root,'scripts/verify_prompt_delivery.py')
+                checked=subprocess.run([sys.executable,str(helper),'--text'],
+                                       input=json.dumps({'inputs':task_inputs,'content':result['result']['content']},ensure_ascii=False),
+                                       capture_output=True,text=True,encoding='utf-8',timeout=30)
+                if checked.returncode:
+                    raise ValueError('Prompt text contract failed: '+(checked.stderr or checked.stdout).strip())
+            return artifacts
+        if character_task or 'artifact_path' in capability.get('output_schema', {}).get('properties', {}):
+            verify_main_file(result['result'], result['artifacts'], artifact_dir)
         for required in capability.get('required_artifacts',[]):
             if required not in result['artifacts']:
                 raise ValueError(f'Required artifact not declared: {required}')
@@ -168,9 +226,7 @@ class Engine:
         base.mkdir(parents=True,exist_ok=True)
         lock=base/'scheduler.lock'
         if lock.exists():
-            try:
-                os.kill(int(lock.read_text()),0)
-            except ProcessLookupError:
+            if not _scheduler_pid_alive(int(lock.read_text())):
                 lock.unlink()
             else:
                 raise RuntimeError('A scheduler already owns this run')

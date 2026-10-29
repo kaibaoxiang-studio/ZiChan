@@ -1,54 +1,20 @@
 ---
 name: character-image-prompt
-description: "把已批准设计转成 GPT Image 2.5 分阶段提示词"
+description: "把具体角色设计保真编译为GPT Image 2.5提示词，默认同源文件与可读文档"
 ---
 
-# 图像提示词
+# 角色图像提示词
 
-先读 [知识索引](../../knowledge/index.md)，按情景只加载本轮需要的 reference。
+将当前具体设计编译成当前画幅可用的完整提示词，不临时发明脸、衣片或妆饰。先核成熟度：有可画结构就接续，缺哪处只回补哪处；candidate 仅改变批准状态，不免设计。没有工程可接真实冻结独立 delivery；错误工程不能自动降级。接口与真实命令见[提示词合同](../../references/prompt-detail-contract.md)。
 
-调用本能力前，先区分方向稿与已深化的阶段稿：前者只给定位和任务，后者须有真实专项方法、人物化的可画结果与采用映射。先核专项成果及其可解析来源，再核 cue 覆盖；不能只把一段浅设计抄成 cue 就视为前置完成。缺少深化时退回 `character-design` 或对应设计师，在原委托内补设计，不由提示词专项临时创造面孔、衣片或妆饰。
+先读[出图规则](../../references/prompting.md)与本次阶段相关规则。投影当前可见细节，按视觉主次整理为无部位标题的自然正文。允许同义、合句、去理由与重复；已选且入画的骨点、左右、比例、片数、叠压连接、色材分区、佩戴与状态不能静默丢改。主次只改排序和强调，不授权删小件；不入画内容留在设计。完成源细节到正文的语义核对；确定性检查不能冒充审美或看图。
 
-候选、预览、批量和仅文字交付都执行上述门槛。只在对话中讨论未完成的想法时可展示并明确标为设计讨论，不能把它称为可用提示词、运行生图或转成自定义短词文件交付。实际可用提示词始终由具体的已批设计或允许的冻结预览设计产生；自动脚本只负责同源 JSON/TXT 与结构检查，不能用人物摘要/职业标签套模板生产设计。
+默认后台交 `prompt-package.json`＋机械导出的 `提示词.txt`，TXT逐字等于 `prompts[].text`；同时把完整可复制正文机械合入同一份角色设计文档。用户只需该文档，版本和审计后台保留。只有本次明确只对话文字，才用 `delivery_mode:text` 免文件，仍交完整正文；不能模型自行把提示词请求改成讨论。
 
-新头像与服饰执行图先读 [提示词硬输出合同](../../references/prompt-detail-contract.md)。逐 item 核对 `CharacterStageDesignV1.2.payload.prompt_detail_contract`，把所有已选且可见的 cue 原样保留在每条 `prompts[].text`，验收项逐 item 至少核一条。不得拿旧 `CharacterStageDesignV1/V1.1` 概述或服饰设计说明直接改写为可交付提示词；缺主衣片数、叠压固定、正背接续、妆容局部或头像骨点/五官落点时退回设计。先向操作者展示完整无标题正文，后续预览须使用同一正文，不临时压缩。
-
-默认双份交付：`prompt-package.json` 保存完整 `CharacterPromptPackageV1`、设计依据及验收项；`提示词.txt` 给操作者直接复制。先完成 JSON，再运行本插件 `scripts/export_prompt_text.py <JSON路径> --output <本轮artifact_dir>/提示词.txt`，机械导出每条 `prompts[].text`，不重新改写、摘要或添加部位标题；多条候选按 JSON 顺序以空行分隔。通过 Harness 能力入口时，两个文件都必须声明在 artifacts 中，`artifact_path` 指向 JSON；验收须核对 TXT 的 UTF-8 字节与导出结果一致，并只读校验同一工程中的实际设计依据，不能仅凭文件存在报成功。隔离节点只写自己的 artifact_dir，不自动修改外部工程；主控在正式工程用 `character_project.py submit --kind prompt-package` 完成登记，CLI 同时导出 `提示词/角色ID_角色名_状态_阶段_短SHA.txt` 并记录文本哈希。机器校验通过不等于图片或设计获用户批准。仅在对话讨论且未建立工程时，可展示未完成的设计想法并明确仍在设计中；这不允许跳过深化而交可用的候选短词。交付可用提示词文件时仍从同一标准 JSON 导出 TXT。
-
-读取 [出图规则](../../references/prompting.md) 与当前阶段规则。先检查当前阶段的设计依据是否具象：新项目读取对应阶段快照，旧项目读取整卡；空泛则回设计轮补细。按真实质感规则选择适量可见肌理和材料词。正式提示词使用本阶段已批准的设计依据及当前选定图片；新项目按 [阶段合同](../../references/phased-design.md) 的 design_basis 绑定快照。avatar preview 可引用冻结未批准草案，须明确候选用途，未转正不能作下游锚点。按画幅抽取主锚点，标注每张参考图的身份/服装/风格职责。背景也是设计维度：无明确批准时仅用无场景、无纹理的中性底色作核对背景；不得自行加入地点、建筑、地貌、天气或借光线描述暗示剧情场景。头像默认 3:4 竖版且每条提示词写明比例，只有操作者明确指定才覆盖；新分阶段项目默认一条推荐提示词，重要分歧再给备选；旧项目保留其候选合同；人形头像与表情以脸为主体，可取完整头部、双肩及上胸，不固定裁到锁骨以上；服装不入画用 face_only，上胸入画用对应白色背心，整组模式一致；新项目默认九宫格并写中文标签，16 格须有用户明确要求；全身图默认 9:16 竖版，每条提示词与验收项写明比例，穿对应白色背心、短裤并赤脚，头到双脚完整并留边界，逐条继承已批准身体快照（旧项目为设计卡）中的头身、肩胯与腿身关系并核对；常规独立人物九宫格和全身模卡批准后，每状态从已批准的穿衣风格圣经和服饰文字快照直接产出一张 9:16 竖版四格执行图：上正脸/45°半侧脸、下无头放大正面服装/完整背面。有指定台词的人形群演以 SpeakingExtraDesignV1 做同版式的一张 9:16 执行图，非人按已批准形态布局，无前三张锚图。无台词群像按 GroupEnsembleDesignV1 出一张所有成员全身可见的图，人数和横向比例依剧本与辨识度确定；不得套四格。单图审查批准后直接打包。非人使用已批准替代布局。输出 CharacterPromptPackageV1 与检查点，经 CLI 合同校验后交操作者外部出图。
-
-人形基础头像把已确认的名称与骨点、五官、发际发流、肤质和妆饰按 [头像命名与颗粒度规则](../../references/avatar-identity-granularity.md) 转为无板块标题的连续提示词正文；正常头像尺度不主动要求逐根额前发丝或全脸可见毛孔、绒毛。
-
-完整头像请求须把眉、眼、可见耳、鼻、唇分别核对，显式承接稳定标记与头耳颈饰的存在或留空决定；本能力先交文字，不把省略部位或图像模型随机补出的部位当作已设计。用户另外要求生成预览时，由角色主控在文字展示之后按当前可用工具处理，预览标未批准。
-
-正式服饰执行图按 [穿戴部位拆解](../../references/costume-wearable-zones.md) 从已确认状态稿提取可见件：连体主衣只描述一次，按领肩胸腰、下摆、背部和鞋的画面顺序细化；头面颈只用当前状态已确认物件。内部部位清单的“明确无/不适用”不逐项塞进提示词，也不凭词表新增装饰。配色与面料沿当前已批方案，确保上右45°和下右背面沿用相同开合、挂载、鞋与耳饰。
-
-新状态稿先读 [剧情状态可见需求](../../references/scene-styling-needs.md) 的五项决定；凡 `design` 的 `prompt_cues` 逐字进入最终正文，并在验收项覆盖该项。妆面不可压缩为“自然肤质”，必须把已设计的底妆、眉眼、颊、唇中当前可见的具体颜色、边界和强度放入上方两格；发型与头耳颈饰同样逐件承接。若状态稿只有旧版概述、缺少需求或实际设计，退回状态设计，不在提示词里临时编妆。服装关键部件的轮廓与连接 cue 均需保留；按最终格位尺寸判断能否被看见，微小同色部件需回设计稿调整尺度或分界，不能只堆更多微纹样词。
-
-婚礼等仪式状态须核对已选饰品是否逐件进入相应格位；旧执行图用作身份或版式参考时，其饰品缺席不是保留约束。按原文的准确范围写禁令，不能把“禁皇冠、大型珠宝”改写成全体饰品缺席；未确认的戒指候选不可偷偷加进正式提示词。
-
-重点服装按 [物件级细节规则](../../references/costume-component-design.md) 从已选部件稿提取轮廓、起止、片数/相对尺度、叠压、固定、纹样路径与正背接续，不能把“腰扣锁住翻页式外裙”压缩成“精致腰饰和层叠薄纱”。用户只完成半份设计时，预览也保持原 9:16 竖版 2×2 执行图，除非用户明确改版式；提示词先交完整可复制正文，再用同一正文生成预览，不临时追加另一套未展示的设计。
+正式生产沿已批准设计、状态与图片锚点；task-local试改以冻结稿和只读正式父约束出候选，采用前不污染active。保留3:4头像、9:16全身、九宫格、模卡与四格／群像／非人对应布局，详见[阶段合同](../../references/phased-design.md)。本专项不调用生图；需要预览时由主控使用同一已展示正文，回图后实际审查。
 
 ## Packaged references
 
-- [knowledge/index.md](../../knowledge/index.md)
-- [references/prompting.md](../../references/prompting.md)
-- [references/model-card-baseline.md](../../references/model-card-baseline.md)
-- [references/expression.md](../../references/expression.md)
-- [references/execution-sheet.md](../../references/execution-sheet.md)
-- [references/group-ensemble.md](../../references/group-ensemble.md)
-- [references/costume-design-stage.md](../../references/costume-design-stage.md)
-- [references/interfaces.md](../../references/interfaces.md)
-- [references/phased-design.md](../../references/phased-design.md)
-- [references/knowledge/character-costume-designer/state-makeup.md](../../references/knowledge/character-costume-designer/state-makeup.md)
-- [references/design-detail-standard.md](../../references/design-detail-standard.md)
-- [references/costume-wearable-zones.md](../../references/costume-wearable-zones.md)
-- [references/costume-component-design.md](../../references/costume-component-design.md)
-- [references/scene-styling-needs.md](../../references/scene-styling-needs.md)
 - [references/prompt-detail-contract.md](../../references/prompt-detail-contract.md)
-- [references/prompt-density-example-su.md](../../references/prompt-density-example-su.md)
-- [references/render-texture-standard.md](../../references/render-texture-standard.md)
-- [references/knowledge/character-image-prompt/feature-focus-prompt.md](../../references/knowledge/character-image-prompt/feature-focus-prompt.md)
-- [references/knowledge/character-image-prompt/hedgehog-2d3d.md](../../references/knowledge/character-image-prompt/hedgehog-2d3d.md)
-- [references/knowledge/character-image-prompt/hedgehog-general-image-skill.md](../../references/knowledge/character-image-prompt/hedgehog-general-image-skill.md)
-- [references/knowledge/character-image-prompt/anti-stereotype-texture.md](../../references/knowledge/character-image-prompt/anti-stereotype-texture.md)
+- [references/prompting.md](../../references/prompting.md)
+- [references/phased-design.md](../../references/phased-design.md)

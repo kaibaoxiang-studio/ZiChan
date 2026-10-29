@@ -1,43 +1,31 @@
-# 服饰设计师：人物总控之后的必经环节 v0.2.9
+# 服饰：从人物穿衣命题到具体衣装
 
-## 输入与责任
+接总控已理解的人物、世界条件、当前状态、已选脸发身体与衣装硬要求。复用同版本有效全文上下文，只追溯衣装相关原文，不重复阅读全文；源变化才补受影响处。没有工程可独立设计，不以剧本只写“婚纱／工作服”停止创作。
 
-读取来源版本一致的 `ScriptContextV1`、目标人物 `DesignDirectionBriefV1`、项目视觉基准、身份与身体快照、资产表登记的服饰状态，以及相关剧本场次。总控已解读全文；服饰设计师核对来源 SHA 并追溯与衣装有关的原文，不重复阅读全文。若上下文缺失或版本变化，交回总控补读。不能用“剧本只写婚纱”停止设计。服装类别、剧情作用及明确禁令为硬约束；剪裁、层次、纹样、穿着方式与镜头记忆点由设计师形成可审阅创作选择。
+## 实际设计方法
 
-先写一句人物穿衣命题：人物试图呈现什么，与其真实处境有什么张力。随后制定 `CostumeStyleBibleV1`，每角色共用。资产表主角和重要角色必须用 `tier:full` 和登记状态完整 `state_matrix`；普通角色用 `tier:compact`，仍须具体廓形、剪裁、色材语法与记忆锚点；普通群像可用 `tier:group`，但每人还需个体差别。字段：`schema_version,character_id,variant_id:base,parent_refs,tier,wearing_thesis,world_translation,signature_silhouette,cut_grammar,palette_grammar,material_grammar,recognition_anchor,wearing_habits,state_logic,physical_and_camera_rules,state_matrix(full),new_lore_policy,unresolved`。`parent_refs` 绑定获批 brief、identity 和 body SHA。家族、宗教、阵营含义属于新增设定，须单独待确认；普通结构选择随整稿审。
+先形成一句穿衣命题：此人试图呈现什么，和实际处境有什么张力。用世界工艺、材料取得、维护、行动与个人选择形成主衣清单和视觉语言。不能把职业阶层、宗教或性别列表当固定搭配。
 
-## 每状态设计
+先主衣廓形与衣层，再确定关键衣片数量形状、领肩袖腰摆的落点比例、叠压／缝接／开合／固定、动作余量和正侧背接续；配色落实部位与面积，材料落实厚薄、重量、垂坠、透度、反射和受力磨损。款式、剪裁、配色、材质都须真实起作用，饰品按人物与场景判断。常规设计师同轮执行方法，不固定拉五个会话。
 
-每状态开工先读 [剧情状态可见需求](scene-styling-needs.md)，明确妆、发、头耳颈、主衣、其他穿戴的当前状态决定，再读 [服饰与穿戴部位拆解](costume-wearable-zones.md)。基础头像的 `not_needed` 不代表后续状态素颜或无饰品；婚礼等公开仪式必须实际评估妆容，并将选定底妆、眉眼、颊唇映射到面部装饰专项。人物总控交来的 DesignDirectionBrief 不等于“设计一套衣服”：服饰总控须先建立主衣物件与当前状态的部位决定，再给专项发含原文约束、邻接物件、已批身份/身体、画幅与近邻角色的具体任务。上装/下装若同属一件连衣裙，使用同一主衣物件；头耳颈、面部彩绘、特殊下肢先于服饰挂载确定边界。款式确定衣层与品类，剪裁解决前后连接和动作，饰品只判断独立附加物；配色和材质接收已确定的衣件清单，本轮资料 17–31 不替它们重选颜色或面料。
+重点服装按[部件方法](costume-component-design.md)将结构巧思写到能复现，不能以花纹珠宝数量替代主衣设计。普通衣物也可画，但不强制每件都成为焦点。同一连衣裙跨上腰下仍是一物件；与头耳颈／彩绘／特殊身体／道具明确唯一主责，详情按需读[穿戴部位](costume-wearable-zones.md)。
 
-部位扫描包括头戴、发饰、耳饰、面部穿戴、彩绘、颈饰；主衣上身、外套、可见中层、贴身层、衣身装饰、肩与胸腹；臂、手指/手掌、腕、腰和背；主衣下身、腿件、膝胫、袜品、鞋；特殊下肢只在非人设定触发。每项记为有、明确无、当前画幅不可见、不适用或待设计；有的部件再给名称、落点、轮廓、连接、邻件遮挡、正侧背可见和动作中的状态。只把实际采用且入画的项送去提示词，内部留空决定不写成冗长否定清单。详细唯一主责和知识编号见拆解表。
+本状态判妆、发、头耳颈、主衣和其他穿戴的需要，保留已批骨相和皮肤，不沿用基础身份not_needed当永久禁令。婚礼只提示评估公开呈现与佩戴时点，不强制跨部位候选、独立饰品或妆面；无妆无饰可为完整推荐。禁皇冠大珠宝不扩大为全禁，旧物已摘不复现，未写交换戒指不当已戴事实。状态细则见[可见需求](scene-styling-needs.md)。
 
-婚礼等仪式状态先执行 [仪式饰品判断闸门](costume-wearable-zones.md)：头耳颈与服饰饰品专项各给真实候选，服饰总控评估至少两个不同部位，推荐组合留一件以上独立可见饰品。不能因已选头纱、同布腰带、旧图无首饰或“不加大型珠宝”就把饰品全部判 `明确无`；旧物摘除只约束那件旧物。若确需全空，逐项给剧本或获批人物方向的强理由，标待操作者确认；未写戒指交换时，婚戒只可列待审候选并注明佩戴时点。
+独立或单状态试稿按本次范围交完整具体推荐与关键取舍，不设2000–3000字配额，不强全员矩阵。成熟状态设计可接独立候选词，不因没有正式记录降回讨论。实际方法采用留后台最小依据；唯一角色设计文档呈现完整构成、修改结果与当前提示词，不把机器树当作品。
 
-关键服饰若被要求有巧思，按 [服饰重点细节的物件级设计](costume-component-design.md) 做主轮廓与关键部件设计；首先说明哪一处结构在远景有辨识度，再把一处近景细节写到像道具一样可复现的部件和连接。须有衣片层次、叠压方向、固定件及前背接续；平面纹样与立体装饰分开。增加一串相似花朵、更多首饰或“工艺感”形容词不能替代衣装结构改形。
+## 正式工程的圣经与快照
 
-独立文字验收和单状态试稿默认只交一份约 2000–3000 汉字的具象设计，不提前制造生产 JSON、审批文件或全员矩阵的重复长文；正式项目按下列合同提交结构化记录，执行同一 strict 专项成果与可解析 cue 来源门槛；独立纯文字是设计试稿，不是正式或候选提示词，不可用来绕过正式设计交接。重点角色的状态矩阵可用短句覆盖其余状态，把篇幅留给本次状态的剪裁、材料和动作。
+以下只用于正式常规individual服饰阶段；群演由[单图设计师](group-ensemble.md)处理，不套圣经前置。
 
-对每个新建或重做资产表状态写 `CharacterStageDesignV1.2(scope:costume)` 和 `execution_contract_version:2`（旧 V1/V1.1 批准记录保持可读），其 `parent_refs` 在原有 brief、identity、body 外加入 `costume-bible:CHR:base` 当前 SHA。`payload.costume_direction` 至少有：`script_requirement`、`narrative_function`、`front_structure`、`back_structure`、`cut_and_fastening`、`layering`、`color_placement`、`material_behavior`、`recognition_focus`、`mobility_and_camera`、`state_continuity`、`makeup_and_hair`、`evidence_status`、`script_refs`。`payload.costume` 与 `visual_details.costume` 保持本轮原有合同。正背结构写具体部位、形状、尺寸/比例或穿法；布料写厚薄、光泽、垂坠和动作表现；妆造只改施加层，不改获批骨相。
+每角色CostumeStyleBibleV1承接获批brief／identity／body，含wearing_thesis、world_translation、signature_silhouette、cut_grammar、palette_grammar、material_grammar、recognition_anchor、wearing_habits、state_logic、physical_and_camera_rules、new_lore_policy、unresolved。tier:full重点角色有登记状态state_matrix，普通compact仍有具体语言；不是所有人先详设完才做当前人物。新家族宗教阵营含义集中决定，普通衣片结构整稿审。
 
-统筹五专项：
+逐状态新CharacterStageDesignV1.2(scope:costume)／execution_contract_version:2按原parent_refs加当前costume-bible。payload.costume_direction保留script_requirement、narrative_function、front_structure、back_structure、cut_and_fastening、layering、color_placement、material_behavior、recognition_focus、mobility_and_camera、state_continuity、makeup_and_hair、evidence_status、script_refs及scene_needs；摘要costume与visual_details同源。前四服饰专项保留真实inline方法／知识和映射成果或independent原提案，不只打标签；饰品可明确不需。
 
-| 专项 | 交付到衣装的实际成果 |
-| --- | --- |
-| 款式 | 品类内的廓形、衣长、层次、穿法与身份关系 |
-| 剪裁 | 领肩袖腰摆、拼片、缝/扣/拉链、前背连接和活动余量 |
-| 配色 | 实际部位的明度/色相/面积关系，和同框角色区分 |
-| 材质 | 各衣层表面、厚度、重量、反射、垂坠与磨损逻辑 |
-| 饰品 | 功能、固定点与镜头作用；不用时给出具体理由 |
+新提示词按[保真合同](prompt-detail-contract.md)保持已选入画结构；正式新阶段保留真实cue采用来源。独立稿进入生产只映射与补实际缺项，不倒填过去执行或批准。
 
-款式、剪裁和饰品专项交回时，除领域结果外必须指出所处理的部位及所属主衣/独立件，并写至少一个当前角色可画的形状或落点和一个连接/遮挡关系。单纯“按真实垂坠”“前后保持一致”“饰品左右固定”不能替代当前状态设计；仍可作为一致性检查。面部彩绘和头耳颈物件由各自专项负责，不能在服饰饰品字段中冒名完成。
+## 复核与图片
 
-前四项必须在 `specialist_execution` 留真实的 inline 规则、知识 SHA 和映射到 `costume_direction.*` 或 `visual_details.costume.*` 的可见成果，或独立会诊提案和已采纳元素。不能只打标签。普通状态饰品可在具体逐部位理由后 `not_needed`；仪式状态全部留空时标待确认，不能直接 `not_needed`。复杂跨域问题可独立会诊，常规问题设计师实际执行专项规范并记录结果。风格圣经不取代逐状态文本设计。
+核人物命题、原文状态、结构连接、动作、色材、可见性、近邻差异和焦点；发现实际问题改具体部件。只有看图才报告尺寸／遮挡是否视觉通过。
 
-## 审查与出图
-
-检验剧本约束、人物弧线、正背、剪裁连接、动作、拍摄视角、材质物理和近邻角色差异。对于“白色婚纱”，要守住婚纱与白色，但必须给出这个人物独有的结构与穿法；不要自动指定 A 字裙、泡泡袖或首饰，也不要自动禁止所有配饰。一个到两个主要锚点足够；符号、纹样、色彩公式和叠穿都是可选方法。
-
-用户批准文字快照后，合成设计卡，再生成**一张** `execution` 正式图：9:16 竖版 2×2；上方正面脸与 45° 脸，下方放大无头正面服装与头鞋完整背面。逐状态一张、一次审查批准、直接打包。不要制作新项目的 `costume_design` 横版双视图。已有 pipeline 2/1 仍按各自原链路；`upgrade-pipeline` 用于无已批准服饰或执行图的 pipeline 2 项目，保留获批头像、九宫格、全身模卡。
-
-深层方法见 `references/knowledge/character-costume-designer/costume-deep.md`。学术文献只解释服饰社会语境、视觉显著性和布料物理，不能把课程比例说成经过验证的定律。
+pipeline3正式文字快照获批后合成卡，每状态一张9:16竖版2×2 execution：上正脸／45°，下无头放大正面服装／头鞋完整背面。实际审图和用户批准后打包，不增加横版服饰图。旧pipeline按原链，upgrade-pipeline仅原允许范围；不因新方法改旧批准。深层服饰与状态妆方法在锁定知识快照，按实际问题读。

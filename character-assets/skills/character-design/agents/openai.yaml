@@ -1,6 +1,6 @@
 interface:
   display_name: 人物设计总控
-  short_description: 人物设计总控：全文理解、人物定位与专项设计统筹
+  short_description: 理解人物与世界，设计完整形象或指定局部；普通首稿无需生产工程
   default_prompt: Use $character-design to complete the requested task.
 policy:
   allow_implicit_invocation: false

@@ -35,6 +35,17 @@ class PromptTextExportTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             render_prompt_text(self.package('   '))
 
+    def test_export_rejects_linked_output_without_altering_target(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            actual = root / 'existing.txt'
+            actual.write_bytes(b'previous canonical output')
+            output = root / '提示词.txt'
+            output.symlink_to(actual.name)
+            with self.assertRaisesRegex(ValueError, 'symlink'):
+                write_prompt_text(self.package('新的完整正文。'), output)
+            self.assertEqual(actual.read_bytes(), b'previous canonical output')
+
 
 if __name__ == '__main__':
     unittest.main()

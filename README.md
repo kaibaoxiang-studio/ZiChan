@@ -6,7 +6,7 @@ ZiChan 收录三项平行、可独立安装的资产插件。剧本与资产表�
 
 | 插件 | 当前版本 | 维护来源 | 主要交付 |
 | --- | --- | --- | --- |
-| [角色资产插件](character-assets/README.md) | **v0.2.15** | 项目维护者 | 全文人物理解与专项深化、分阶段设计验收、JSON＋同源 TXT、群演／非人单图与资产交付 |
+| [角色资产插件](character-assets/README.md) | **v0.2.16** | 项目维护者 | 全文人物理解与具体设计、单一人用文档、同源提示词、独立候选与分阶段资产交付 |
 | [道具资产插件](prop-assets/README.md) | **v0.2.5** | [18571635839-a11y](https://github.com/18571635839-a11y) | 道具概念与材质、配色、纹样、轮廓专项；逐件设计及完整 Prompt 表 |
 | [场景资产插件](scene-assets/README.md) | **v0.10.1** | [runningg0301-prog](https://github.com/runningg0301-prog) | 静态场景设计、光影氛围与色卡、反打／多角度及局部修改提示词 |
 
@@ -14,15 +14,15 @@ ZiChan 收录三项平行、可独立安装的资产插件。剧本与资产表�
 
 道具插件 v0.2.5 新增五份设计参考：形体与体积、特殊材质与光学、分品类常见失败、方向发散、呈现／挂载／状态推进。相关知识按需接入概念、主视觉、审核与扩展节点，保持独立专项的范围及用户确认规则；详见[道具插件更新说明](prop-assets/README.md#参考资料)。
 
-角色 v0.2.15 将人物方向、实际专项深化、阶段快照和提示词交接分别验收；未批准候选也需要先完成设计。群演提示词逐人承接获批细节，执行图合成保留各阶段依据，资产包带 JSON 与同源 TXT；旧 complete 工程保留整卡合同。完整安装包与文件校验见[正式发布页](https://github.com/kaibaoxiang-studio/ZiChan/releases/tag/character-assets-v0.2.15)，规则与验收范围见[角色说明](character-assets/README.md)、[验证记录](character-assets/VALIDATION.md)和[硬输出合同](character-assets/references/prompt-detail-contract.md)。
+角色 v0.2.16 从剧本、小传或成熟角色稿形成当前范围的完整具体设计，再保真编译可复制提示词。人用交付收敛为一份持续更新的角色设计文档；JSON、同源TXT、来源与版本记录保留后台。完整人物、局部修改和成熟稿可按实际需求进入，普通首稿无需先建立正式工程；正式资产继续沿用原有阶段、ID与批准规则。完整22项能力和58份锁定知识快照随源码与安装包保留，详见[角色说明](character-assets/README.md)、[验证范围](character-assets/VALIDATION.md)及[正式发布页](https://github.com/kaibaoxiang-studio/ZiChan/releases/tag/character-assets-v0.2.16)。
 
-角色插件当前仍有已知范围限制：Windows 项目文件锁和调度探活未修，部分辅助专项的独立成功回执只代表文件返回，正式采纳须经总控与阶段验收；最终有图资产表需表格工具实际制作与重开核验，CLI 打包不会自动完成。不能把本版宣传为 Windows 已支持或完整图像端到端已验收。
+本版完成了Windows项目文件锁与调度恢复探活的适配，并通过模拟Windows API回归；尚未在Windows真机验收。实际验证覆盖两套Python的代码/状态回归、源码重建与解包，以及多项真实文字设计旅程和五人实测；没有据此宣称图像审美、普遍提速或图像端到端已经通过。最终有图资产表仍需表格工具实际制作与重开核验，CLI打包不会自动完成。
 
 ## 仓库结构
 
 ```text
 ZiChan/
-├── character-assets/   角色资产插件 v0.2.15
+├── character-assets/   角色资产插件 v0.2.16
 ├── prop-assets/        道具资产插件 v0.2.5
 ├── scene-assets/       场景资产插件与技能 v0.10.1
 ├── .agents/            三插件本地市场清单
@@ -61,7 +61,7 @@ $sence-prompts 根据场景资产表和剧本设计静态场景提示词。
 
 ```mermaid
 flowchart LR
-    A["标准剧本、资产表与项目美术方向"] --> B{"选择资产领域"}
+    A["剧本、小传、现有设计或资产表及美术方向"] --> B{"选择资产领域"}
     B --> C["角色：人物理解、专项深化与阶段设计"]
     B --> D["道具：逐件概念与四专项设计"]
     B --> E["场景：空间、光影与多角度设计"]
@@ -94,7 +94,7 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    S["剧本事实与资产 ID"] --> R["角色插件：人物依据、设计快照、cue与批准"]
+    S["真实剧本与人物资料、可选正式资产 ID"] --> R["角色插件：人物理解、具体设计、候选与阶段批准"]
     S --> P["道具插件：逐件依据、设计与 Prompt 表"]
     S --> C["场景插件：空间依据、静帧提示词与色卡"]
     R --> RR["角色资产包与有设定图资产表"]

@@ -3,15 +3,14 @@ name: character-feature-focus
 description: "特征聚焦：主锚点、安静区与自然不对称"
 ---
 
-# 特征聚焦：主锚点、安静区与自然不对称
+# 特征主次与辨识
 
-读取 [专项交接](../../references/specialist-contract.md)、[群像差异化框架](../../references/differentiation-framework.md) 与本专项知识快照。从剧本处境提炼一句辨识核心；提出少量主锚点与退居次要的特征，核对正侧背可见性、近邻撞型和自然不对称。不得自动添加伤痕或痣。读取总控的 DesignDirectionBriefV1、当前阶段任务、已有视觉基准与最近比较组；没有项目时可直接接人物材料，注明草案与材料范围。先回应任务目标、人物语境、约束和所需成果，默认一套推荐，仅重要分歧增加备选，每方案列至少两个部位、形状、位置/连接和依据明确的设计元素，供设计卡实际采纳；明确原文事实、合理推导、创作选择、制作核对点及与近邻的差异。把人物未写明的外观当作需要设计的空白；无须编造身世证明某种脸型。常规项可由总控同轮执行本 Skill 的规范并记录 inline 成果；独立会诊记录 independent 原始返回物。新特征仍是待审设计，不能自行批准。提案包含当前 variant_id；新独立提案提交 CharacterSpecialistProposalV1.2 JSON 与短 Markdown，执行 scripts/validate_specialist_proposal.py；旧 V1/V1.1 仍可回读；不调用生图。
+读[聚焦方法](../../references/knowledge/character-feature-focus/feature-focus.md)。从人物处境与观众读取提出辨识命题，比较近邻，在已有形状、比例、发流、衣装或动作中选择主锚点与安静区。其余部分仍具体设计，不能以次要为由删已选入画结构。
+
+注明当前画幅及正侧背可见性，指出同质化和互抢焦点的地方，给保留、退为次要、改哪里的一套推荐。自然不对称是可选方法，不自动加痣、伤痕或极端比例；未实际看图不报剪影／遮挡测试通过。需要群像时再读[差异化框架](../../references/differentiation-framework.md)，交付按[专项合同](../../references/specialist-contract.md)。不调用生图。
 
 ## Packaged references
 
-- [knowledge/index.md](../../knowledge/index.md)
-- [references/specialist-contract.md](../../references/specialist-contract.md)
-- [references/differentiation-framework.md](../../references/differentiation-framework.md)
-- [references/design-detail-standard.md](../../references/design-detail-standard.md)
 - [references/knowledge/character-feature-focus/feature-focus.md](../../references/knowledge/character-feature-focus/feature-focus.md)
-- [references/feature-focus-and-body-form.md](../../references/feature-focus-and-body-form.md)
+- [references/differentiation-framework.md](../../references/differentiation-framework.md)
+- [references/specialist-contract.md](../../references/specialist-contract.md)

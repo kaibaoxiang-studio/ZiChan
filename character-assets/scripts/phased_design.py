@@ -204,6 +204,10 @@ def validate_prompt_detail_coverage(cp, root, state, package, character, variant
     design = cp.read_json(root / record["path"])
     cp.ensure(design.get("schema_version") == "CharacterStageDesignV1.2",
               f"New {stage} prompts require a V1.2 {scope} design; deepen legacy summaries first")
+    if 'fidelity_review' in package:
+        from prompt_fidelity import design_inventory, validate_fidelity
+        validate_fidelity(package, design_inventory(design, stage), record['sha256'])
+        return
     contract = design["payload"]["prompt_detail_contract"]
     checks = "\n".join(package["acceptance_checks"])
     for prompt in package["prompts"]:
@@ -724,6 +728,11 @@ def validate_scene_prompt_coverage(cp, root, state, package, character, variant)
     record = cp._checked_record(root, state, key("stage-design", character, variant, "costume"))
     stage = cp.read_json(root / record["path"])
     if stage.get("schema_version") not in {"CharacterStageDesignV1.1", "CharacterStageDesignV1.2"}:
+        return
+    if 'fidelity_review' in package:
+        # The unified inventory includes scene cues as well as adopted objects.
+        from prompt_fidelity import design_inventory, validate_fidelity
+        validate_fidelity(package, design_inventory(stage, 'execution'), record['sha256'])
         return
     requirements = stage["payload"]["costume_direction"]["scene_needs"]["requirements"]
     checks = "\n".join(package["acceptance_checks"])

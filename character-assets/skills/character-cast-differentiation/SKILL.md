@@ -3,15 +3,15 @@ name: character-cast-differentiation
 description: "群像差异化总控：比较组、五轴矩阵与回图防撞型复核"
 ---
 
-# 群像差异化总控
+# 群像差异与近邻复核
 
-读取 [差异化框架](../../references/differentiation-framework.md)、[专项交接](../../references/specialist-contract.md) 和群像知识快照。从真实同框及功能近邻建立比较组，生成角色 × 识别轴矩阵；指出重复的结构组合和全员美型偏差。按文本阶段或已收到的图片明确证据等级；需要回图判断时实际打开图片。不能因差异化硬造疤痕、怪发或极端体型，不自动改已批准卡。把类型标签翻译成可画结构，分别报告设计空泛与回图渲染趋同。给主控具体修订点与应启用的专项，检查各角色主锚点是否同质化；问题经操作者选择后才写入正式设计卡。
+读[差异化框架](../../references/differentiation-framework.md)，从真实同框与叙事近邻建立本次比较；普通单人请求没有近邻时说明未做比较，不先要求全员资料。用轮廓、脸、体态、发型块面与衣装色块等当前可见结构找重复组合；五轴是索引，不代替人物理解。
+
+保留世界圈层共性，给具体改动与保留建议，避免全员模板脸或只换色；不能为差异强造疤痕、怪发或极端体型。控制每人主锚点和安静区，普通相貌也完整可画。
+
+区分文本判断和实图证据；需要视觉结论就实际打开图片并排，未见侧背写未验证。复核结果合入同一角色设计文档，正式工程不自动改已批卡；执行证据见[专项交付](../../references/specialist-contract.md)。
 
 ## Packaged references
 
-- [knowledge/index.md](../../knowledge/index.md)
 - [references/differentiation-framework.md](../../references/differentiation-framework.md)
 - [references/specialist-contract.md](../../references/specialist-contract.md)
-- [references/knowledge/character-cast-differentiation/ensemble.md](../../references/knowledge/character-cast-differentiation/ensemble.md)
-- [references/knowledge/character-cast-differentiation/legacy-visual.md](../../references/knowledge/character-cast-differentiation/legacy-visual.md)
-- [references/knowledge/character-cast-differentiation/anti-stereotype-texture.md](../../references/knowledge/character-cast-differentiation/anti-stereotype-texture.md)

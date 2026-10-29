@@ -1,8 +1,10 @@
-# 接口与文件契约 v0.2.6.2
+# 设计与生产接口 v0.2.16
 
-新提交的独立人形 `avatar` 与 `execution` 提示词采用 [提示词硬输出合同](prompt-detail-contract.md)：对应身份或服饰阶段稿使用 `CharacterStageDesignV1.2`，`payload.prompt_detail_contract` 冻结逐 item 的可见 cue；程序逐字核对每条 `prompts[].text`，并检查 `acceptance_checks` 覆盖各 item。旧 V1/V1.1 批准记录保持可读；要从旧简版重新出词，先提交 V1.2 阶段设计。正式工程的 `--project-root`、提示词包、图片、审查、逐状态包和总表须按用户给定交付根目录映射。
+本页后续为**正式工程与历史兼容合同**，不要求普通独立设计先补全这些记录。当前任务范围、text/files边界、真实专项成果、冻结候选与唯一角色设计文档见[专项交付](specialist-contract.md)，提示词来源与结构保真见[提示词合同](prompt-detail-contract.md)。
 
-新建/重做阶段使用 `execution_contract_version:2`，cue 按 [专项合同](specialist-contract.md) 解析到实际专项 results/applied_elements、当前布局或允许的已批准父记录，原文引用不能替代专项成果。人物方向、专项深化和提示词是不同交接；候选、预览、纯文字和批量不豁免深化。人物设计 Harness 返回 `CharacterDesignDeliveryV1` 的 design-result.json 与机械生成的 design.md；正式服饰阶段同样遵守 V1.2 与 strict 成果合同，独立服饰文字仅为设计试稿，不是正式提示词。旧批准不因升级自动改写。
+当前独立跨维度沿CharacterDesignDeliveryV1／StandaloneCharacterDesignV1，scope:requested与requested_dimensions仅表达创作范围，不是生产scope；正式identity/body/costume与旧complete保持。task-local冻结来源不写active；只有真实采用后按原规则登记。
+
+新显式fidelity_review允许同义合句、保留所有已选入画结构；未启用新分支的旧合同继续原逐cue规则。不要把旧默认identity或十三项生产规划套给用户完整人物首稿，也不倒填旧执行／批准。提示词默认后台JSON＋同源TXT，用户只用机械更新的角色设计文档；明确本次只对话才免文件。
 
 ## 群演单图扩展
 

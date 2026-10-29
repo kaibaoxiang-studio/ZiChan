@@ -1,63 +1,45 @@
-# 角色专项执行与交接
+# 专项执行、冻结与交付 v0.2.16
 
-专项服务于 [人物总控](director-understanding.md) 已建立的人物理解和设计意图，不从职业标签独立重造人物。主控负责定位、路由、焦点和整合，专项负责本领域结构方案；任何执行方式都不自行批准项目。
+方向确定设计意图，专项形成结构与取舍，提示词编译可见结果，生产记录管理来源与批准；四者不能互相冒充。常规由主控真实inline执行，复杂冲突才独立会诊，不要求十三会话或普通首稿先交十三份证明。
 
-## 三种成果不能互相替代
+## 实际设计工作
 
-方向稿提出人物定位、设计意图和要解决的问题；专项深化用具体方法形成结构与取舍；提示词承接已选的可见结果。读过 Skill、列出知识名称、写“已会诊”、做一份造型摘要，均不等于专项深化。主控应能指出这个人物的哪个问题因该项工作得到解决，哪些部位/参数因而作了什么决定；不能先凭通用模板写好脸与衣服，再回填专项标签。
+先接当前人物理解、任务、世界与动作条件、已选约束和最近比较组，再读相关Skill方法及必要知识，形成形状、比例／落点、连接、表面与状态决定。后台留“本人物问题→所用方法／知识→采用的具体结果→设计位置”。只读资料、复制摘要、职业标签套模板、回填会诊名称都不算执行。区分script_fact／inference／creative_choice，不编身世解释普通骨相。
 
-方向确认是继续执行所委托设计任务的依据，不是重新询问是否执行的节点。普通细节由主控与专项整合后集中审阅；批量、候选和预览也要先深化，不把未批准状态当成跳过理由。常规 inline 不必另建聊天或伪造独立返回物，独立会诊也不天然比 inline 更有质量。
+成熟用户或外部稿按provided/captured记真实来源，结构齐备就接当前复核／编译；缺历史收据不等于缺设计。缺哪个结构只补哪个。独立会诊保留真实返回物，不能把inline伪写independent。专项不自行批准或改写正式记录。
 
-## 输入和执行方式
+## 本次范围与真实输入
 
-接受 `project_root`，或独立提供 `sources` 路径数组、`script_context_path`、`direction_brief_path` 和当前任务。独立剧本/小传可以先分析，说明阅读范围；无项目且未指定阶段默认identity/头像，只做当前首稿和关键路由，不先要求生产JSON或身体衣装详设。先读用户全文/复用有效context，再按任务加载必要规范，references是目录而非全读清单；正式登记按项目合同补记录。输入含人物言行证据、弧线和观众信息、已批准锚点、设计意图、生活行动条件、比较组、可创作范围及待解矛盾。可以读现有相关知识全文，不要求每次重读全部；知识不是原文事实。
+现有task可用 `requested_dimensions:[face,hair,skin,body,costume,adornments]` 表达当前范围；跨维度独立设计的外层仍 `CharacterDesignDeliveryV1`、`kind:standalone,scope:requested`，data仍 `StandaloneCharacterDesignV1` 并含相同requested_dimensions。requested不是新生产scope。现有identity/body/costume与旧complete交付继续兼容，显式生产scope不能被requested降级。
 
-- **inline**：常规问题由主控真实加载并执行专项规范。阶段 `specialist_execution` 记录 `mode:inline`、`decision`、`knowledge_refs[{path,sha256}]`、`rules_applied[]`、`results[{field,visible_result,basis,evidence_status}]`。路径相对插件根，必须对应实际知识快照；进入项目后复制到 knowledge-snapshots/sha 并保留收据，后续插件升级不因旧知识哈希改变而使历史项目失效；规则写具体采用方法，结果指向 `visual_details.face.contour` 等真实字段。`evidence_status` 为 `script_fact|inference|creative_choice`。不用伪造独立专家提案证明主控做过设计。
-- **independent**：跨专项冲突、重要身份/信息取舍、复杂形体工艺或反复失败时真实委派会诊。保存返回提案，在阶段记录 `mode:independent`、`decision`、`proposal_ref`、`proposal_sha256`、`selected_option_id`、`applied_elements[{field,element_index}]`；目标角色、状态与专项匹配。仅写已调用、自己编造外部返回物或只记录名称不成立。
-- **not_needed**：本阶段不适用或已有充分决定，写具体 `decision`。尚待身体或服饰阶段深化属于 `defer` 规划和 `deferred_dimensions`，不伪装成永不需要。
+来源绑定实际request与文件哈希；外层仍 `schema_version,kind,scope,data`。独立data保留subject.name/local_key、sources、understanding、design_thesis、payload、实际specialist_execution、deferred_dimensions、unresolved等，按本次维度校验；不造正式CHR ID。真实task传project_root就必须是真工程，不因验证失败改standalone。
 
-方向稿的 `specialist_plan` 覆盖十三项，状态为 `inline|independent|defer|not_needed`；inline/independent 项另有 `task{objective,character_context,constraints[],expected_result}`，把人物理解和设计意图变成具体委派目标。阶段只记录本阶段实际执行的项；从 defer 激活时在 work 写同结构 task 和 activation_reason，更改既定执行方式须 execution_change_reason，原 not_needed 不能悄悄激活；唯一例外是新服饰状态稿按 [剧情状态可见需求](scene-styling-needs.md) 为妆、发、头耳颈或其他穿戴提供具体 `work.task` 和 `state_activation_reason`，只改变本场施加层，不改基础身份方向。其他领域仍先修订方向稿。十三项不是十三轮询问或十三次独立会诊。复杂性看真实矛盾与返工风险，不按字段数量机械判断。
+`delivery_mode` 默认files；text须本次用户明确只要文字，result.content是实际完整正文，不仅summary；discussion只用于本来讨论请求，不能被执行节点自改以绕过设计交付。文件设计交内部 `design-result.json` 与同源 `design.md`，prompt默认内部JSON／TXT。唯一人用视图见下节。
 
-inline 的最小真实工作链是“读该专项方法 → 说明本人物问题 → 采用方法作出结构/比例/落点/表面决定 → 将具体结果映射到当前 payload”。`knowledge_refs` 留实际路径和 SHA，`rules_applied` 写用了哪种设计办法，`results` 写已采用的可画结果及原文/推导/创作性质。只列 Skill 名称、复制知识摘要、批量替换姓名或把同一句通用美化词填进多个 field 都不成立。可复用来源、方法和项目共有约束，但必须检查当前人物与状态是否相容。
+## 冻结候选与唯一人用文档
 
-## 深化成果到 cue 的可解析来源
+已有成熟设计或新稿在ledger外冻结，复用真实CLI，不submit覆盖active：
 
-新建或重做阶段用 `CharacterStageDesignV1.2`、`execution_contract_version:2`；提示词 cue 的 `source_refs` 采用以下可核对来源，不接受任意“见人物小传/已设计”字符串代替：
+```sh
+python scripts/character_project.py freeze-design --file /internal/design-result.json --inputs /internal/inputs.json --output /internal/frozen
+python scripts/verify_design_delivery.py render --design /internal/design-result.json --output /internal/design.md
+python scripts/verify_design_delivery.py document --design /internal/design-result.json --prompt /internal/prompt-package.json --output /delivery/角色设计.md
+```
 
-- inline：`specialist_execution.<专项ID>.results.<零基index>`。被引用的 `visible_result` 须含该 cue，且其 `field` 指向实际采用的当前 payload 字段。
-- independent：`specialist_execution.<专项ID>.applied_elements.<零基index>`。须有真实提案与所选元素，元素的 `visible_feature`、`placement_or_structure` 已进入映射 payload，cue 从该采纳字段提取，不能只挂一个提案哈希。
-- 画幅/格位：仅引用 `payload.execution_layout` 或它的实际子字段，且引用结构中确实有该布局 cue；不得用布局例外替代脸、发或衣装设计。
-- 执行图继承的身份、发、皮肤：可用 `approved_parent:<record_key>#payload.<field>`，限定当前 `parent_refs` SHA 对应的已批准父记录。新妆造或新衣装不能伪装成旧身份继承。执行图 identity 项的 reference_roles/cross_panel 等排版语义可引用 payload.execution_layout.identity 的实际子字段，face_body_anchor 仍须来自已批准父设计。
+freeze-design核真实design和inputs，将冻结文件和来源收据写output，返回 `design_source`：`kind:task_frozen_delivery,path,sha256,inputs_path,inputs_sha256`。prompt使用该实际返回，不能手编SHA或用交付自带task冒充真实inputs。试改可携只读正式project_root及parent_refs，确认采用前不改active、批准或图像有效性。
 
-专项职责必须匹配：头像的脸型与眉、眼、耳、鼻、唇落到 face，发型到 hair，皮肤到 skin，妆面到 decoration，头耳颈等饰品到 signature/accessory；其他部位按本领域职责。原文证据仍保留在 facts/source_refs 或 results 的 basis/evidence_status 中，不冒充专项执行引用。非人和群演继续采用本领域适用合同，不为满足人类部位目录制造器官、衣服或额外图片阶段。可解析引用证明交接与采用链存在，语义、人物适配和设计质量仍须审阅。
+无工程局部稿编译完整头像时，`freeze-design` 同样用可重复的 `--base-design /internal/既有完整设计.json`，把实际基底path与SHA写进冻结inputs的`base_designs`。读取冻结源会复核基底版本并合并未改脸、身体等结构；不能只冻结hair-only稿就丢掉脸。基底必须同一人物，正式工程试改用真实parent_refs，不能让local base覆盖正式身份。`--markdown`可显式指定所选JSON的内部对应稿；未指定时由所选JSON机械生成校验稿，不误绑同目录另一版design.md。
 
-## 人物设计 Harness 的最小返回
+局部改稿更新已有完整人用文档时，`document` 用可重复的 `--base-design /internal/既有完整设计.json` 继承未改域，再用当前design覆盖实际改动；没有base不允许把旧完整文档覆盖成只剩局部稿。正式stage记录也可作真实base；候选清楚标未替正式。
 
-`character-design` 每次返回 `design-result.json` 和同源生成的 `design.md`，`artifact_path` 指向 JSON。外层为 `CharacterDesignDeliveryV1`，含 `kind`、`scope` 和 `data`：
+`render`服务内部固定交付验收；`document`机械更新唯一用户角色设计文档，按人物意图、完整推荐、具体构成、取舍、修改与当前完整prompt组织，不显示工程树。只交设计时可省--prompt。后台JSON/TXT／版本／方法记录不作为用户必用文件。明确text不强制落JSON，也不报告未计算SHA；后续登记保存实际原文和captured_from_conversation来源，不倒填历史会诊／批准。
 
-| kind | 何时使用 | data |
-| --- | --- | --- |
-| `direction` | 请求确实为正式项目人物方向 | `DesignDirectionBriefV1`，承接实际工程上下文 |
-| `stage` | 正式项目当前身份、身体或状态服饰设计 | `CharacterStageDesignV1.2`，含 `execution_contract_version:2`、准确角色/状态、父记录与实际专项成果 |
-| `standalone` | 没有 project.json，基于剧本/小传独立设计，scope 为 identity/body/costume | `StandaloneCharacterDesignV1`，以 subject 的 name/local_key 标识人物，保存实际请求文本和输入文件的 sources 哈希、understanding、design_thesis、execution_contract_version:2、当前 payload、specialist_execution、deferred_dimensions 与 unresolved |
-| `legacy_card` | 正式工程仍为 complete，scope 为 complete | 现有整卡合同的 `CharacterDesignCardV1/V2/V2.1/V2.2/V2.4`；实际接受版本及重点人形门槛沿原提交规则，不能交阶段摘要 |
+## 正式阶段继续原合同
 
-`kind/scope` 必须对应实际输入；独立设计或 phased 工程未指定阶段默认 identity，旧 complete 工程未指定阶段默认 complete。显式 scope complete 只用于非 phased 工程，仍核真实角色、状态、来源 SHA、已批准的 visual-bible/cast-plan 和旧整卡必需字段；新写或改动的人形重点卡沿用现行整卡版本、比例与专项 handoff 门槛，未改的已批准旧卡可按旧合同读取。验证只读临时副本，不自动迁移 phased，不批准或覆盖原卡；legacy_card 不能满足 identity/body/costume 任务。普通交付目录由主控映射为 artifact_dir，不当作正式 project_root；实际任务传入 project_root 时必须有 project.json，错误不能降级为 standalone。不能把阶段任务降级为 direction，也不能把已有正式工程伪装成 standalone 来跳过父记录或审批约束。独立草案不编造正式资产 ID，不要求先做全员或全身衣装详设；进入生产再映射项目 ID。JSON 保存完整可追溯内容，可读稿由同一 JSON 机械呈现，不另写简版来隐藏未完成维度。工具排版与验收不能代替设计，合同通过也不等于用户批准。
+正式project的direction、stage与legacy_card返回仍受现有阶段、真实ID、父记录SHA和批准约束；[分阶段](phased-design.md)与[接口](interfaces.md)只在该路线读取。新阶段 `CharacterStageDesignV1.2/execution_contract_version:2` 的inline保留实际knowledge_refs路径／SHA、rules_applied及results映射；independent保留真实proposal_ref/SHA、所选方案与applied_elements。defer激活写任务及原因，不把未做伪装为永远不需。新剧情状态的妆发穿戴按场景任务激活，不改基础身份。
 
-先生成 JSON，再运行 `python scripts/verify_design_delivery.py render --design /absolute/artifact_dir/design-result.json --output /absolute/artifact_dir/design.md`。验证用同脚本 `validate --design ... [--markdown ...]`，由 Harness 把本次实际 inputs JSON 经 stdin 传入；不能把交付文件自带的 task 当成真实输入。外层精确四键 `schema_version/kind/scope/data`，`sources` 以工具的 `source_bindings(inputs)` 规则生成并核实际请求及文件哈希，独立输入保留其真实覆盖范围。验证只在临时副本检查，不批准或写回正式工程。
+cue来源解析到实际results／applied_elements、实际execution_layout或当前已批父记录；原文事实另保留，不冒充专项成果来源。同物件唯一主责。真实知识快照在正式成功提交时归档，旧记录继续可读，插件升级不因知识哈希变化强迫重做。
 
-## 独立提案
+独立专项生产提案仍用CharacterSpecialistProposalV1.2，含task、knowledge_refs、facts、options、recommended_option_id、unresolved与不适用理由；实际方案1–3且至少两个可画元素是既有机器合同，不是每个普通聊天再建提案。真实调用该提案时运行 `python scripts/validate_specialist_proposal.py --file /internal/proposal.json`。旧V1/V1.1按原合同回读。
 
-当前新提案为 `CharacterSpecialistProposalV1.2`。保存 UTF-8 JSON 和简短可读 Markdown，至少有 `schema_version`、`specialist`、`character_id`、`variant_id`、`scope`、`execution_mode:inline|independent`、`task{objective,character_context,constraints[],expected_result}`、`knowledge_refs[{path,sha256}]`、`facts[{text,source_refs}]`、`options[]`、`recommended_option_id`、`unresolved[]` 和 `not_applicable_reason`。
-
-默认一个推荐方案；确有重要取舍时给备选，`options` 为 1–3。每项保留 `id`、`visible_design`、`rationale`、`comparison_difference`、`production_check`、至少两条 `design_elements[{part,visible_feature,placement_or_structure,basis,evidence_status}]`。描述部位、形态、比例/连接、来源性质和实际使用约束，不能只写清秀、利落或自然。零基 `element_index` 指向被选方案元素。没有首饰、无特殊痕迹、衣装简洁可以是完整决定，不因交接而强加物件。
-
-执行 `python scripts/validate_specialist_proposal.py --file /absolute/artifact_dir/proposal.json`。主控复制原样 JSON 到项目 `drafts/specialists/` 并记录 SHA；V1.2独立提案的知识路径/SHA同inline真实校验并归档knowledge-snapshots，应用到visual_details的元素必须属于该专项领域（例如发型提案不能映射脸部）；V1.1保持旧兼容。校验只验证合同和真实文件，人物理解、语义采纳及美感仍需审阅。推荐不等于批准，独立专家也不能覆盖原文、已批准身份或观众信息策略。
-
-## 整合与回溯
-
-每个提案说明解决了哪个人物问题，输出哪些可画结果、怎样与近邻区别、对动作和工艺的影响。总控裁决同一部位冲突，为跨头颈和衣身的同一饰物指定唯一主责；保持安静区，不把各专项焦点全部叠加。阶段稿将成果转为连贯人设文字，JSON 与 Markdown 同样具体。
-
-群像审查继续使用 `CharacterCastDifferentiationReviewV1`，区分文本证据与实图，列比较组、五轴、具体混淆、真实度疑点、未做检查和未实施建议，不改批准状态。
-
-历史 V1/V1.1 提案与 `CharacterSpecialistRouteV1`、旧卡 used/not_needed 交接继续回读；其原有选项数量、哈希和字段映射门槛保留。新 V2.5 阶段流程采用上述执行证据，不能把旧版必须独立提案的规则施加给新 inline 任务。
+采用试改后才沿已有submit/approve登记，受影响图片按原依赖复核；无变化转录不另加批准仪式，正式本来所需批准仍真实执行。结构、来源和字面一致不证明人物理解、语义或美感，交付前由主控作本次任务复核，有图才作视觉审查。

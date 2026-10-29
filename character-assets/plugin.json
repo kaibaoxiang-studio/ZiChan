@@ -1,15 +1,15 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "character-assets",
-  "version": "0.2.15",
-  "description": "从剧本依据建设可追溯的角色视觉资产包与 GPT Image 2.5 提示词",
+  "version": "0.2.16",
+  "description": "基于人物理解深化角色设计，交付可读设计稿、同源提示词与可追溯视觉资产",
   "author": {
     "name": "开宝箱工作室"
   },
   "interface": {
     "displayName": "角色资产插件",
-    "shortDescription": "从剧本依据到角色视觉资产包",
-    "defaultPrompt": "Use $character-assets to build a character asset package from my screenplay and asset table."
+    "shortDescription": "具体人物设计、完整提示词与视觉资产",
+    "defaultPrompt": "使用 $character-assets 理解我提供的人物材料，完成这次需要的具体设计；已有设计直接接续，按需生成提示词或正式资产。"
   },
   "extensions": {
     "com.openai": {

@@ -82,6 +82,9 @@ MODEL_CARD_ATTIRE = {
 }
 SPECIALIST_FIELD_DOMAINS = {
     "character-world-appearance-design": {"face", "hair", "body", "skin", "costume", "adornments"},
+    # Focus selects anchors in existing visible structures. Callers still
+    # restrict these domains to the current task and verify actual adoption.
+    "character-feature-focus": {"face", "hair", "body", "skin", "costume", "adornments"},
     "character-face-decoration-design": {"face", "skin", "adornments"},
     "character-hair-design": {"hair"}, "character-body-design": {"body"},
     "character-face-design": {"face"},
@@ -405,6 +408,10 @@ def validate_body_proportion_anchors(data):
 def validate_full_body_prompt_proportions(prompt_package, design_card):
     """Copy approved body anchors into each new full-body prompt and its checks."""
     validate_body_proportion_anchors(design_card)
+    if 'fidelity_review' in prompt_package:
+        from prompt_fidelity import validate_fidelity, design_inventory
+        validate_fidelity(prompt_package, design_inventory(design_card, 'full_body'), digest(design_card))
+        return
     anchors = design_card["body_form"]["proportion_anchors"]
     required = ("head_body", "shoulder_hip", "torso_legs")
     for prompt in prompt_package["prompts"]:
@@ -983,12 +990,33 @@ def _validate_record(kind, data, state, character_id=None, variant_id=None, stag
 
 
 @contextlib.contextmanager
+def _project_state_lock(root):
+    with (root / ".lock").open("a+b") as lock:
+        if os.name == "nt":
+            import msvcrt
+            lock.seek(0, os.SEEK_END)
+            if lock.tell() == 0:
+                lock.write(b"\0")
+                lock.flush()
+            lock.seek(0)
+            # Fail clearly when busy instead of changing state without a lock.
+            msvcrt.locking(lock.fileno(), msvcrt.LK_NBLCK, 1)
+            try:
+                yield
+            finally:
+                lock.seek(0)
+                msvcrt.locking(lock.fileno(), msvcrt.LK_UNLCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+            yield
+
+
+@contextlib.contextmanager
 def locked_project(root):
-    import fcntl
     root = Path(root).expanduser().resolve()
     ensure((root / "project.json").is_file(), f"Not a character project: {root}")
-    with (root / ".lock").open("a+") as lock:
-        fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+    with _project_state_lock(root):
         state = read_json(root / "project.json")
         ensure(state.get("schema_version") == SCHEMA, "Unsupported project state")
         yield root, state
@@ -1140,7 +1168,36 @@ def _design_queue(root, state, roster, image_tasks):
     output = []
     for person in roster:
         targets = [x for x in image_tasks if x["character_id"] == person["id"]]
-        if not targets or any(x["asset_mode"] != "individual" for x in targets):
+        if not targets:
+            continue
+        if any(x["asset_mode"] != "individual" for x in targets):
+            for target in targets:
+                mode, variant = target["asset_mode"], target["variant_id"]
+                record_key = ensemble.design_key(mode, person["id"], variant)
+                dependencies = ["script-context", "visual-bible", "cast-plan"]
+                blockers = []
+                for dependency in dependencies:
+                    try:
+                        _checked_record(root, state, dependency)
+                    except (ValueError, KeyError) as exc:
+                        blockers.append(str(exc))
+                try:
+                    _checked_record(root, state, record_key)
+                    status = "approved"
+                except (ValueError, KeyError):
+                    try:
+                        phased.draft(_runtime(), root, state, record_key)
+                        status = "awaiting_approval"
+                    except (ValueError, KeyError):
+                        status = "needs_design"
+                if blockers or state.get("pending_impact"):
+                    status = "blocked"
+                output.append({"record_key": record_key, "kind": "extra-design" if mode == "speaking_extra" else "ensemble-design",
+                               "scope": "single_image", "character_id": person["id"], "asset_name": person["name"],
+                               "variant_id": variant, "capability": "character-ensemble-designer", "status": status,
+                               "blockers": blockers, "dependencies": dependencies,
+                               "action": "review_design" if status == "awaiting_approval" else
+                                         "deepen_design" if status == "needs_design" else status})
             continue
         wanted = {x["stage"] for x in targets}
         scopes = {"identity"}
@@ -1197,6 +1254,54 @@ def _design_queue(root, state, roster, image_tasks):
                            "blockers": blockers, "dependencies": dependencies,
                            "action": ("review_design" if status == "awaiting_approval" else
                                       "deepen_design" if status == "needs_design" else status)})
+    return output
+
+
+def _foundation_queue(root, state):
+    """Missing records become work; an unapproved existing draft becomes review."""
+    specs = [("script-context", [], "character-design", "read_or_reuse_context"),
+             ("visual-bible", ["script-context"], "character-design", "propose_visual_baseline"),
+             ("cast-plan", ["script-context", "visual-bible"], "character-cast-differentiation", "plan_cast_comparison")]
+    if not phased.enabled(state):
+        # Old complete projects never acquire a new context approval gate just
+        # because the current planner knows a newer creative method.
+        specs = [("visual-bible", [], "character-design", "propose_visual_baseline"),
+                 ("cast-plan", ["visual-bible"], "character-cast-differentiation", "plan_cast_comparison")]
+    output = []
+    for record_key, dependencies, capability, action in specs:
+        blockers = []
+        for dependency in dependencies:
+            try:
+                _checked_record(root, state, dependency)
+            except (ValueError, KeyError) as exc:
+                blockers.append(str(exc))
+        try:
+            _checked_record(root, state, record_key)
+            status = "approved"
+        except (ValueError, KeyError):
+            try:
+                phased.draft(_runtime(), root, state, record_key)
+                status = "awaiting_approval"
+            except (ValueError, KeyError):
+                status = "needs_design"
+        if blockers or state.get("pending_impact"):
+            status = "blocked"
+        output.append({"record_key": record_key, "kind": record_key, "scope": "project",
+                       "character_id": None, "variant_id": None, "capability": capability,
+                       "status": status, "dependencies": dependencies, "blockers": blockers,
+                       "action": "review_design" if status == "awaiting_approval" else action if status == "needs_design" else status})
+    return output
+
+
+def _next_actions(state, design_tasks):
+    if state.get("pending_impact"):
+        return [{"action": "resolve_upstream_impact", "category": "user_decision",
+                 "reason": "Review the concrete upstream changes before replacing approved work"}]
+    output = []
+    for task in design_tasks:
+        if task["status"] in {"needs_design", "awaiting_approval"}:
+            output.append({**task, "category": "review_existing" if task["status"] == "awaiting_approval" else "work",
+                           "requires_user_decision": task["status"] == "awaiting_approval"})
     return output
 
 
@@ -1273,13 +1378,77 @@ def cmd_plan(args):
                     except (ValueError, KeyError) as exc:
                         task["preview_modes"][mode] = {"status": "blocked", "reason": str(exc)}
             tasks.append(task)
-    design_tasks = _design_queue(root, state, roster, tasks)
+    design_tasks = _foundation_queue(root, state) + _design_queue(root, state, roster, tasks)
     return {"mode": "single" if len(requested) == 1 else "batch",
             "design_progression": state.get("design_progression", "complete"),
             "pipeline_version": state.get("pipeline_version", 1),
             "design_tasks": design_tasks,
-            "next_actions": [x for x in design_tasks if x["status"] in {"needs_design", "awaiting_approval"}],
+            "next_actions": _next_actions(state, design_tasks),
             "tasks": tasks}
+
+
+def cmd_freeze_design(args):
+    """Freeze an isolated delivery and actual inputs, leaving the ledger untouched."""
+    import verify_design_delivery as design
+    source = Path(args.file).expanduser().resolve()
+    inputs_path = Path(args.inputs).expanduser().resolve()
+    inputs = read_json(inputs_path)
+    selected_bases = getattr(args, 'base_design', None)
+    if selected_bases:
+        inputs = copy.deepcopy(inputs)
+        inputs['base_designs'] = []
+        for selected in selected_bases:
+            path = Path(selected).expanduser().resolve()
+            ensure(path.is_file(), 'Local base design does not exist')
+            inputs['base_designs'].append({'path': str(path), 'sha256': digest(path)})
+        design.read_base_designs(inputs)
+    explicit_markdown = getattr(args, 'markdown', None)
+    if explicit_markdown:
+        design.validate(source, inputs, Path(explicit_markdown).expanduser().resolve())
+    else:
+        # The selected JSON is canonical. An unrelated design.md beside a
+        # named revision is not its view; render an exact throwaway view for
+        # validation, then freeze our own corresponding internal design.md.
+        with tempfile.TemporaryDirectory(prefix='character-freeze-view-') as folder:
+            view = Path(folder) / 'design.md'
+            view.write_text(design.render(read_json(source)), encoding='utf-8')
+            design.validate(source, inputs, view)
+    target = Path(args.output).expanduser().resolve()
+    if inputs.get("project_root"):
+        root = Path(inputs["project_root"]).expanduser().resolve()
+        if target.is_relative_to(root):
+            relative = target.relative_to(root)
+            ensure(relative.parts and relative.parts[0] in {"drafts", ".harness", "artifacts"},
+                   "Frozen trial may write only isolated drafts/artifacts, never active project records")
+    payload = read_json(source)
+    files = {"design-result.json": json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+             "design-inputs.json": json.dumps(inputs, ensure_ascii=False, indent=2) + "\n",
+             "design.md": design.render(payload)}
+    for name, content in files.items():
+        destination = target / name
+        ensure(not destination.is_symlink(), "Frozen design must not overwrite a symlink")
+        ensure(not destination.exists() or destination.read_text(encoding="utf-8") == content,
+               "Frozen design destination already holds a different version; choose a new draft directory")
+    if target.exists():
+        ensure(not any(p.is_symlink() for p in target.rglob('*')), "Frozen output must not contain symlinks")
+    target.mkdir(parents=True, exist_ok=True)
+    # Keep real independent returns and available knowledge receipts with the
+    # frozen draft so moving it does not erase its adopted-work evidence.
+    design._minimal_copy(source.parent, target, None, payload.get('data', {}), source.parent)
+    for name, content in files.items():
+        (target / name).write_text(content, encoding="utf-8")
+    reference = {"kind": "task_frozen_delivery", "path": str(target / "design-result.json"),
+                 "sha256": digest(target / "design-result.json"), "inputs_path": str(target / "design-inputs.json"),
+                 "inputs_sha256": digest(target / "design-inputs.json")}
+    if inputs.get("project_root"):
+        reference.update(project_root=inputs["project_root"], parent_refs=inputs.get("parent_refs", {}))
+    receipt = target / "frozen-design.json"
+    if receipt.exists():
+        ensure(not receipt.is_symlink() and read_json(receipt) == reference,
+               "Frozen receipt already holds another source")
+    write_json(receipt, reference)
+    return {"design_source": reference, "receipt": str(receipt), "project_ledger_write_performed": False,
+            "approved": False, "next_action": "compile_candidate_prompt"}
 
 
 def cmd_submit(args):
@@ -1301,6 +1470,8 @@ def cmd_submit(args):
         asset_mode = (ensemble.mode(_runtime(), root, state, character_id)
                       if character_id and modern else "individual")
         if args.kind == "prompt-package":
+            ensure(content.get("purpose") != "candidate" and not content.get("design_source"),
+                   "Task-local candidates stay in drafts; register approved production design and compile its formal prompt first")
             ensure(args.stage in pipeline_stages(state), "Stage is not available in this project pipeline")
             if asset_mode in {"ensemble", "speaking_extra"}:
                 ensure(args.stage == "execution", "Extras have one execution sheet, not multi-stage identity images")
@@ -1815,6 +1986,12 @@ def build_parser():
     context.add_argument("--output")
     status = sub.add_parser("status")
     status.add_argument("--project-root", required=True)
+    freeze = sub.add_parser("freeze-design", help="Freeze a task-local design outside the active production ledger")
+    freeze.add_argument("--file", required=True)
+    freeze.add_argument("--inputs", required=True)
+    freeze.add_argument("--output", required=True)
+    freeze.add_argument("--base-design", action="append", help="Bind an existing canonical local base by real file SHA; repeat for compatible sources")
+    freeze.add_argument("--markdown", help="Optional exact readable view of the selected JSON; otherwise render its corresponding view internally")
     upgrade = sub.add_parser("upgrade-pipeline", help="Explicitly migrate an eligible phased V2 project to the four-image V3 pipeline")
     upgrade.add_argument("--project-root", required=True)
     upgrade.add_argument("--operator", required=True)
@@ -1888,7 +2065,7 @@ def build_parser():
 def main():
     args = build_parser().parse_args()
     actions = {"init": cmd_init, "status": cmd_status, "upgrade-pipeline": cmd_upgrade_pipeline,
-               "plan": cmd_plan, "submit": cmd_submit,
+               "plan": cmd_plan, "freeze-design": cmd_freeze_design, "submit": cmd_submit,
                "context-units": lambda args: phased.context_units(_runtime(), args),
                "compile-design-card": lambda args: phased.compile_card(_runtime(), args),
                "promote-candidate": lambda args: phased.promote(_runtime(), args),

@@ -22,7 +22,10 @@ def main():
     if not args.install:
         print(json.dumps({'status':'install_required','target':str(target),
                           'command':[sys.executable,str(Path(__file__).resolve()),'--install']})); return
-    if not executable.exists(): venv.EnvBuilder(with_pip=True).create(target)
+    # Standalone macOS/Linux interpreters locate their standard library through
+    # the real executable. Copying the binary alone can retain a build-time
+    # /install prefix. Windows uses the platform's normal venv copy behavior.
+    if not executable.exists(): venv.EnvBuilder(with_pip=True,symlinks=os.name!='nt').create(target)
     subprocess.run(command,check=True)
     subprocess.run([str(executable),'-c','import yaml,jsonschema'],check=True)
     print(json.dumps({'status':'ready','python':str(executable)}))

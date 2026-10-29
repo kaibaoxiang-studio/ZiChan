@@ -14,7 +14,7 @@ from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'runtime'))
-from harness_core.appserver import AppServer, envelope_schema
+from harness_core.appserver import AppServer, envelope_schema, strict_wire_schema
 from harness_core.engine import Engine, Executor
 
 SERVER = r'''
@@ -97,6 +97,35 @@ class RuntimeLifecycleTest(unittest.TestCase):
             self.assertEqual(spawn.call_args.kwargs['encoding'], 'utf-8')
             self.assertEqual(spawn.call_args.kwargs['env']['PYTHONIOENCODING'], 'utf-8')
             self.assertEqual(client.process.stdin.encoding, 'utf-8')
+
+    def test_strict_wire_schema_is_recursive_and_leaves_local_optionality_unchanged(self):
+        from harness_core.contracts import validate_data
+        result_schema = {'type': 'object', 'properties': {'value': {'type': 'string'},
+            'content': {'type': 'string'}, 'delivery_mode': {'type': 'string', 'enum': ['files', 'text']},
+            'rows': {'type': 'array', 'items': {'anyOf': [{'type': 'object', 'properties': {
+                'description': {'type': 'string'}, 'note': {'type': 'string'}}, 'required': ['description']},
+                {'type': 'null'}]}}}, 'required': ['value'], 'additionalProperties': False}
+        schema = envelope_schema(result_schema)
+        original = json.dumps(schema, sort_keys=True)
+        wire = strict_wire_schema(schema)
+        self.assertEqual(json.dumps(schema, sort_keys=True), original)
+        output = wire['properties']['result']['anyOf'][0]
+        self.assertEqual(set(output['required']), set(output['properties']))
+        row = output['properties']['rows']['items']['anyOf'][0]
+        self.assertEqual(set(row['required']), {'description', 'note'})
+        self.assertFalse(row['additionalProperties'])
+        # Optional content remains optional in the authoritative local schema.
+        validate_data({'value': 'older successful result'}, result_schema)
+
+    def test_turn_uses_strict_wire_schema_instead_of_mutating_local_envelope(self):
+        self.schema['properties']['content'] = {'type': 'string'}
+        client = self.client()
+        self.run_client(client)
+        turn = next(row for row in self.messages() if row.get('method') == 'turn/start')
+        result_schema = turn['params']['outputSchema']['properties']['result']['anyOf'][0]
+        self.assertEqual(set(result_schema['required']), {'value', 'content'})
+        self.assertEqual(self.schema['required'], ['value'])
+        self.assertFalse(result_schema['additionalProperties'])
 
     def test_startup_failure_includes_bounded_stderr_and_discards_process(self):
         client = self.client('startup-fail')

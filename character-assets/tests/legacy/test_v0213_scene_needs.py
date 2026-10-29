@@ -87,7 +87,7 @@ class SceneNeedsContract(unittest.TestCase):
             phased.validate_scene_needs(cp, data)
 
     def test_package_metadata_matches_installed_version(self):
-        self.assertEqual(cp.PLUGIN_VERSION, '0.2.15')
+        self.assertEqual(cp.PLUGIN_VERSION, cp.read_json(PLUGIN / 'plugin.json')['version'])
 
 
 class PromptCoverage(unittest.TestCase):

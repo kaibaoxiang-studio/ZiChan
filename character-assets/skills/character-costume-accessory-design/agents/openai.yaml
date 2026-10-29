@@ -1,6 +1,6 @@
 interface:
   display_name: 服饰饰品设计
-  short_description: 服饰附加物设计：肩胸背、臂手腕腰腿穿戴
+  short_description: 服饰附加物设计：肩胸背、臂手腕腰腿的装饰与挂载
   default_prompt: Use $character-costume-accessory-design to complete the requested
     task.
 policy:
