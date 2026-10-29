@@ -44,10 +44,10 @@ class PromptContractTest(unittest.TestCase):
 
     def test_design_requires_every_avatar_dimension(self):
         design = self.avatar_design()
-        phased_design.validate_prompt_detail_contract(CP, design)
+        phased_design.validate_prompt_detail_contract(CP, design, strict=False)
         design['payload']['prompt_detail_contract']['items'].pop()
         with self.assertRaisesRegex(ValueError, 'Missing required avatar'):
-            phased_design.validate_prompt_detail_contract(CP, design)
+            phased_design.validate_prompt_detail_contract(CP, design, strict=False)
 
     def test_prompt_cannot_drop_approved_cue(self):
         design = self.avatar_design()
@@ -98,7 +98,7 @@ class PromptContractTest(unittest.TestCase):
             'complexity': 'featured', 'items': items},
             'costume_direction': {'scene_needs': {'requirements': requirements}}}}
         with self.assertRaisesRegex(ValueError, 'focus_component'):
-            phased_design.validate_prompt_detail_contract(CP, design)
+            phased_design.validate_prompt_detail_contract(CP, design, strict=False)
 
 
 if __name__ == '__main__':

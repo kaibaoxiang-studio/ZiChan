@@ -43,6 +43,20 @@ def verify_result(result, capability, artifact_dir, task_inputs=None, plugin_roo
         for required in capability.get('required_artifacts',[]):
             if required not in result['artifacts']:
                 raise ValueError(f'Required artifact not declared: {required}')
+        if capability.get('artifact_contract')=='character-design-delivery-v1':
+            if result['result'].get('artifact_path')!='design-result.json':
+                raise ValueError('Design result artifact_path must identify design-result.json')
+            if not isinstance(task_inputs,dict):
+                raise ValueError('Design delivery needs the actual task inputs and project basis')
+            root=Path(plugin_root or Path(__file__).resolve().parents[2]).resolve()
+            helper=inside(root,'scripts/verify_design_delivery.py')
+            checked=subprocess.run([sys.executable,str(helper),'validate','--design',
+                                    str(inside(artifact_dir,'design-result.json')),
+                                    '--markdown',str(inside(artifact_dir,'design.md'))],
+                                   input=json.dumps(task_inputs,ensure_ascii=False),
+                                   capture_output=True,text=True,encoding='utf-8',timeout=30)
+            if checked.returncode:
+                raise ValueError('Design delivery contract failed: '+(checked.stderr or checked.stdout).strip())
         if capability.get('artifact_contract')=='character-prompt-package-v1':
             if result['result'].get('artifact_path')!='prompt-package.json':
                 raise ValueError('Prompt result artifact_path must identify prompt-package.json')
@@ -91,8 +105,13 @@ class Executor:
         if execution['kind']=='agent':
             with self.client_lock:
                 if self.client is None:
-                    self.client=AppServer()
-                    self.client.start()
+                    client=AppServer()
+                    try:
+                        client.start()
+                    except Exception:
+                        client.close()
+                        raise
+                    self.client=client
             return self.client.run(inside(self.root,f'skills/{capability["skill_name"]}/SKILL.md'),
                 task,envelope_schema(capability['output_schema']),directory,
                 writable=execution.get('access','read-only')=='workspace-write',
@@ -102,8 +121,9 @@ class Executor:
         result_path=directory/'result.json'
         result_path.unlink(missing_ok=True)
         script=inside(self.root,execution['script'])
-        env={**os.environ,'PYTHONPATH':str(self.root/'runtime')}
-        with (directory/'stdout.log').open('w') as stdout, (directory/'stderr.log').open('w') as stderr:
+        env={**os.environ,'PYTHONPATH':str(self.root/'runtime'),
+             'PYTHONUTF8':'1','PYTHONIOENCODING':'utf-8'}
+        with (directory/'stdout.log').open('w',encoding='utf-8') as stdout, (directory/'stderr.log').open('w',encoding='utf-8') as stderr:
             process=subprocess.Popen([sys.executable,str(script),'--input',str(directory/'input.json'),
                                       '--output',str(result_path)],cwd=directory,env=env,
                                      stdout=stdout,stderr=stderr,start_new_session=os.name!='nt')
@@ -124,7 +144,8 @@ class Executor:
                     process.wait()
 
     def close(self):
-        if self.client: self.client.close()
+        client,self.client=self.client,None
+        if client: client.close()
 
 class Engine:
     def __init__(self, root, workspace, executor=None):

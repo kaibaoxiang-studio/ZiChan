@@ -301,7 +301,8 @@
           },
           "scope": {
             "type": "string",
-            "minLength": 1
+            "minLength": 1,
+            "description": "direction/identity/body/costume for phased projects; default identity for phased or standalone. Legacy complete projects use scope complete and default to complete; they return legacy_card without automatic migration."
           },
           "review_mode": {
             "type": "string",
@@ -331,7 +332,7 @@
           },
           "artifact_path": {
             "type": "string",
-            "description": "Main output path relative to artifact_dir, for example design.md; never an absolute path."
+            "description": "Must be design-result.json. Typed CharacterDesignDeliveryV1 JSON plus mechanically rendered design.md; a direction is not a completed stage design."
           },
           "summary": {
             "type": "string"
@@ -378,7 +379,12 @@
         "references/knowledge/character-design/feature-focus-design.md",
         "references/knowledge/character-design/anti-stereotype-texture.md"
       ],
-      "explicit_only": true
+      "explicit_only": true,
+      "required_artifacts": [
+        "design-result.json",
+        "design.md"
+      ],
+      "artifact_contract": "character-design-delivery-v1"
     },
     {
       "id": "character-costume-designer",

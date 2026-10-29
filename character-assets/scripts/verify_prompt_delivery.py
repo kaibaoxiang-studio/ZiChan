@@ -15,15 +15,20 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import character_project as cp
 
 
-def read_only_knowledge(api, root, refs):
+def read_only_knowledge(api, root, refs, specialist=None, strict=True, archive=False):
     """Use the original integrity checks without _knowledge's cache writes."""
     api.ensure(isinstance(refs, list) and refs, "Inline execution needs real knowledge_refs")
     plugin = Path(cp.__file__).resolve().parents[1]
+    locked = api.read_json(plugin / 'knowledge-lock.json')['snapshots'] if strict else []
     for item in refs:
         api.ensure(isinstance(item, dict), "Knowledge reference must be an object")
         sha = item.get('sha256', '')
         api.ensure(isinstance(sha, str) and len(sha) == 64 and all(x in '0123456789abcdef' for x in sha),
                    'Knowledge reference SHA must be hexadecimal SHA-256')
+        if strict:
+            api.ensure(any(row.get('path') == item.get('path') and row.get('rules_sha256') == sha and
+                           specialist in row.get('capability_ids', []) for row in locked),
+                       f'Knowledge reference is not locked for specialist {specialist}')
         snapshot = root / 'knowledge-snapshots' / sha
         if snapshot.is_file():
             api.ensure(api.digest(snapshot) == sha, 'Project knowledge snapshot changed')
@@ -85,7 +90,9 @@ def validate(package_path, inputs):
             record_key = cp.phased.key('stage-design', character, variant, design_scope)
             record = (cp.phased.draft(api, root, state, record_key) if content.get('purpose') == 'preview'
                       else cp._checked_record(root, state, record_key))
-            cp.phased.validate_prompt_detail_contract(api, cp.read_json(root / record['path']))
+            design = cp.read_json(root / record['path'])
+            cp.phased.validate_prompt_detail_contract(api, design, root=root, state=state,
+                strict=design.get('execution_contract_version') == 2 or not record.get('approval'))
             cp.phased.validate_prompt_detail_coverage(api, root, state, content, character, variant, stage)
         if stage == 'expression' and human:
             key = cp._record_key('prompt-package', character, 'base' if modern else variant, 'avatar')

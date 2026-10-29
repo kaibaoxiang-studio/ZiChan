@@ -40,23 +40,69 @@ def _style_anchors(style):
 
 def _script_count(row, screenplay=None, variant=None):
     """Recognize only an unambiguous local numeral near the group name."""
-    numerals = {"一": 1, "二": 2, "两": 2, "三": 3, "四": 4, "五": 5,
+    numerals = {"零": 0, "〇": 0, "一": 1, "二": 2, "两": 2, "三": 3, "四": 4, "五": 5,
                 "六": 6, "七": 7, "八": 8, "九": 9}
 
     def number(token):
         if token.isdigit():
             return int(token)
-        if token == "十":
-            return 10
-        if "十" in token:
-            high, low = token.split("十", 1)
-            return (numerals.get(high, 1) if high else 1) * 10 + (numerals.get(low, 0) if low else 0)
-        return numerals[token]
+        if "万" in token:
+            if token.count("万") != 1:
+                raise ValueError(f"Unsupported explicit group count: {token}")
+            high, low = token.split("万")
+            if not high:
+                raise ValueError(f"Unsupported explicit group count: {token}")
+            if low and low[0] not in {"零", "〇"} and not any(unit in low for unit in "十百千"):
+                raise ValueError(f"Ambiguous group count, use an exact quantity: {token}")
+            return number(high) * 10000 + (number(low) if low else 0)
+        total, pending, last_unit = 0, None, 10000
+        for char in token:
+            if char in numerals:
+                if pending not in {None, 0}:
+                    raise ValueError(f"Ambiguous group count, use an exact quantity: {token}")
+                pending = numerals[char]
+                continue
+            unit_value = {"十": 10, "百": 100, "千": 1000}.get(char)
+            if unit_value is None or unit_value >= last_unit:
+                raise ValueError(f"Unsupported explicit group count: {token}")
+            total += (pending if pending is not None else 1) * unit_value
+            pending, last_unit = None, unit_value
+        if pending is not None:
+            if last_unit >= 100 and total and len(token) > 1 and token[-2] not in {"零", "〇"}:
+                raise ValueError(f"Ambiguous group count, use an exact quantity: {token}")
+            total += pending
+        return total
+
+    def explicit(source, start, end):
+        # Approximation/bounds are not a script-exact count. Keep them available
+        # to the designer as evidence, but never turn “约三名” into exactly 3.
+        before, after = source[:start], source[end:]
+        return not (re.search(r"(?:大约|大概|差不多|将近|接近|至少|至多|最多|最少|超过|不足|不到|好几|约|近|数|几|上)\s*(?:有|为)?\s*$", before) or
+                    re.match(r"\s*(?:左右|上下|以上|以下|余|来|许)", after))
 
     counts = set()
-    amount = r"(\d+|[一二两三四五六七八九十]{1,3})"
+    # Greedy complete tokens and the left boundary prevent taking 二十 from
+    # 一百二十. Unsupported larger notation is rejected, never suffix-counted.
+    number_chars = r"0-9零〇一二两三四五六七八九十百千万亿点"
+    amount = r"(?<![" + number_chars + r"])(\d+|[零〇一二两三四五六七八九十百千万亿点]+)"
     unit = r"[名个位人]"
-    name = re.escape(row["name"])
+    # Asset-table display names often carry a count or a catalogue suffix,
+    # e.g. “三个小纸人” or “武士群像”. Match the real named group in evidence,
+    # rather than accidentally asking for “三个三个小纸人”. Aliases may carry
+    # the scripted noun; unrelated numbers in the same block are never used.
+    names = set()
+    counted_names = []
+    for display in [row["name"], *row.get("aliases", [])]:
+        if not isinstance(display, str) or not display.strip():
+            continue
+        display = display.strip()
+        prefix = re.fullmatch(amount + r"\s*" + unit + r"\s*(.+)", display)
+        if prefix:
+            counted_names.append((display, prefix.group(1)))
+            display = prefix.group(2).strip()
+        display = re.sub(r"(?:群像|群演)$", "", display).strip()
+        if display and display not in {"人", "名", "位", "个", "群像", "群演"}:
+            names.add(re.escape(display))
     states = [x for x in row.get("states", []) if variant is None or x.get("id") == variant]
     evidence = [item for part in states for item in part.get("evidence", [])]
     texts = [item.get("text", "") for item in evidence]
@@ -68,10 +114,16 @@ def _script_count(row, screenplay=None, variant=None):
                     if refs.intersection(block.get("source_refs", [])):
                         texts.append(block.get("text", ""))
     for source in texts:
-        for pattern in (amount + r"\s*" + unit + r"\s*" + name,
-                        name + r"\s*" + amount + r"\s*" + unit):
-            for match in re.finditer(pattern, source):
-                counts.add(number(match.group(1)))
+        for display, token in counted_names:
+            for match in re.finditer(re.escape(display), source):
+                if explicit(source, match.start(), match.end()):
+                    counts.add(number(token))
+        for name in names:
+            for pattern in (amount + r"\s*" + unit + r"\s*" + name,
+                            name + r"\s*(?:共计|总计|共有|一共|共|有)?\s*" + amount + r"\s*" + unit):
+                for match in re.finditer(pattern, source):
+                    if explicit(source, match.start(1), match.end()):
+                        counts.add(number(match.group(1)))
     if len(counts) > 1:
         raise ValueError(f"Conflicting explicit group counts for {row['name']}: {sorted(counts)}")
     return next(iter(counts)) if counts else None
@@ -158,7 +210,12 @@ def validate(cp, root, state, data, character, variant):
         cp.ensure(data["quantity_status"] == "representative_choice",
                   "Unknown group size requires a labeled representative choice")
     screenplay = cp.load_source(root / state["inputs"]["screenplay"]["path"])
-    found_count = _script_count(row, screenplay, variant)
+    existing = state.get("records", {}).get(key(character, variant), {})
+    frozen_approval = (existing.get("approval") and not existing.get("stale") and
+                       existing.get("sha256") == cp.digest(data))
+    # Correct new count extraction on new/revised designs. Reading an unchanged
+    # approved historical design must not silently introduce a new gate.
+    found_count = None if frozen_approval else _script_count(row, screenplay, variant)
     if found_count is not None:
         cp.ensure(explicit == found_count and count == found_count,
                   "Group figure count must match the explicit asset-table script evidence")
@@ -194,10 +251,22 @@ def validate_extra(cp, root, state, data, character, variant):
                 ("script-context", "visual-bible", "cast-plan")}
     cp.ensure(data.get("parent_refs") == expected,
               "Speaking extra design must bind current script, cast and visual style")
-    for field in ("narrative_function", "spoken_line", "world_style_translation", "face_and_hair",
-                  "body_and_posture", "costume_front", "costume_back", "color_and_material",
-                  "prop_and_action"):
+    morphology = data.get("morphology", "human")
+    cp.ensure(morphology in {"human", "humanoid", "nonhuman"}, "Unknown speaking extra morphology")
+    for field in ("narrative_function", "spoken_line", "world_style_translation",
+                  "body_and_posture", "color_and_material", "prop_and_action"):
         cp.require_text(data, field)
+    if morphology in {"human", "humanoid"}:
+        for field in ("face_and_hair", "costume_front", "costume_back"):
+            cp.require_text(data, field)
+    else:
+        details = data.get("morphology_details")
+        cp.ensure(isinstance(details, dict) and details, "Nonhuman speaking extra needs concrete morphology_details")
+        for field in details:
+            cp.require_text(details, field)
+        cp.ensure(isinstance(data.get("execution_layout"), dict) and data["execution_layout"],
+                  "Nonhuman speaking extra needs an approved one-sheet execution_layout")
+        cp.require_text(data["execution_layout"], "description")
     screenplay = cp.load_source(root / state["inputs"]["screenplay"]["path"])
     row = next(x for x in state["roster"] if x["id"] == character)
     names = {re.sub(r"\s+", "", x) for x in [row["name"], *row.get("aliases", [])] if x}
@@ -291,10 +360,10 @@ def validate_prompt(cp, package, design):
     else:
         cp.ensure(ratio == "9:16", "A single non-speaking extra uses a 9:16 full-body canvas")
     cp.require_text(package, "aspect_ratio_basis")
-    cp.ensure(design["world_style_translation"] in "\n".join(x["text"] for x in package["prompts"]),
-              "Group prompt must carry the approved style translation verbatim")
     for prompt in package["prompts"]:
         text = prompt["text"]
+        cp.ensure(design["world_style_translation"] in text,
+                  "Each group prompt must carry the approved style translation verbatim")
         cp.ensure(ratio in text and str(count) in text and all(slot in text for slot in slots),
                   "Group prompt must state ratio, exact depicted count and ordered member slots")
         cp.ensure("全身" in text and "风格" in text,
@@ -302,27 +371,59 @@ def validate_prompt(cp, package, design):
     checks = "\n".join(package["acceptance_checks"])
     cp.ensure(all(x in checks for x in (ratio, "人数", "全身", "顺序", "风格")),
               "Group review must check canvas, count, full bodies, order and project style")
+    selected = [(f"{member['slot']}.{field}", member[field])
+                for member in design["members"]
+                for field in ("body_and_posture", "face_and_hair", "costume_structure",
+                              "color_and_material", "action_or_prop")]
+    _validate_design_coverage(cp, package, selected)
+
+
+def _validate_design_coverage(cp, package, selected):
+    """Apply to new submissions only; approved historical prompts stay readable.
+
+    These designs predate structured cue items. Their visible design fields are
+    therefore the frozen cue units. Repeating a broad label or a slot name must
+    not erase an approved person's face, construction, materials or prop owner.
+    """
+    checks = "\n".join(package["acceptance_checks"])
+    for field, cue in selected:
+        cp.ensure(isinstance(cue, str) and cue.strip(), f"Approved extra design missing {field}")
+        for prompt in package["prompts"]:
+            cp.ensure(cue in prompt["text"], f"Extra prompt {prompt['id']} dropped approved {field}")
+        cp.ensure(cue in checks, f"Extra acceptance checks do not inspect approved {field}")
 
 
 def validate_extra_prompt(cp, package, design):
-    cp.ensure(package.get("morphology") == "human", "Speaking extra prompt must depict one human")
+    morphology = design.get("morphology", "human")
+    cp.ensure(package.get("morphology") == morphology, "Speaking extra prompt morphology must match its approved design")
     cp.ensure(package.get("anchor_images") == {}, "Single-sheet extra has no identity image prerequisites")
     cp.ensure(package.get("aspect_ratio") == "9:16", "Speaking extra execution sheet must be 9:16")
     required_layout = {"top_left": "front_face", "top_right": "three_quarter_face_45",
                        "bottom_left": "headless_enlarged_front_costume",
                        "bottom_right": "complete_back_head_to_shoes"}
-    cp.ensure(package.get("layout") == required_layout,
-              "Speaking extra uses one 9:16 four-panel execution sheet")
+    human = morphology in {"human", "humanoid"}
+    expected_layout = required_layout if human else design.get("execution_layout")
+    cp.ensure(isinstance(expected_layout, dict) and expected_layout and package.get("layout") == expected_layout,
+              "Speaking extra layout must match its approved morphology-specific execution sheet")
+    tokens = ("9:16", "正脸", "45", "无头", "背面") if human else ("9:16",)
     for prompt in package["prompts"]:
         content = prompt["text"]
-        cp.ensure(all(token in content for token in
-                      ("9:16", "正脸", "45", "无头", "背面")),
+        cp.ensure(all(token in content for token in tokens),
                   "Speaking extra prompt must state the one-sheet layout")
         cp.ensure(design["world_style_translation"] in content,
                   "Speaking extra prompt must carry approved style verbatim")
     checks = "\n".join(package["acceptance_checks"])
-    cp.ensure(all(token in checks for token in ("9:16", "正脸", "45", "无头", "背面", "风格")),
-              "Speaking extra review must check all four panels and project style")
+    cp.ensure(all(token in checks for token in (*tokens, "风格")),
+              "Speaking extra review must check its approved layout and project style")
+    fields = (("face_and_hair", "body_and_posture", "costume_front", "costume_back",
+               "color_and_material", "prop_and_action") if human else
+              ("body_and_posture", "color_and_material", "prop_and_action"))
+    selected = [(field, design[field]) for field in fields]
+    if not human:
+        selected.extend((f"morphology_details.{field}", cue)
+                        for field, cue in design["morphology_details"].items())
+        selected.append(("execution_layout.description", expected_layout["description"]))
+    _validate_design_coverage(cp, package, selected)
 
 
 def package(cp, args, root, state):
@@ -349,6 +450,9 @@ def package(cp, args, root, state):
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, target)
         copied.append({"path": str(target.relative_to(out)), "sha256": cp.digest(target)})
+    for record_key, record in records.items():
+        if record_key.startswith("prompt-package:"):
+            copied.append(cp.copy_prompt_text_delivery(root, out, record))
     refs = [x for x in state["references"] if x.get("character_id") in {None, character}]
     for item in refs:
         source = root / item["path"]

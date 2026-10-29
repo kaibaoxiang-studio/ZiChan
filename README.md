@@ -6,7 +6,7 @@ ZiChan 收录三项平行、可独立安装的资产插件。剧本与资产表�
 
 | 插件 | 当前版本 | 维护来源 | 主要交付 |
 | --- | --- | --- | --- |
-| [角色资产插件](character-assets/README.md) | **v0.2.14** | 项目维护者 | 全文人物理解、头像与服饰执行提示词 V1.2 硬合同、JSON＋自动导出 TXT 双交付、四阶段案例与资产交付 |
+| [角色资产插件](character-assets/README.md) | **v0.2.15** | 项目维护者 | 全文人物理解与专项深化、分阶段设计验收、JSON＋同源 TXT、群演／非人单图与资产交付 |
 | [道具资产插件](prop-assets/README.md) | **v0.2.5** | [18571635839-a11y](https://github.com/18571635839-a11y) | 道具概念与材质、配色、纹样、轮廓专项；逐件设计及完整 Prompt 表 |
 | [场景资产插件](scene-assets/README.md) | **v0.10.1** | [runningg0301-prog](https://github.com/runningg0301-prog) | 静态场景设计、光影氛围与色卡、反打／多角度及局部修改提示词 |
 
@@ -14,13 +14,15 @@ ZiChan 收录三项平行、可独立安装的资产插件。剧本与资产表�
 
 道具插件 v0.2.5 新增五份设计参考：形体与体积、特殊材质与光学、分品类常见失败、方向发散、呈现／挂载／状态推进。相关知识按需接入概念、主视觉、审核与扩展节点，保持独立专项的范围及用户确认规则；详见[道具插件更新说明](prop-assets/README.md#参考资料)。
 
-角色 v0.2.14 的[硬输出合同](character-assets/references/prompt-detail-contract.md)与[苏老太四阶段案例](character-assets/references/prompt-density-example-su.md)随完整插件分发，安装包见[正式发布页](https://github.com/kaibaoxiang-studio/ZiChan/releases/tag/character-assets-v0.2.14)。本次未发布 Windows 兼容修复。
+角色 v0.2.15 将人物方向、实际专项深化、阶段快照和提示词交接分别验收；未批准候选也需要先完成设计。群演提示词逐人承接获批细节，执行图合成保留各阶段依据，资产包带 JSON 与同源 TXT；旧 complete 工程保留整卡合同。完整安装包与文件校验见[正式发布页](https://github.com/kaibaoxiang-studio/ZiChan/releases/tag/character-assets-v0.2.15)，规则与验收范围见[角色说明](character-assets/README.md)、[验证记录](character-assets/VALIDATION.md)和[硬输出合同](character-assets/references/prompt-detail-contract.md)。
+
+角色插件当前仍有已知范围限制：Windows 项目文件锁和调度探活未修，部分辅助专项的独立成功回执只代表文件返回，正式采纳须经总控与阶段验收；最终有图资产表需表格工具实际制作与重开核验，CLI 打包不会自动完成。不能把本版宣传为 Windows 已支持或完整图像端到端已验收。
 
 ## 仓库结构
 
 ```text
 ZiChan/
-├── character-assets/   角色资产插件 v0.2.14
+├── character-assets/   角色资产插件 v0.2.15
 ├── prop-assets/        道具资产插件 v0.2.5
 ├── scene-assets/       场景资产插件与技能 v0.10.1
 ├── .agents/            三插件本地市场清单
@@ -60,7 +62,7 @@ $sence-prompts 根据场景资产表和剧本设计静态场景提示词。
 ```mermaid
 flowchart LR
     A["标准剧本、资产表与项目美术方向"] --> B{"选择资产领域"}
-    B --> C["角色：人物理解与分阶段设计"]
+    B --> C["角色：人物理解、专项深化与阶段设计"]
     B --> D["道具：逐件概念与四专项设计"]
     B --> E["场景：空间、光影与多角度设计"]
     C --> F["各插件交付提示词或 Prompt 表"]
@@ -92,7 +94,7 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    S["剧本事实与资产 ID"] --> R["角色插件：人物依据、状态与批准记录"]
+    S["剧本事实与资产 ID"] --> R["角色插件：人物依据、设计快照、cue与批准"]
     S --> P["道具插件：逐件依据、设计与 Prompt 表"]
     S --> C["场景插件：空间依据、静帧提示词与色卡"]
     R --> RR["角色资产包与有设定图资产表"]

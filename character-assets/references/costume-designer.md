@@ -16,9 +16,9 @@
 
 关键服饰若被要求有巧思，按 [服饰重点细节的物件级设计](costume-component-design.md) 做主轮廓与关键部件设计；首先说明哪一处结构在远景有辨识度，再把一处近景细节写到像道具一样可复现的部件和连接。须有衣片层次、叠压方向、固定件及前背接续；平面纹样与立体装饰分开。增加一串相似花朵、更多首饰或“工艺感”形容词不能替代衣装结构改形。
 
-独立文字验收和单状态试稿默认只交一份约 2000–3000 汉字的具象设计，不提前制造生产 JSON、审批文件或全员矩阵的重复长文；正式项目才按下列合同提交结构化记录。重点角色的状态矩阵可用短句覆盖其余状态，把篇幅留给本次状态的剪裁、材料和动作。
+独立文字验收和单状态试稿默认只交一份约 2000–3000 汉字的具象设计，不提前制造生产 JSON、审批文件或全员矩阵的重复长文；正式项目按下列合同提交结构化记录，执行同一 strict 专项成果与可解析 cue 来源门槛；独立纯文字是设计试稿，不是正式或候选提示词，不可用来绕过正式设计交接。重点角色的状态矩阵可用短句覆盖其余状态，把篇幅留给本次状态的剪裁、材料和动作。
 
-对每个新资产表状态写 `CharacterStageDesignV1.1(scope:costume)`（旧 V1 保持可读），其 `parent_refs` 在原有 brief、identity、body 外加入 `costume-bible:CHR:base` 当前 SHA。`payload.costume_direction` 至少有：`script_requirement`、`narrative_function`、`front_structure`、`back_structure`、`cut_and_fastening`、`layering`、`color_placement`、`material_behavior`、`recognition_focus`、`mobility_and_camera`、`state_continuity`、`makeup_and_hair`、`evidence_status`、`script_refs`。`payload.costume` 与 `visual_details.costume` 保持本轮原有合同。正背结构写具体部位、形状、尺寸/比例或穿法；布料写厚薄、光泽、垂坠和动作表现；妆造只改施加层，不改获批骨相。
+对每个新建或重做资产表状态写 `CharacterStageDesignV1.2(scope:costume)` 和 `execution_contract_version:2`（旧 V1/V1.1 批准记录保持可读），其 `parent_refs` 在原有 brief、identity、body 外加入 `costume-bible:CHR:base` 当前 SHA。`payload.costume_direction` 至少有：`script_requirement`、`narrative_function`、`front_structure`、`back_structure`、`cut_and_fastening`、`layering`、`color_placement`、`material_behavior`、`recognition_focus`、`mobility_and_camera`、`state_continuity`、`makeup_and_hair`、`evidence_status`、`script_refs`。`payload.costume` 与 `visual_details.costume` 保持本轮原有合同。正背结构写具体部位、形状、尺寸/比例或穿法；布料写厚薄、光泽、垂坠和动作表现；妆造只改施加层，不改获批骨相。
 
 统筹五专项：
 

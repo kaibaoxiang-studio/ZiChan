@@ -1,6 +1,12 @@
-# 角色专项执行与交接 v0.2.5
+# 角色专项执行与交接
 
 专项服务于 [人物总控](director-understanding.md) 已建立的人物理解和设计意图，不从职业标签独立重造人物。主控负责定位、路由、焦点和整合，专项负责本领域结构方案；任何执行方式都不自行批准项目。
+
+## 三种成果不能互相替代
+
+方向稿提出人物定位、设计意图和要解决的问题；专项深化用具体方法形成结构与取舍；提示词承接已选的可见结果。读过 Skill、列出知识名称、写“已会诊”、做一份造型摘要，均不等于专项深化。主控应能指出这个人物的哪个问题因该项工作得到解决，哪些部位/参数因而作了什么决定；不能先凭通用模板写好脸与衣服，再回填专项标签。
+
+方向确认是继续执行所委托设计任务的依据，不是重新询问是否执行的节点。普通细节由主控与专项整合后集中审阅；批量、候选和预览也要先深化，不把未批准状态当成跳过理由。常规 inline 不必另建聊天或伪造独立返回物，独立会诊也不天然比 inline 更有质量。
 
 ## 输入和执行方式
 
@@ -11,6 +17,34 @@
 - **not_needed**：本阶段不适用或已有充分决定，写具体 `decision`。尚待身体或服饰阶段深化属于 `defer` 规划和 `deferred_dimensions`，不伪装成永不需要。
 
 方向稿的 `specialist_plan` 覆盖十三项，状态为 `inline|independent|defer|not_needed`；inline/independent 项另有 `task{objective,character_context,constraints[],expected_result}`，把人物理解和设计意图变成具体委派目标。阶段只记录本阶段实际执行的项；从 defer 激活时在 work 写同结构 task 和 activation_reason，更改既定执行方式须 execution_change_reason，原 not_needed 不能悄悄激活；唯一例外是新服饰状态稿按 [剧情状态可见需求](scene-styling-needs.md) 为妆、发、头耳颈或其他穿戴提供具体 `work.task` 和 `state_activation_reason`，只改变本场施加层，不改基础身份方向。其他领域仍先修订方向稿。十三项不是十三轮询问或十三次独立会诊。复杂性看真实矛盾与返工风险，不按字段数量机械判断。
+
+inline 的最小真实工作链是“读该专项方法 → 说明本人物问题 → 采用方法作出结构/比例/落点/表面决定 → 将具体结果映射到当前 payload”。`knowledge_refs` 留实际路径和 SHA，`rules_applied` 写用了哪种设计办法，`results` 写已采用的可画结果及原文/推导/创作性质。只列 Skill 名称、复制知识摘要、批量替换姓名或把同一句通用美化词填进多个 field 都不成立。可复用来源、方法和项目共有约束，但必须检查当前人物与状态是否相容。
+
+## 深化成果到 cue 的可解析来源
+
+新建或重做阶段用 `CharacterStageDesignV1.2`、`execution_contract_version:2`；提示词 cue 的 `source_refs` 采用以下可核对来源，不接受任意“见人物小传/已设计”字符串代替：
+
+- inline：`specialist_execution.<专项ID>.results.<零基index>`。被引用的 `visible_result` 须含该 cue，且其 `field` 指向实际采用的当前 payload 字段。
+- independent：`specialist_execution.<专项ID>.applied_elements.<零基index>`。须有真实提案与所选元素，元素的 `visible_feature`、`placement_or_structure` 已进入映射 payload，cue 从该采纳字段提取，不能只挂一个提案哈希。
+- 画幅/格位：仅引用 `payload.execution_layout` 或它的实际子字段，且引用结构中确实有该布局 cue；不得用布局例外替代脸、发或衣装设计。
+- 执行图继承的身份、发、皮肤：可用 `approved_parent:<record_key>#payload.<field>`，限定当前 `parent_refs` SHA 对应的已批准父记录。新妆造或新衣装不能伪装成旧身份继承。执行图 identity 项的 reference_roles/cross_panel 等排版语义可引用 payload.execution_layout.identity 的实际子字段，face_body_anchor 仍须来自已批准父设计。
+
+专项职责必须匹配：头像的脸型与眉、眼、耳、鼻、唇落到 face，发型到 hair，皮肤到 skin，妆面到 decoration，头耳颈等饰品到 signature/accessory；其他部位按本领域职责。原文证据仍保留在 facts/source_refs 或 results 的 basis/evidence_status 中，不冒充专项执行引用。非人和群演继续采用本领域适用合同，不为满足人类部位目录制造器官、衣服或额外图片阶段。可解析引用证明交接与采用链存在，语义、人物适配和设计质量仍须审阅。
+
+## 人物设计 Harness 的最小返回
+
+`character-design` 每次返回 `design-result.json` 和同源生成的 `design.md`，`artifact_path` 指向 JSON。外层为 `CharacterDesignDeliveryV1`，含 `kind`、`scope` 和 `data`：
+
+| kind | 何时使用 | data |
+| --- | --- | --- |
+| `direction` | 请求确实为正式项目人物方向 | `DesignDirectionBriefV1`，承接实际工程上下文 |
+| `stage` | 正式项目当前身份、身体或状态服饰设计 | `CharacterStageDesignV1.2`，含 `execution_contract_version:2`、准确角色/状态、父记录与实际专项成果 |
+| `standalone` | 没有 project.json，基于剧本/小传独立设计，scope 为 identity/body/costume | `StandaloneCharacterDesignV1`，以 subject 的 name/local_key 标识人物，保存实际请求文本和输入文件的 sources 哈希、understanding、design_thesis、execution_contract_version:2、当前 payload、specialist_execution、deferred_dimensions 与 unresolved |
+| `legacy_card` | 正式工程仍为 complete，scope 为 complete | 现有整卡合同的 `CharacterDesignCardV1/V2/V2.1/V2.2/V2.4`；实际接受版本及重点人形门槛沿原提交规则，不能交阶段摘要 |
+
+`kind/scope` 必须对应实际输入；独立设计或 phased 工程未指定阶段默认 identity，旧 complete 工程未指定阶段默认 complete。显式 scope complete 只用于非 phased 工程，仍核真实角色、状态、来源 SHA、已批准的 visual-bible/cast-plan 和旧整卡必需字段；新写或改动的人形重点卡沿用现行整卡版本、比例与专项 handoff 门槛，未改的已批准旧卡可按旧合同读取。验证只读临时副本，不自动迁移 phased，不批准或覆盖原卡；legacy_card 不能满足 identity/body/costume 任务。普通交付目录由主控映射为 artifact_dir，不当作正式 project_root；实际任务传入 project_root 时必须有 project.json，错误不能降级为 standalone。不能把阶段任务降级为 direction，也不能把已有正式工程伪装成 standalone 来跳过父记录或审批约束。独立草案不编造正式资产 ID，不要求先做全员或全身衣装详设；进入生产再映射项目 ID。JSON 保存完整可追溯内容，可读稿由同一 JSON 机械呈现，不另写简版来隐藏未完成维度。工具排版与验收不能代替设计，合同通过也不等于用户批准。
+
+先生成 JSON，再运行 `python scripts/verify_design_delivery.py render --design /absolute/artifact_dir/design-result.json --output /absolute/artifact_dir/design.md`。验证用同脚本 `validate --design ... [--markdown ...]`，由 Harness 把本次实际 inputs JSON 经 stdin 传入；不能把交付文件自带的 task 当成真实输入。外层精确四键 `schema_version/kind/scope/data`，`sources` 以工具的 `source_bindings(inputs)` 规则生成并核实际请求及文件哈希，独立输入保留其真实覆盖范围。验证只在临时副本检查，不批准或写回正式工程。
 
 ## 独立提案
 

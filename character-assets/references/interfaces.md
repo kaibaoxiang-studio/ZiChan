@@ -2,9 +2,13 @@
 
 新提交的独立人形 `avatar` 与 `execution` 提示词采用 [提示词硬输出合同](prompt-detail-contract.md)：对应身份或服饰阶段稿使用 `CharacterStageDesignV1.2`，`payload.prompt_detail_contract` 冻结逐 item 的可见 cue；程序逐字核对每条 `prompts[].text`，并检查 `acceptance_checks` 覆盖各 item。旧 V1/V1.1 批准记录保持可读；要从旧简版重新出词，先提交 V1.2 阶段设计。正式工程的 `--project-root`、提示词包、图片、审查、逐状态包和总表须按用户给定交付根目录映射。
 
+新建/重做阶段使用 `execution_contract_version:2`，cue 按 [专项合同](specialist-contract.md) 解析到实际专项 results/applied_elements、当前布局或允许的已批准父记录，原文引用不能替代专项成果。人物方向、专项深化和提示词是不同交接；候选、预览、纯文字和批量不豁免深化。人物设计 Harness 返回 `CharacterDesignDeliveryV1` 的 design-result.json 与机械生成的 design.md；正式服饰阶段同样遵守 V1.2 与 strict 成果合同，独立服饰文字仅为设计试稿，不是正式提示词。旧批准不因升级自动改写。
+
 ## 群演单图扩展
 
-`plan.asset_mode=speaking_extra` 的有台词群演先获批 `SpeakingExtraDesignV1`，字段和命令见[群演单图合同](group-ensemble.md)。每状态只用一张 9:16 四格 `execution` 图，`design_basis.records` 只绑定 `extra-design:角色ID:状态ID`，`anchor_images:{}`；审图批准后打包 `CharacterSpeakingExtraPackV1`。头像、九宫格、模卡和穿衣圣经不作前置。
+`plan.asset_mode=speaking_extra` 的有台词群演先获批 `SpeakingExtraDesignV1`，字段和命令见[群演单图合同](group-ensemble.md)。每状态只用一张 9:16 `execution` 图，人形四格、非人按已批准形态布局，`design_basis.records` 只绑定 `extra-design:角色ID:状态ID`，`anchor_images:{}`；审图批准后打包 `CharacterSpeakingExtraPackV1`。头像、九宫格、模卡和穿衣圣经不作前置。
+
+有台词者 morphology 默认 human，支持 humanoid/nonhuman。human/humanoid 使用上述四格；nonhuman 用 morphology_details 及含可读 description 的已批准 execution_layout，prompt 必须继承同 morphology/layout，仍一张 9:16，不强套人类部位。新说话群演提示词与验收项逐字段保留真实形态设计；新无台词群像逐槽位保留五类设计和道具归属，每条备选均须完整。旧已批准 prompt 仅按其原合同读取、审图与打包，不倒推新覆盖门槛。
 
 `pipeline_version:3` 且 `plan.asset_mode=ensemble` 时，先提交并批准 `GroupEnsembleDesignV1`，字段和命令见[群像单图合同](group-ensemble.md)。正式提示词仍用 `CharacterPromptPackageV1` 的 `stage:execution`，但 `morphology:group`、`anchor_images:{}`、`layout.type:ensemble_lineup`、`layout.single_canvas:true`、`layout.full_body:true`、逐人 `ordered_slots`，`design_basis.records` 只绑定对应 `ensemble-design:角色ID:状态ID`。多人横版比例按人数与辨识度决定，单人 9:16。审图批准一次后打包 `CharacterEnsemblePackV1`。下文身份图前置仅适用于 `asset_mode=individual`；有台词群演沿用四格布局，无台词群像使用完整全身同画布布局。
 

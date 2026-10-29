@@ -25,7 +25,7 @@ import zipfile
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import phased_design as phased
 import ensemble_assets as ensemble
-from export_prompt_text import write_prompt_text
+from export_prompt_text import render_prompt_text, write_prompt_text
 
 SCHEMA = "CharacterProjectV1"
 PLUGIN_VERSION = json.loads((Path(__file__).resolve().parents[1] / ".codex-plugin/plugin.json").read_text(encoding="utf-8"))["version"]
@@ -157,6 +157,54 @@ def export_project_prompt_text(root, state, content, character, variant, stage, 
     relative = Path("提示词") / f"{safe_asset_label(character)}_{label}_{safe_asset_label(variant)}_{stage}_{incoming[:12]}.txt"
     result = write_prompt_text(content, root / relative)
     return {"text_path": relative.as_posix(), "text_sha256": result["sha256"]}
+
+
+def copy_prompt_text_delivery(root, output, record):
+    """Package the exact human-readable prompt without changing old approvals."""
+    root, output = Path(root).resolve(), Path(output).resolve()
+    source = (root / record["path"]).resolve()
+    ensure(source.is_relative_to(root) and source.is_file(), "Prompt JSON is outside project or missing")
+    package = read_json(source)
+    ensure(digest(package) == record["sha256"], "Prompt JSON changed before packaging text")
+    expected = render_prompt_text(package).encode("utf-8")
+    relative = record.get("text_path")
+    if relative:
+        path = Path(relative)
+        ensure(not path.is_absolute() and ".." not in path.parts, "Prompt TXT needs a project-relative path")
+        text_source = (root / path).resolve()
+        ensure(text_source.is_relative_to(root) and text_source.is_file() and not (root / path).is_symlink(),
+               "Prompt TXT is missing or outside project")
+        ensure(record.get("text_sha256") == digest(text_source), "Prompt TXT changed before packaging")
+        ensure(text_source.read_bytes() == expected, "Prompt TXT is not the exact JSON export")
+    else:
+        ensure(not record.get("text_sha256"), "Prompt TXT hash has no path")
+        # Historical approved JSON did not record a TXT. Derive it in the pack
+        # only, leaving its source project and approvals byte-for-byte intact.
+        path = Path(record["path"]).with_suffix(".txt")
+        ensure(not path.is_absolute() and ".." not in path.parts, "Legacy prompt needs a project-relative path")
+    target = (output / path).resolve()
+    ensure(target.is_relative_to(output), "Prompt TXT escapes output package")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes(expected)
+    return {"path": path.as_posix(), "sha256": digest(target),
+            "derived_from": record["path"], "encoding": "utf-8"}
+
+
+def copy_pack_knowledge(root, output, reference):
+    """Package verified knowledge; a legacy read must not recreate its cache."""
+    sha = reference["sha256"]
+    ensure(isinstance(sha, str) and re.fullmatch(r"[0-9a-f]{64}", sha), "Invalid knowledge SHA")
+    source = Path(root) / "knowledge-snapshots" / sha
+    if not source.exists():
+        plugin = Path(__file__).resolve().parents[1]
+        source = (plugin / reference["path"]).resolve()
+        ensure(source.is_relative_to(plugin), "Knowledge resource escapes plugin")
+    ensure(source.is_file() and digest(source) == sha, "Knowledge snapshot changed before packaging")
+    relative = Path("knowledge-snapshots") / sha
+    target = Path(output) / relative
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source, target)
+    return {"path": relative.as_posix(), "sha256": digest(target)}
 
 
 def pipeline_stages(state):
@@ -406,9 +454,11 @@ def checked_handoff_file(root, relative, expected_sha, label):
     ensure(isinstance(relative, str) and relative.startswith("drafts/specialists/") and
            relative.endswith(".json") and ".." not in Path(relative).parts,
            f"{label} must be a project-relative drafts/specialists JSON path")
-    base = (root / "drafts" / "specialists").resolve()
-    target = (root / relative).resolve()
-    ensure(target.is_relative_to(base) and target.is_file(), f"{label} missing or outside project")
+    project = Path(root).resolve()
+    base = (project / "drafts" / "specialists").resolve()
+    target = (project / relative).resolve()
+    ensure(base.is_relative_to(project) and target.is_relative_to(project) and
+           target.is_relative_to(base) and target.is_file(), f"{label} missing or outside project")
     ensure(isinstance(expected_sha, str) and re.fullmatch(r"[0-9a-f]{64}", expected_sha) and
            digest(target) == expected_sha, f"{label} SHA mismatch")
     return read_json(target)
@@ -917,8 +967,9 @@ def _validate_record(kind, data, state, character_id=None, variant_id=None, stag
                    "Each costume execution prompt must state its canvas ratio")
             ensure(any(ratio in check for check in data["acceptance_checks"]),
                    "Costume execution review must verify the canvas ratio")
-            ensure(any("服饰" in check or "服装" in check for check in data["acceptance_checks"]),
-                   "Costume execution review must check garment structure")
+            if data.get("morphology") in {"human", "humanoid"}:
+                ensure(any("服饰" in check or "服装" in check for check in data["acceptance_checks"]),
+                       "Costume execution review must check garment structure")
             require_text(data, "variant_name")
             ensure(data["variant_name"] == variant_name(state, character_id, variant_id),
                    "Costume execution must use the asset-table state name")
@@ -1078,6 +1129,77 @@ def cmd_upgrade_pipeline(args):
                                                  "CostumeStyleBibleV1", "new state costume snapshots", "execution 9:16"])}
 
 
+def _design_queue(root, state, roster, image_tasks):
+    """Expose creative work before image work; this does not approve anything.
+
+    An identity draft may be deepened from a current direction draft. Approval
+    is still checked by the separate prompt/preview and stage submit contracts.
+    """
+    if not phased.enabled(state):
+        return []
+    output = []
+    for person in roster:
+        targets = [x for x in image_tasks if x["character_id"] == person["id"]]
+        if not targets or any(x["asset_mode"] != "individual" for x in targets):
+            continue
+        wanted = {x["stage"] for x in targets}
+        scopes = {"identity"}
+        if wanted & {"full_body", "costume_design", "execution"}:
+            scopes.add("body")
+        if wanted & {"costume_design", "execution"}:
+            scopes.add("costume")
+        character = person["id"]
+        direction = phased.key("design-brief", character)
+        specs = [(direction, "design-brief", "direction", "base", "character-design",
+                  ["script-context", "visual-bible", "cast-plan"], True)]
+        specs.append((phased.key("stage-design", character, scope="identity"),
+                      "stage-design", "identity", "base", "character-design", [direction], False))
+        if "body" in scopes:
+            specs.append((phased.key("stage-design", character, scope="body"),
+                          "stage-design", "body", "base", "character-design",
+                          phased.required_parents(state, character, "body", "base"), True))
+        if "costume" in scopes:
+            if state.get("pipeline_version", 1) >= 3:
+                specs.append((phased.key("costume-bible", character), "costume-bible", "style_bible",
+                              "base", "character-costume-designer",
+                              [direction, phased.key("stage-design", character, scope="identity"),
+                               phased.key("stage-design", character, scope="body")], True))
+            variants = dict.fromkeys(x["variant_id"] for x in targets
+                                     if x["stage"] in {"costume_design", "execution"})
+            for variant in variants:
+                specs.append((phased.key("stage-design", character, variant, "costume"),
+                              "stage-design", "costume", variant, "character-costume-designer",
+                              phased.required_parents(state, character, "costume", variant), True))
+        for record_key, kind, scope, variant, capability, dependencies, approved_parents in specs:
+            blockers = []
+            if state.get("pending_impact"):
+                blockers.append("Unresolved upstream impact")
+            for dependency in dependencies:
+                try:
+                    (_checked_record(root, state, dependency) if approved_parents else
+                     phased.draft(_runtime(), root, state, dependency))
+                except (ValueError, KeyError) as exc:
+                    blockers.append(str(exc))
+            try:
+                _checked_record(root, state, record_key)
+                status = "approved"
+            except (ValueError, KeyError):
+                try:
+                    phased.draft(_runtime(), root, state, record_key)
+                    status = "awaiting_approval"
+                except (ValueError, KeyError):
+                    status = "needs_design"
+            if blockers:
+                status = "blocked"
+            output.append({"record_key": record_key, "kind": kind, "scope": scope,
+                           "character_id": character, "asset_name": person["name"],
+                           "variant_id": variant, "capability": capability, "status": status,
+                           "blockers": blockers, "dependencies": dependencies,
+                           "action": ("review_design" if status == "awaiting_approval" else
+                                      "deepen_design" if status == "needs_design" else status)})
+    return output
+
+
 def cmd_plan(args):
     """Read-only single or batch queue; each image remains separately reviewed and approved."""
     root = Path(args.project_root).expanduser().resolve()
@@ -1151,9 +1273,12 @@ def cmd_plan(args):
                     except (ValueError, KeyError) as exc:
                         task["preview_modes"][mode] = {"status": "blocked", "reason": str(exc)}
             tasks.append(task)
+    design_tasks = _design_queue(root, state, roster, tasks)
     return {"mode": "single" if len(requested) == 1 else "batch",
             "design_progression": state.get("design_progression", "complete"),
             "pipeline_version": state.get("pipeline_version", 1),
+            "design_tasks": design_tasks,
+            "next_actions": [x for x in design_tasks if x["status"] in {"needs_design", "awaiting_approval"}],
             "tasks": tasks}
 
 
@@ -1351,10 +1476,14 @@ def cmd_import_image(args):
         ensure(not state["pending_impact"], "Resolve upstream impact first")
         variant_id = args.variant_id or "base"
         key = _record_key("prompt-package", args.character_id, variant_id, args.stage)
-        _require_approved(state, key)
+        prompt_record = _checked_record(root, state, key)
+        prompt_sha = prompt_record["sha256"]
         sha = digest(source)
-        ident = (f"{args.character_id}-{variant_id}-{args.stage}-{sha[:16]}"
-                 if state.get("pipeline_version", 1) >= 2 else f"{args.stage}-{sha[:16]}")
+        legacy_ident = (f"{args.character_id}-{variant_id}-{args.stage}-{sha[:16]}"
+                        if state.get("pipeline_version", 1) >= 2 else f"{args.stage}-{sha[:16]}")
+        # An explicit reimport may reuse the pixels after a prompt change, but
+        # must create a new review target rather than revive an old approval.
+        ident = f"{legacy_ident}-{prompt_sha[:12]}"
         roster_item = next((x for x in state["roster"] if x["id"] == args.character_id), None)
         ensure(roster_item is not None, "Unknown character ID")
         asset_mode = ensemble.mode(_runtime(), root, state, args.character_id)
@@ -1371,16 +1500,21 @@ def cmd_import_image(args):
         target.parent.mkdir(parents=True, exist_ok=True)
         if not target.exists():
             shutil.copy2(source, target)
-        existing = next((x for x in state["images"] if x["id"] == ident and
+        existing = next((x for x in state["images"] if x.get("sha256") == sha and x["stage"] == args.stage and
                          x["character_id"] == args.character_id and
-                         x["variant_id"] == variant_id), None)
+                         x["variant_id"] == variant_id and
+                         x.get("prompt_sha256") == prompt_sha and not x.get("stale")), None)
         if existing:
             return existing
+        base_ident, generation = ident, 1
+        while any(x["id"] == ident for x in state["images"]):
+            generation += 1
+            ident = f"{base_ident}-r{generation}"
         row = {"id": ident, "stage": args.stage, "character_id": args.character_id,
                "variant_id": variant_id, "asset_name": roster_item["name"],
                "variant_name": variant_name(state, args.character_id, variant_id),
                "path": str(target.relative_to(root)),
-               "sha256": sha, "prompt_sha256": state["records"][key]["sha256"],
+               "sha256": sha, "prompt_sha256": prompt_sha,
                "imported_at": now(), "approval": None, "stale": False}
         row["purpose"] = read_json(root / state["records"][key]["path"]).get("purpose", "production")
         state["images"].append(row)
@@ -1410,7 +1544,8 @@ def cmd_submit_review(args):
         if report["verdict"] == "pass":
             ensure(not report["blocking_issues"] and not report["factual_conflicts"] and
                    not report["identity_issues"] and not report["layout_issues"] and
-                   not report["label_issues"], "A passing review cannot contain unresolved defects")
+                   not report["label_issues"] and not report["adoption_proposals"],
+                   "A passing review cannot contain unresolved defects or adoption_proposals")
         review_sha = digest(report)
         path = root / "reviews" / f"{image['id']}-{review_sha[:12]}.json"
         write_json(path, report)
@@ -1442,7 +1577,8 @@ def cmd_approve_image(args):
                "Imported image contents changed")
         report = read_json(root / entry["path"])
         ensure(digest(report) == entry["sha256"], "Review contents changed")
-        ensure(report["verdict"] == "pass" and not report["blocking_issues"],
+        ensure(report["verdict"] == "pass" and not report["blocking_issues"] and
+               not report.get("adoption_proposals"),
                "Image review has not passed")
         require_text({"operator": args.operator}, "operator")
         previous = [x for x in state["images"] if x is not image and x["stage"] == image["stage"]
@@ -1567,6 +1703,8 @@ def cmd_package(args):
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, target)
         copied.append({"path": str(target.relative_to(out)), "sha256": digest(target)})
+        if read_json(source).get("schema_version") == "CharacterPromptPackageV1":
+            copied.append(copy_prompt_text_delivery(root, out, item))
     for image in images:
         review = state["reviews"][image["id"]]
         for item in (image, review):
@@ -1582,13 +1720,9 @@ def cmd_package(args):
             data = read_json(root / state["records"][item]["path"])
             for work in data["specialist_execution"].values():
                 for knowledge in work.get("knowledge_refs", []):
-                    source = root / "knowledge-snapshots" / knowledge["sha256"]
-                    ensure(source.is_file() and digest(source) == knowledge["sha256"], "Knowledge snapshot changed before packaging")
-                    target = out / "knowledge-snapshots" / knowledge["sha256"]
-                    target.parent.mkdir(parents=True, exist_ok=True)
-                    shutil.copy2(source, target)
-                    if not any(x["path"] == str(target.relative_to(out)) for x in copied):
-                        copied.append({"path": str(target.relative_to(out)), "sha256": digest(target)})
+                    item = copy_pack_knowledge(root, out, knowledge)
+                    if not any(x["path"] == item["path"] for x in copied):
+                        copied.append(item)
                 if work.get("mode") != "independent":
                     continue
                 source = root / work["proposal_ref"]
@@ -1601,14 +1735,9 @@ def cmd_package(args):
                 proposal = read_json(source)
                 for knowledge in (proposal.get("knowledge_refs", [])
                                   if proposal.get("schema_version") == "CharacterSpecialistProposalV1.2" else []):
-                    knowledge_source = root / "knowledge-snapshots" / knowledge["sha256"]
-                    ensure(knowledge_source.is_file() and digest(knowledge_source) == knowledge["sha256"],
-                           "Independent knowledge snapshot changed before packaging")
-                    knowledge_target = out / "knowledge-snapshots" / knowledge["sha256"]
-                    knowledge_target.parent.mkdir(parents=True, exist_ok=True)
-                    shutil.copy2(knowledge_source, knowledge_target)
-                    if not any(x["path"] == str(knowledge_target.relative_to(out)) for x in copied):
-                        copied.append({"path": str(knowledge_target.relative_to(out)), "sha256": digest(knowledge_target)})
+                    item = copy_pack_knowledge(root, out, knowledge)
+                    if not any(x["path"] == item["path"] for x in copied):
+                        copied.append(item)
     relevant_refs = [x for x in state["references"] if x.get("character_id") in
                      {None, ident}]
     for item in relevant_refs:

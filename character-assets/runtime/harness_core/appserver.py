@@ -29,21 +29,35 @@ class AppServer:
         self.readers = []
 
     def start(self):
-        if self.process:
+        if self.process and self.process.poll() is None:
             return
+        if self.process:
+            self.close()
+        self.stderr = []
+        self.events = []
+        self.server_requests = []
         self.process = subprocess.Popen(self.command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                        stderr=subprocess.PIPE, text=True, bufsize=1)
+                                        stderr=subprocess.PIPE, text=True, encoding='utf-8', bufsize=1,
+                                        env={**os.environ, 'PYTHONUTF8':'1', 'PYTHONIOENCODING':'utf-8'})
         self.readers = [threading.Thread(target=self._read, daemon=True),
                         threading.Thread(target=self._errors, daemon=True)]
         for reader in self.readers:
             reader.start()
-        self.request('initialize', {'clientInfo': {'name':'harness-creator', 'title':'Harness Creator',
-                                                 'version':'0.1.0'}})
-        self.send({'method':'initialized','params':{}})
+        try:
+            self.request('initialize', {'clientInfo': {'name':'harness-creator', 'title':'Harness Creator',
+                                                     'version':'0.1.0'}})
+            self.send({'method':'initialized','params':{}})
+        except Exception as exc:
+            self.close()
+            detail = self._diagnostics()
+            raise RuntimeError(f'App Server startup failed: {exc}' + (f'\n{detail}' if detail else '')) from exc
+
+    def _diagnostics(self):
+        return '\n'.join(self.stderr[-8:])[-8000:]
 
     def _errors(self):
         for line in self.process.stderr:
-            self.stderr.append(line.rstrip())
+            self.stderr.append(line.rstrip()[:2000])
             self.stderr = self.stderr[-100:]
 
     def _read(self):
@@ -95,9 +109,16 @@ class AppServer:
             self.process.stdin.write(json.dumps({'id':sequence,'method':method,'params':params})+'\n')
             self.process.stdin.flush()
         try:
-            result = pending.get(timeout=timeout)
-        except queue.Empty:
-            raise TimeoutError(f'App Server {method} timed out') from None
+            deadline = time.monotonic() + timeout
+            while True:
+                try:
+                    result = pending.get(timeout=min(0.1, max(0.001, deadline-time.monotonic())))
+                    break
+                except queue.Empty:
+                    if self.process is None or self.process.poll() is not None:
+                        raise RuntimeError(f'App Server closed during {method}: ' + self._diagnostics()) from None
+                    if time.monotonic() >= deadline:
+                        raise TimeoutError(f'App Server {method} timed out: ' + self._diagnostics()) from None
         finally:
             self.pending.pop(sequence, None)
         if 'error' in result:
@@ -199,6 +220,9 @@ class AppServer:
             for stream in (self.process.stdin, self.process.stdout, self.process.stderr):
                 if stream:
                     stream.close()
+        self.process = None
+        self.readers = []
+        self.pending.clear()
 
 def envelope_schema(result_schema):
     return {'type':'object','additionalProperties':False,

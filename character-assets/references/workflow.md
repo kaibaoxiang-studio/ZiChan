@@ -1,14 +1,18 @@
-# 角色资产项目工作流 v0.2.6.2
+# 角色资产项目工作流
 
 新头像和服饰执行图按 [提示词硬输出合同](prompt-detail-contract.md) 交付：专项成果先写入 `CharacterStageDesignV1.2` 并获批或为头像预览冻结，再生成标准化 `prompts[].text`，先在对话展示同一全文；预览/正式出图、审查和打包依同一提示词包 SHA。项目根目录与各产出子目录以用户给定交付根为准，具体路径映射见合同。旧记录不自动改写；新提示词依据旧简版设计时先重开设计阶段。
 
+人物方向 → 当前阶段的专项深化 → 冻结/批准阶段设计 → 提示词，是四个不同交接。不能把“方向获确认”当成“外观已设计”，也不能因为正式图尚待批准而改走未经深化的候选出口。用户委托当前人物设计后，方向确认即继续执行已分配专项，交一套具体阶段首稿集中审阅；不另设“是否调用 Skill/是否继续深化”的重复授权。
+
+常规问题同轮真实读取方法、设计并记录 inline 成果；独立会诊只处理确有需要的分歧。各路线均须保留设计成果：常规人物按阶段快照，群演/群像及非人按各自合同；不用人类字段或四格去填不适用的形态。批量只排队多项任务，不以一套职业标签模板代替逐人、逐状态设计。
+
 ## 无台词群演群像分支
 
-先运行 `plan` 查看 `asset_mode`。`ensemble` 按[群像单图合同](group-ensemble.md)从标准剧本人数、动作、道具与已批视觉基准形成 `GroupEnsembleDesignV1`，文字稿获批后每状态只生成一张完整全身群像 `execution` 图，再审图、批准和打包。有指定台词的群演走 `speaking_extra`：以原文台词和获批风格设计 `SpeakingExtraDesignV1`，每状态只产一张独立 9:16 四格执行资产，跳过前三张身份图。旧项目已批准记录不自动迁移。
+先运行 `plan` 查看 `asset_mode`。`ensemble` 按[群像单图合同](group-ensemble.md)从标准剧本人数、动作、道具与已批视觉基准形成 `GroupEnsembleDesignV1`，文字稿获批后每状态只生成一张完整全身群像 `execution` 图，再审图、批准和打包。有指定台词的群演走 `speaking_extra`：以原文台词和获批风格设计 `SpeakingExtraDesignV1`，每状态只产一张独立 9:16 执行资产，人形四格、非人按已批准形态布局，跳过前三张身份图。旧项目已批准记录不自动迁移。
 
 ## v0.2.6 新项目链路
 
-全文理解 → 人物方向 → 身份设计与头像 3:4 → 表情九宫格 → 身体设计与全身模卡 9:16 → 服饰设计师制定并获批穿衣风格圣经 → 每状态五专项实际成果和服饰文字快照获批 → 机械合成设计卡 → 每状态一张 9:16 竖版四格执行图 → 单图审查、批准、打包。文字阶段不是额外图片阶段。旧项目按 pipeline_version 回读。
+全文理解 → 人物方向确认 → 身份专项深化与阶段稿 → 头像 3:4 → 表情九宫格 → 身体专项深化与全身模卡 9:16 → 服饰设计师制定并获批穿衣风格圣经 → 每状态五专项实际成果和服饰文字快照获批 → 机械合成设计卡 → 每状态一张 9:16 竖版四格执行图 → 单图审查、批准、打包。各图在本阶段具体设计获批或满足限定预览条件后才生成提示词；文字阶段不是额外图片阶段。旧项目按 pipeline_version 回读。
 
 
 主入口 `$character-assets`。先读 `knowledge/index.md` 与 [人物总控](director-understanding.md)，根据人物问题加载已有知识。模型负责阅读理解和创作，`scripts/character_project.py` 管理文件、哈希、批准和发布门槛；CLI 合同通过不证明人物或画面质量通过。
@@ -44,11 +48,15 @@ python scripts/character_project.py submit --project-root /work/role-project --k
 
 approve 命令在用户已确认相应内容后执行，不把示例命令当作模型自行批准的授权。方向默认先确认；用户明确先看图时才走 image_first 预览。常规项由主控执行规范、记 inline 结果，复杂项独立会诊、保存真实提案；见 [专项合同](specialist-contract.md)。阶段门槛、payload 与全部命令见 [分阶段设计](phased-design.md)。不为十三专项固定十三轮。
 
+人物设计 Harness 交接固定为 `design-result.json` 与同源 `design.md`，具体封装见 [专项合同](specialist-contract.md)。先验收当前请求对应的设计成果，再提交阶段；结构、字段覆盖和文件数量只验证合同，不证明理解或创作质量。自动化可排版、序列化、导出和比对，不允许用预填字典将人物摘要直接拼成“候选提示词”。
+
 参考图通过 `import-reference --role identity|costume|style|inspiration --desired-strength '具体提取点'` 登记，按用户已指定用途采纳，不整体照搬。近邻比较按 [差异化框架](differentiation-framework.md) 执行；`cast_diff_audit.py` 只找相同文本/缺轴候选，不证明成图辨识度。
 
-## 3. 首图快看与正式五阶段
+## 3. 首图快看与按版本出图
 
 phased 身份草案可先生成 preview 头像。提示词使用冻结的 `design_basis.records`，填写 `purpose:preview`；默认 direction_first 的 brief 已批准、identity 可未批。image_first 只按明确先图需求允许两者冻结未批；script-context须ready，项目基准和cast-plan仍先批。preview 不能作为正式下游锚点或打包。
+
+这里放宽的是指定依据的批准时点，不是设计深度：身份草案仍须执行专项、保留结果映射并按当前合同冻结。把文件命名为“草案”“非正式包”，或只在 Markdown 中展示，均不能绕开这些前置。没有可用设计时继续完成设计首稿，不交一套浅词作为任务终点。
 
 ```sh
 python scripts/character_project.py submit --project-root /work/role-project --kind prompt-package --character-id CHR-001 --variant-id base --stage avatar --file /draft/avatar-prompt.json

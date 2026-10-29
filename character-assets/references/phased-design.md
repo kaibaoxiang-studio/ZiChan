@@ -1,4 +1,4 @@
-# 分阶段设计、首图预览与同图转正 v0.2.5
+# 分阶段设计、首图预览与同图转正
 
 ## v0.2.6 / pipeline_version 3 优先规则
 
@@ -6,6 +6,8 @@
 
 
 新项目默认 `design_progression:phased`：先理解全剧并确认人物方向，身份阶段看头像，身体与状态服饰按需深化。`init --design-progression complete` 保留先整卡后出图；旧 `project.json` 无此字段按 complete，不自动迁移批准记录。
+
+Harness 的 character-design 对旧 complete 工程保留整卡分支：未给 scope 时默认 complete，也可显式指定 complete；返回 `CharacterDesignDeliveryV1`，`kind:legacy_card`、`scope:complete`，data 为原整卡合同。真实角色、状态、来源哈希和已批全局基准继续检查；新写或修改卡沿现行整卡版本、比例和专项交接门槛，已批准且未改的旧卡保持可读。此分支不自动迁移工程，不批准或改写记录，也不能满足 phased 的 identity/body/costume 阶段任务。phased 与独立设计的默认 scope 仍为 identity。
 
 ## 1. 可复用的阅读与人物方向
 
@@ -17,9 +19,13 @@
 
 默认一套推荐，只有重要分歧才填备选。方向确认说明已获授权的意图和委托范围，不能假装完整脸、身体和服饰已经批准。
 
+方向确认后，总控继续在既有委托内执行当前阶段的专项方法并完成可画设计，不再次询问是否深化或是否启用已有 Skill。角色定位、审美关键词和专项计划只是输入，不能代替专项结果；普通细节整合成一套推荐后集中审阅，只有改变人物/剧情或已批方向的选择单独提出。身份阶段不提前完成全身和所有状态，防止重复分析与不必要的审批成本。
+
 ## 2. 三类阶段设计快照
 
 `CharacterStageDesignV1` 保存 `character_id`、`variant_id`、`scope`、`parent_refs`、`payload`、`specialist_execution`、`deferred_dimensions`、`unresolved`。`parent_refs` 用实际记录键映射当前 SHA；采用 [专项执行合同](specialist-contract.md) 的 inline/independent 结果，未深化部分放 deferred，不写成无需求。从defer激活补 work.task和activation_reason；改变执行方式记execution_change_reason，基础身份的 not_needed 不跨状态继承；新身份与服饰状态使用 `CharacterStageDesignV1.2`，旧 V1/V1.1 保持可读；新提示词另按 [提示词硬输出合同](prompt-detail-contract.md) 逐项覆盖 和 [剧情状态可见需求](scene-styling-needs.md)，可凭具体任务及 `state_activation_reason` 激活妆、发、头耳颈或其他穿戴专项。旧 V1 保持可读，其余领域 not_needed 改为执行仍须先改方向稿。
+
+新建或本轮重做的 `CharacterStageDesignV1.2` 增加 `execution_contract_version:2`。当前阶段须有实际专项成果，而不只是填满 `prompt_detail_contract`：每个可见设计 cue 应能解析到已采用的专项结果，布局和已批父记录继承按 [专项合同](specialist-contract.md) 的明确例外处理。事实依据保存在原文/推导字段，不能把任意原文引用当成专项已完成的证明。已有批准记录仍按原合同回读，不自动改写或失效；新设计不能通过改用旧 schema/省略标记来降级。
 
 | scope | 所属状态 | payload 的当前阶段设计 |
 | --- | --- | --- |
@@ -43,7 +49,7 @@ python scripts/character_project.py submit --project-root /work/role-project --k
 
 阶段metadata与可见字段同样守分域：identity_invariants只属identity；approved_choices.field须指向当前payload实际存在的本域字段；recognition_axes中face_structure/hair_structure属identity，silhouette/body_posture属body，costume_color属costume。morphology_details只含当前scope。body/costume若追加world_influences，只能写appearance_effects数组，各项除feature/mechanism/basis/evidence_status外须有field，指向本域实际可见字段；不得重设environment/technology/resources_and_access或改写身份世界规则。
 
-独立首稿中的类型标称不是生产合同：人物理解可能只是可读摘要；正式submit时须补齐完整对象、十三项对象式specialist_plan和准确parent_refs。参照 [最小身份合同样例](../examples/phased-identity-contract.md)，不要把独立草案原封不动提交。
+独立首稿中的类型标称不是生产项目合同：人物理解可能只是可读摘要；正式 submit 时须补齐完整对象、十三项对象式 specialist_plan 和准确 parent_refs。经 Harness 返回的独立成果仍须符合 `CharacterDesignDeliveryV1` 的 standalone 分支，有真实来源和当前阶段的专项成果，但不强制创建项目或全员记录。参照 [专项交接](specialist-contract.md) 与 [最小身份合同样例](../examples/phased-identity-contract.md)，不要把独立草案原封不动提交。
 
 ## 3. 正式设计依据（下表为 v2；v3 见顶部优先规则）
 
@@ -56,11 +62,13 @@ phased 的 `CharacterPromptPackageV1` 使用 `design_basis:{records:{记录键:s
 | costume_design | 上述三项，加 `stage-design:costume:CHR:STATE` |
 | execution | 上述四项，加 `design-card:CHR:STATE` |
 
-将 CHR、STATE 替换为真实角色与状态 ID。正式提示词的全部依据必须已批准且哈希匹配。图片的 `anchor_images` 仍按五阶段绑定正式上游图；设计快照不代替图片锚点。complete 模式继续用批准整卡的 `design_card_sha256`，头像保持既有 2–3 条候选；phased 允许 1–3 条，默认一套推荐。
+将 CHR、STATE 替换为真实角色与状态 ID。正式提示词的全部依据必须已批准且哈希匹配。图片的 `anchor_images` 按项目 pipeline_version 绑定正式上游图：v3 四图，v2 五阶段；设计快照不代替图片锚点。complete 模式继续用批准整卡的 `design_card_sha256`，头像保持既有 2–3 条候选；phased 允许 1–3 条，默认一套推荐。
 
 ## 4. 头像 preview 与原图转正
 
 默认先确认方向，再让身份草案以头像快看：提示词 `purpose:preview`、`preview_mode:direction_first`，brief 已批准，identity 可以未批准但已提交冻结；两者 SHA 放入 `design_basis.records`。只有用户明确要求先图后确认方向时才用 `preview_mode:image_first`，此时 brief 和 identity 都可未批准，但仍已提交冻结；script-context须ready，visual-bible与cast-plan仍须先批准。
+
+预览与正式身份设计使用相同的专项深化和可追溯颗粒度；只允许上述批准时点差异。不因“候选”“文字版”“批量先铺一轮”而跳过专项或把方向摘要拼为短词。冻结草案与已批准草案均须能回答具体设计来自哪项实际成果；模板只负责序列化与导出。
 
 preview 只用于看方向和首稿，不是正式身份锚点，不能推进九宫格、打包或用回图意外细节悄悄改卡。图片仍需导入并实际审查。希望采用首图时：
 

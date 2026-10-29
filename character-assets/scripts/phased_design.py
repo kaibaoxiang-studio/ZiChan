@@ -34,7 +34,7 @@ SCENE_NEED_NAMES = (*STATE_STYLING_SPECIALISTS, "garment")
 COMMON_PAYLOAD = {"facts", "inferences", "approved_choices", "recognition_axes", "world_influences", "morphology", "morphology_details"}
 SCOPE_PAYLOAD = {
     "identity": {"appearance", "feature_focus", "facial_surface", "differentiation_review", "execution_layout", "identity_invariants", "prompt_detail_contract"},
-    "body": {"body_form"}, "costume": {"costume", "costume_direction", "prompt_detail_contract"},
+    "body": {"body_form"}, "costume": {"costume", "costume_direction", "prompt_detail_contract", "execution_layout"},
 }
 AXIS_SCOPES = {"face_structure": "identity", "hair_structure": "identity", "silhouette": "body",
                "body_posture": "body", "costume_color": "costume"}
@@ -72,7 +72,78 @@ PROMPT_DETAIL_ALLOWED = {
 }
 
 
-def validate_prompt_detail_contract(cp, data):
+DETAIL_SPECIALISTS = {
+    **{kind: {"character-face-design"} for kind in ("face", "brow", "eye", "ear", "nose", "lip")},
+    "hair": {"character-hair-design"}, "skin": {"character-skin-design"},
+    "makeup": {"character-face-decoration-design"},
+    "adornment": {"character-face-signature-design", "character-costume-accessory-design"},
+    **{kind: SCOPE_SPECIALISTS["costume"] for kind in
+       ("garment", "footwear", "focus_component", "surface_pattern")},
+}
+
+
+def _as_text(value):
+    return value if isinstance(value, str) else json.dumps(value, ensure_ascii=False)
+
+
+def _detail_source(cp, root, state, data, kind, ref):
+    """Resolve adopted work, never a self-declared source label, into cue material."""
+    match = re.fullmatch(r"specialist_execution\.([a-z0-9-]+)\.(results|applied_elements)\.(0|[1-9][0-9]*)", ref)
+    if match:
+        specialist, collection, index = match.group(1), match.group(2), int(match.group(3))
+        cp.ensure(specialist in DETAIL_SPECIALISTS.get(kind, set()),
+                  f"Detail {kind} source belongs to another specialist")
+        work = data.get("specialist_execution", {}).get(specialist, {})
+        expected_mode = "inline" if collection == "results" else "independent"
+        cp.ensure(work.get("mode") == expected_mode, "Detail source execution mode mismatch")
+        rows = work.get(collection, [])
+        cp.ensure(isinstance(rows, list) and index < len(rows), "Detail source result index is invalid")
+        row = rows[index]
+        if collection == "results":
+            cp.require_text(row, "visible_result")
+            value = _get(data["payload"], row["field"])
+            cp.ensure(row["visible_result"] in _as_text(value), "Detail source result is not adopted")
+            return row["visible_result"]
+        cp.ensure(root is not None, "Independent detail source needs its real artifact root")
+        proposal = cp.checked_handoff_file(root, work.get("proposal_ref"), work.get("proposal_sha256"), specialist)
+        option = next((x for x in proposal["options"] if x["id"] == work.get("selected_option_id")), None)
+        cp.ensure(option is not None, "Detail source has no selected proposal option")
+        elements = option["design_elements"]
+        element_index = row.get("element_index")
+        cp.ensure(isinstance(element_index, int) and not isinstance(element_index, bool) and
+                  0 <= element_index < len(elements), "Detail source proposal element is invalid")
+        adopted = _as_text(_get(data["payload"], row["field"]))
+        cp.ensure(all(elements[element_index][field] in adopted for field in
+                      ("visible_feature", "placement_or_structure")),
+                  "Independent detail source is not visibly adopted")
+        return adopted
+    if ref == "payload.execution_layout" or ref.startswith("payload.execution_layout."):
+        identity_layout = (kind == "identity" and data["scope"] == "costume" and
+                           (ref == "payload.execution_layout.identity" or
+                            ref.startswith("payload.execution_layout.identity.")))
+        cp.ensure(kind == "framing" or identity_layout, "Layout may only source framing or identity placement cues")
+        return _as_text(_get(data, ref))
+    if ref.startswith("approved_parent:"):
+        cp.ensure(data["scope"] == "costume" and kind in {"identity", "hair", "skin"},
+                  "Approved parent sources only preserve execution identity, hair or skin")
+        cp.ensure(root is not None and state is not None, "Approved parent source needs the real project")
+        record_key, separator, path = ref[len("approved_parent:"):].partition("#")
+        cp.ensure(separator and path.startswith("payload."), "Approved parent source needs a payload field")
+        expected_scope = "body" if kind == "identity" and path.startswith("payload.body_form") else "identity"
+        cp.ensure(record_key == key("stage-design", data["character_id"], scope=expected_scope),
+                  "Approved parent source must be the same character's identity/body stage")
+        allowed = {"identity": ("payload.appearance", "payload.identity_invariants", "payload.body_form"),
+                   "hair": ("payload.visual_details.hair",), "skin": ("payload.visual_details.skin",)}[kind]
+        cp.ensure(any(path == prefix or path.startswith(prefix + ".") for prefix in allowed),
+                  "Approved parent source does not belong to its detail kind")
+        record = cp._checked_record(root, state, record_key)
+        cp.ensure(data.get("parent_refs", {}).get(record_key) == record["sha256"],
+                  "Approved detail parent must match the current stage parent SHA")
+        return _as_text(_get(cp.read_json(root / record["path"]), path))
+    raise ValueError(f"Unresolved detail source: {ref}")
+
+
+def validate_prompt_detail_contract(cp, data, root=None, state=None, strict=True):
     """Validate the approved visual inventory before any new avatar/execution prompt."""
     scope = data["scope"]
     expected_stage = "avatar" if scope == "identity" else "execution"
@@ -104,6 +175,14 @@ def validate_prompt_detail_contract(cp, data):
                   f"Prompt detail item {item['id']} has empty or generic cues")
         cp.ensure(len(set(cues.values())) == len(cues),
                   f"Prompt detail item {item['id']} repeats a summary across dimensions")
+        if strict:
+            material = [_detail_source(cp, root, state, data, kind, ref) for ref in refs]
+            cp.ensure(all(any(cue in source for source in material) for cue in cues.values()),
+                      f"Prompt detail item {item['id']} has cues absent from its adopted specialist results")
+            if kind == "identity":
+                parent_material = [source for source, ref in zip(material, refs) if ref.startswith("approved_parent:")]
+                cp.ensure(any(cues["face_body_anchor"] in source for source in parent_material),
+                          "Execution identity anchor must preserve an approved identity/body result")
     cp.ensure(PROMPT_DETAIL_REQUIRED[expected_stage] <= kinds,
               f"Missing required {expected_stage} detail kinds: {sorted(PROMPT_DETAIL_REQUIRED[expected_stage] - kinds)}")
     if expected_stage == "execution":
@@ -217,7 +296,10 @@ def checked_dependencies(cp, root, state, record_key, data):
     elif record_key.startswith(("design-brief:", "stage-design:", "costume-bible:")):
         parents(cp, root, state, data, approved=True)
         if record_key.startswith("stage-design:"):
-            validate_execution(cp, root, data, state)
+            # Existing approved contracts remain readable. New submissions carry
+            # the marker and keep their stronger provenance checks on every read.
+            validate_execution(cp, root, data, state,
+                               strict=data.get("execution_contract_version") == 2)
         if record_key.startswith("costume-bible:"):
             validate_bible(cp, root, state, data, data["character_id"])
     elif data.get("schema_version") == "CharacterDesignCardV2.5":
@@ -334,14 +416,19 @@ def _field_scope(path):
     return None
 
 
-def _knowledge(cp, root, refs):
+def _knowledge(cp, root, refs, specialist=None, strict=True, archive=False):
     cp.ensure(isinstance(refs, list) and refs, "Inline execution needs real knowledge_refs")
     plugin = Path(cp.__file__).resolve().parents[1]
+    locked = cp.read_json(plugin / "knowledge-lock.json")["snapshots"] if strict else []
     for item in refs:
         cp.ensure(isinstance(item, dict), "Knowledge reference must be an object")
         sha = item.get("sha256", "")
         cp.ensure(isinstance(sha, str) and len(sha) == 64 and all(x in "0123456789abcdef" for x in sha),
                   "Knowledge reference SHA must be hexadecimal SHA-256")
+        if strict:
+            cp.ensure(any(row.get("path") == item.get("path") and row.get("rules_sha256") == sha and
+                          specialist in row.get("capability_ids", []) for row in locked),
+                      f"Knowledge reference is not locked for specialist {specialist}")
         snapshot = root / "knowledge-snapshots" / sha
         if snapshot.is_file():
             cp.ensure(cp.digest(snapshot) == sha, "Project knowledge snapshot changed")
@@ -349,11 +436,65 @@ def _knowledge(cp, root, refs):
         path = (plugin / item.get("path", "")).resolve()
         cp.ensure(path.is_relative_to(plugin) and path.is_file(), "Knowledge file must be inside this plugin")
         cp.ensure(cp.digest(path) == item.get("sha256"), "Knowledge reference SHA mismatch")
-        snapshot.parent.mkdir(parents=True, exist_ok=True)
-        cp.shutil.copy2(path, snapshot)
+        if archive:
+            snapshot.parent.mkdir(parents=True, exist_ok=True)
+            cp.shutil.copy2(path, snapshot)
 
 
-def validate_execution(cp, root, data, state=None):
+def _archive_execution_knowledge(cp, root, data):
+    """Archive once on successful new-stage submission, never during reads."""
+    for specialist, work in data["specialist_execution"].items():
+        if work["mode"] == "inline":
+            refs = work["knowledge_refs"]
+        elif work["mode"] == "independent":
+            proposal = cp.checked_handoff_file(root, work["proposal_ref"], work["proposal_sha256"], specialist)
+            refs = proposal.get("knowledge_refs", [])
+        else:
+            continue
+        _knowledge(cp, root, refs, specialist, strict=True, archive=True)
+
+
+def _stage_morphology(cp, root, data, state):
+    morphology = data.get("payload", {}).get("morphology")
+    if morphology is None and data["scope"] != "identity" and state is not None:
+        identity_key = key("stage-design", data["character_id"], scope="identity")
+        identity_record = cp._checked_record(root, state, identity_key)
+        morphology = cp.read_json(root / identity_record["path"])["payload"]["morphology"]
+    return morphology
+
+
+def _specialist_field(cp, data, specialist, path):
+    """Evidence/labels cannot stand in for a specialist's adopted design field."""
+    cp.ensure(isinstance(path, str) and path.strip(), "Specialist result needs a payload field")
+    parts = path.split(".")
+    if parts[0] == "visual_details":
+        cp.ensure(len(parts) > 2 and parts[1] in cp.SPECIALIST_FIELD_DOMAINS[specialist],
+                  "Specialist result is outside its design domain")
+        return
+    prefixes = {
+        "character-world-appearance-design": ("world_influences",),
+        "character-feature-focus": ("feature_focus", "recognition_axes", "identity_invariants"),
+        "character-face-design": ("appearance",),
+        "character-hair-design": ("costume_direction.state_hair",),
+        "character-body-design": ("body_form",),
+        "character-skin-design": (),
+        "character-face-signature-design": ("facial_surface", "costume_direction.head_ear_neck"),
+        "character-face-decoration-design": ("facial_surface", "costume_direction.state_makeup"),
+        "character-costume-style-design": ("costume", "costume_direction.front_structure", "costume_direction.back_structure",
+                                            "costume_direction.recognition_focus"),
+        "character-costume-cut-design": ("costume_direction.cut_and_fastening", "costume_direction.layering",
+                                          "costume_direction.mobility_and_camera"),
+        "character-costume-color-design": ("costume_direction.color_placement", "recognition_axes.costume_color"),
+        "character-costume-material-design": ("costume_direction.material_behavior",),
+        "character-costume-accessory-design": ("costume_direction.wearable_accessories", "costume_direction.head_ear_neck"),
+    }.get(specialist, ())
+    shape_prefix = f"morphology_details.{data['scope']}"
+    nonhuman = (path == shape_prefix or path.startswith(shape_prefix + ".")) and specialist in SCOPE_SPECIALISTS[data['scope']]
+    cp.ensure(nonhuman or any(path == prefix or path.startswith(prefix + ".") for prefix in prefixes),
+              "Specialist result must map an owned design field, not evidence or prompt metadata")
+
+
+def validate_execution(cp, root, data, state=None, strict=True):
     execution = data.get("specialist_execution")
     cp.ensure(isinstance(execution, dict) and execution, "Stage design needs actual specialist_execution")
     cp.ensure(SCOPE_SPECIALISTS[data["scope"]] <= set(execution),
@@ -362,11 +503,22 @@ def validate_execution(cp, root, data, state=None):
     if state is not None:
         brief_record = draft(cp, root, state, key("design-brief", data["character_id"]))
         brief = cp.read_json(root / brief_record["path"])
+    # Historical reads used no new morphology-parent lookups. Only fresh work
+    # needs the human/core applicability gate introduced with this contract.
+    morphology = _stage_morphology(cp, root, data, state) if strict else None
+    core = ({"character-face-design", "character-hair-design", "character-skin-design"}
+            if data["scope"] == "identity" else {"character-body-design"} if data["scope"] == "body" else set())
     for specialist, work in execution.items():
         cp.ensure(specialist in cp.SPECIALIST_DOMAINS_V24, f"Unknown specialist: {specialist}")
         cp.require_text(work, "decision")
         mode = work.get("mode")
         cp.ensure(mode in {"inline", "independent", "not_needed"}, "Unknown specialist execution mode")
+        if strict and mode == "not_needed":
+            cp.ensure(morphology == "nonhuman" or specialist not in core,
+                      f"Current human design needs actual {specialist} work; baldness is a hair design result")
+            if brief is not None and brief["specialist_plan"][specialist]["status"] in {"inline", "independent"}:
+                cp.require_text(work, "execution_change_reason")
+                cp.require_text(work, "not_applicable_reason")
         if brief is not None and mode != "not_needed":
             planned = brief["specialist_plan"][specialist]
             state_activation = (data["scope"] == "costume" and
@@ -388,13 +540,15 @@ def validate_execution(cp, root, data, state=None):
             cp.ensure(isinstance(work.get("rules_applied"), list) and work["rules_applied"] and
                       all(isinstance(x, str) and x.strip() for x in work["rules_applied"]),
                       "Inline work must name the specialist rules actually applied")
-            _knowledge(cp, root, work.get("knowledge_refs"))
+            _knowledge(cp, root, work.get("knowledge_refs"), specialist, strict)
             cp.ensure(isinstance(work.get("results"), list) and work["results"], "Inline work needs visible results")
             for result in work["results"]:
                 _text_fields(cp, result, ("field", "visible_result", "basis"))
                 cp.ensure(result.get("evidence_status") in {"script_fact", "inference", "creative_choice"},
                           "Inline result needs evidence_status")
                 value = _get(data["payload"], result["field"])
+                if strict:
+                    _specialist_field(cp, data, specialist, result["field"])
                 cp.ensure(result["visible_result"] in (value if isinstance(value, str) else json.dumps(value, ensure_ascii=False)),
                           "Inline result must actually occur in its mapped payload field")
                 domain = result["field"].split(".")
@@ -408,9 +562,14 @@ def validate_execution(cp, root, data, state=None):
             cp.ensure(proposal.get("schema_version") in {"CharacterSpecialistProposalV1.1", "CharacterSpecialistProposalV1.2"},
                       "Independent handoff needs V1.1 or V1.2")
             if proposal["schema_version"] == "CharacterSpecialistProposalV1.2":
-                _knowledge(cp, root, proposal["knowledge_refs"])
+                _knowledge(cp, root, proposal["knowledge_refs"], specialist, strict)
+            elif strict:
+                cp.ensure(False, "New independent work needs V1.2 with specialist-applicable knowledge")
             cp.ensure(proposal.get("specialist") == specialist and proposal.get("character_id") == data["character_id"] and
                       proposal.get("variant_id") == data["variant_id"], "Independent proposal target mismatch")
+            if strict:
+                cp.ensure(proposal.get("scope") == data["scope"] and proposal.get("execution_mode") == "independent",
+                          "Independent proposal must match the current stage scope and actual execution mode")
             option = next((x for x in proposal["options"] if x["id"] == work.get("selected_option_id")), None)
             cp.ensure(option, "Independent work must select a real proposal option")
             mappings = work.get("applied_elements")
@@ -419,7 +578,13 @@ def validate_execution(cp, root, data, state=None):
                 index = mapping.get("element_index")
                 cp.ensure(isinstance(index, int) and not isinstance(index, bool) and 0 <= index < len(option["design_elements"]),
                           "Independent element index is invalid")
-                _get(data["payload"], mapping["field"])
+                adopted = _get(data["payload"], mapping["field"])
+                if strict:
+                    _specialist_field(cp, data, specialist, mapping["field"])
+                    element = option["design_elements"][index]
+                    cp.ensure(all(element[field] in _as_text(adopted) for field in
+                                  ("visible_feature", "placement_or_structure")),
+                              "Independent selected feature and structure must actually occur in its mapped payload")
                 domain = mapping["field"].split(".")
                 if domain[0] == "visual_details":
                     cp.ensure(len(domain) > 2 and domain[1] in cp.SPECIALIST_FIELD_DOMAINS[specialist],
@@ -584,11 +749,14 @@ def required_parents(state, character, scope, variant):
     return result
 
 
-def validate_stage(cp, root, state, data, character, variant, scope):
+def validate_stage(cp, root, state, data, character, variant, scope, strict=True):
     cp.ensure(scope in SCOPES and data.get("schema_version") in {"CharacterStageDesignV1", "CharacterStageDesignV1.1", "CharacterStageDesignV1.2"},
               "Expected CharacterStageDesignV1/V1.1/V1.2 and a design scope")
     cp.ensure(data.get("character_id") == character and data.get("scope") == scope and data.get("variant_id") == variant,
               "Stage design target mismatch")
+    if strict:
+        cp.ensure(data.get("execution_contract_version") == 2,
+                  "New or modified stage design needs execution_contract_version: 2")
     cp.ensure(variant == "base" or scope == "costume", "Identity and body scopes belong to base")
     refs = data.get("parent_refs")
     cp.ensure(isinstance(refs, dict) and set(refs) == set(required_parents(state, character, scope, variant)),
@@ -672,11 +840,11 @@ def validate_stage(cp, root, state, data, character, variant, scope):
     if scope == "costume":
         cp.ensure(isinstance(payload.get("costume"), dict) and payload["costume"], "Costume scope needs costume summary")
     cp.require_list(data, "deferred_dimensions")
-    validate_execution(cp, root, data, state)
+    validate_execution(cp, root, data, state, strict=strict)
     if scope == "costume" and state.get("pipeline_version", 1) >= 3:
         validate_costume_direction(cp, root, state, data)
-    if data["schema_version"] == "CharacterStageDesignV1.2" and scope in {"identity", "costume"}:
-        validate_prompt_detail_contract(cp, data)
+    if human and data["schema_version"] == "CharacterStageDesignV1.2" and scope in {"identity", "costume"}:
+        validate_prompt_detail_contract(cp, data, root=root, state=state, strict=strict)
 
 
 def _store(cp, root, state, record_key, data, approval=None):
@@ -738,6 +906,15 @@ def submit(cp, args, root, state):
             cp.ensure(variant == "base", "Costume bible belongs to base")
             validate_bible(cp, root, state, data, character)
         else:
+            # A byte-identical, already approved historical stage is a read,
+            # not newly authored work. Never make an old approval stale merely
+            # because the installed validator gained a stronger contract.
+            previous_key = key("stage-design", character, variant, scope)
+            previous_stage = state["records"].get(previous_key)
+            if (previous_stage and previous_stage.get("approval") and not previous_stage.get("stale") and
+                    previous_stage["sha256"] == cp.digest(data)):
+                cp._checked_record(root, state, previous_key)
+                return {"key": previous_key, "status": "unchanged", "sha256": previous_stage["sha256"]}
             if scope in {"identity", "costume"} and state.get("pipeline_version", 1) >= 3:
                 if scope == "identity":
                     human = data.get("payload", {}).get("morphology") in {"human", "humanoid"}
@@ -754,6 +931,8 @@ def submit(cp, args, root, state):
     previous = state["records"].get(record_key)
     if previous and previous["sha256"] == incoming and not previous.get("stale"):
         return {"key": record_key, "status": "unchanged", "sha256": incoming}
+    if args.kind == "stage-design":
+        _archive_execution_knowledge(cp, root, data)
     if previous:
         if args.kind == "costume-bible":
             invalidate_bible(cp, state, character)
@@ -781,7 +960,8 @@ def approve(cp, args, root, state):
     elif args.kind == "costume-bible":
         validate_bible(cp, root, state, data, args.character_id)
     else:
-        validate_stage(cp, root, state, data, args.character_id, args.variant_id or "base", args.scope)
+        validate_stage(cp, root, state, data, args.character_id, args.variant_id or "base", args.scope,
+                       strict=data.get("execution_contract_version") == 2 or not value.get("approval"))
         parents(cp, root, state, data, approved=True)
     cp.require_text({"operator": args.operator}, "operator")
     value["approval"] = {"operator": args.operator, "at": cp.now(), "sha256": value["sha256"]}
@@ -823,7 +1003,12 @@ def resolve_basis(cp, root, state, package, character, variant, stage, force_app
         data = cp.read_json(root / record["path"])
         if record_key.startswith("stage-design:"):
             parents(cp, root, state, data, approved=not preview)
-            validate_execution(cp, root, data, state)
+            strict = data.get("execution_contract_version") == 2 or not record.get("approval")
+            validate_execution(cp, root, data, state, strict=strict)
+            if (strict and data["scope"] in {"identity", "costume"} and
+                    data.get("schema_version") == "CharacterStageDesignV1.2" and
+                    _stage_morphology(cp, root, data, state) in {"human", "humanoid"}):
+                validate_prompt_detail_contract(cp, data, root=root, state=state, strict=True)
             payloads.append(data["payload"])
     merged = merge_payloads(cp, payloads)
     return merged
@@ -845,7 +1030,25 @@ def merge_payloads(cp, payloads):
             else:
                 cp.ensure(target[name] == value, f"Conflicting design scopes at {path}")
     for payload in payloads:
-        merge(result, payload)
+        source = copy.deepcopy(payload)
+        contract = source.pop("prompt_detail_contract", None)
+        if contract is not None:
+            stage = contract["stage"]
+            contracts = result.setdefault("prompt_detail_contracts", {})
+            cp.ensure(stage not in contracts or contracts[stage] == contract,
+                      f"Conflicting prompt detail contracts for {stage}")
+            contracts[stage] = contract
+        if "execution_layout" in source:
+            layout = source.pop("execution_layout")
+            scope = ("costume" if source.get("costume_direction") is not None or source.get("costume") is not None or
+                     contract is not None and contract["stage"] == "execution" else "identity")
+            layouts = result.setdefault("stage_execution_layouts", {})
+            cp.ensure(scope not in layouts or layouts[scope] == layout, f"Conflicting {scope} execution layouts")
+            layouts[scope] = layout
+            # Existing nonhuman readers use execution_layout. Preserve that
+            # interface, choosing the current state layout over identity framing.
+            result["execution_layout"] = copy.deepcopy(layouts.get("costume", layouts.get("identity")))
+        merge(result, source)
     return result
 
 
