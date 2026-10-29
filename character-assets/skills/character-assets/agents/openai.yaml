@@ -1,6 +1,6 @@
 interface:
   display_name: 角色资产主控
-  short_description: 从剧本、小传或已有稿交具体角色设计和提示词，按需接正式资产生产
+  short_description: 从剧本、小传或已有稿形成一个角色方向，深度设计直接写完整提示词，维护一份文档
   default_prompt: Use $character-assets to complete the requested task.
 policy:
   allow_implicit_invocation: false

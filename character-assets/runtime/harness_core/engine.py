@@ -14,7 +14,8 @@ from .appserver import AppServer, envelope_schema
 from .common import inside, fingerprint, sha, read_json, write_json, now, redact
 from .contracts import graph_order, bind_inputs, validate_data
 from .store import Store
-from .delivery import completion_mode, verify_text, verify_main_file
+from .delivery import (completion_mode, verify_text, verify_main_file, prompt_document_allowed,
+                       verify_prompt_document, verify_prompt_text, PROMPT_DOCUMENT_CAPABILITIES)
 
 
 def _scheduler_pid_alive(pid):
@@ -70,7 +71,10 @@ def input_files(value):
                 path=Path(item)
                 if path.is_absolute() and path.is_file(): found[str(path.resolve())]=sha(path)
             except OSError: pass
-    visit(value)
+    # A caller-bound persistent document is the mutable output, protected by
+    # document revision checks; it is not an immutable upstream input file.
+    visit({key: child for key, child in value.items() if key != 'document_path'}
+          if isinstance(value, dict) else value)
     return found
 
 def verify_result(result, capability, artifact_dir, task_inputs=None, plugin_root=None):
@@ -80,8 +84,19 @@ def verify_result(result, capability, artifact_dir, task_inputs=None, plugin_roo
         validate_data(result['result'],capability['output_schema'])
         character_task = capability.get('id', '').startswith('character-')
         mode = completion_mode(capability, task_inputs, result['result']) if character_task else 'files'
+        ordinary_document = prompt_document_allowed(capability, task_inputs) if character_task else False
+        main = result['result'].get('artifact_path', '')
+        bound_document = None
+        if ordinary_document and isinstance(main, str) and Path(main).is_absolute():
+            target = (task_inputs or {}).get('document_path')
+            if (Path(main).expanduser().is_symlink() or not target
+                    or Path(target).expanduser().resolve() != Path(main).expanduser().resolve()
+                    or Path(main).suffix.lower() not in {'.md', '.markdown'}):
+                raise ValueError('Absolute prompt document must equal actual inputs.document_path')
+            bound_document = Path(main).expanduser().resolve()
         for relative in result['artifacts']:
-            path=inside(artifact_dir,relative)
+            path=(bound_document if bound_document is not None and relative == main
+                  else inside(artifact_dir,relative))
             if not path.is_file() or path.is_symlink():
                 raise ValueError(f'Missing or invalid artifact: {relative}')
             artifacts.append({'path':str(path.resolve()),'sha256':sha(path)})
@@ -89,15 +104,47 @@ def verify_result(result, capability, artifact_dir, task_inputs=None, plugin_roo
             verify_text(result['result'])
             if capability.get('id') == 'character-image-prompt':
                 root=Path(plugin_root or Path(__file__).resolve().parents[2]).resolve()
-                helper=inside(root,'scripts/verify_prompt_delivery.py')
-                checked=subprocess.run([sys.executable,str(helper),'--text'],
-                                       input=json.dumps({'inputs':task_inputs,'content':result['result']['content']},ensure_ascii=False),
-                                       capture_output=True,text=True,encoding='utf-8',timeout=30)
-                if checked.returncode:
-                    raise ValueError('Prompt text contract failed: '+(checked.stderr or checked.stdout).strip())
+                if ordinary_document:
+                    verify_prompt_text(result['result']['content'], task_inputs, root)
+                else:
+                    helper=inside(root,'scripts/verify_prompt_delivery.py')
+                    checked=subprocess.run([sys.executable,str(helper),'--text'],
+                                           input=json.dumps({'inputs':task_inputs,'content':result['result']['content']},ensure_ascii=False),
+                                           capture_output=True,text=True,encoding='utf-8',timeout=30)
+                    if checked.returncode:
+                        raise ValueError('Prompt text contract failed: '+(checked.stderr or checked.stdout).strip())
             return artifacts
         if character_task or 'artifact_path' in capability.get('output_schema', {}).get('properties', {}):
             verify_main_file(result['result'], result['artifacts'], artifact_dir)
+        if capability.get('id') in PROMPT_DOCUMENT_CAPABILITIES:
+            main = result['result']['artifact_path']
+            if Path(main).suffix.lower() in {'.md', '.markdown'} and ordinary_document:
+                root=Path(plugin_root or Path(__file__).resolve().parents[2]).resolve()
+                validated = verify_prompt_document(bound_document or inside(artifact_dir, main), task_inputs or {}, root)
+                seen = {item['path'] for item in artifacts}
+                for filename in validated['artifacts']:
+                    path = Path(filename)
+                    if not path.is_absolute() or not path.is_file() or path.is_symlink():
+                        raise ValueError('Missing or invalid program-derived prompt artifact')
+                    resolved = str(path.resolve())
+                    if resolved not in seen:
+                        artifacts.append({'path': resolved, 'sha256': sha(path)})
+                        seen.add(resolved)
+                return artifacts
+            if (task_inputs or {}).get('delivery_contract') == 'prompt_document':
+                raise ValueError('Prompt document delivery needs its actual Markdown main artifact')
+            # A legacy JSON return remains subject to its complete old contract.
+            # Choosing a Markdown filename never grants a formal/typed escape.
+            if capability.get('id') == 'character-assets':
+                if Path(main).suffix.lower() != '.json':
+                    raise ValueError('Formal/typed delivery requires its real typed artifact, not a renamed document')
+                value = read_json(inside(artifact_dir, main))
+                legacy = {'CharacterDesignDeliveryV1': ('character-design-delivery-v1', ['design-result.json', 'design.md']),
+                          'CharacterPromptPackageV1': ('character-prompt-package-v1', ['prompt-package.json', '提示词.txt'])}
+                if not isinstance(value, dict) or value.get('schema_version') not in legacy:
+                    raise ValueError('Character delivery needs a validated prompt document or supported legacy typed result')
+                contract, required = legacy[value['schema_version']]
+                capability = {**capability, 'artifact_contract': contract, 'required_artifacts': required}
         for required in capability.get('required_artifacts',[]):
             if required not in result['artifacts']:
                 raise ValueError(f'Required artifact not declared: {required}')
@@ -158,6 +205,11 @@ class Executor:
         directory=Path(task['artifact_dir'])
         directory.mkdir(parents=True,exist_ok=True)
         validate_data(task['inputs'],capability['input_schema'])
+        if prompt_document_allowed(capability, task['inputs']):
+            # This is the actual caller-bound task, not a model-authored copy.
+            inputs_path = directory / 'task-inputs.json'
+            write_json(inputs_path, task['inputs'])
+            task = {**task, 'inputs_path': str(inputs_path.resolve())}
         execution=capability['execution']
         timeout=node.get('timeout_seconds',600)
         if execution['kind']=='agent':

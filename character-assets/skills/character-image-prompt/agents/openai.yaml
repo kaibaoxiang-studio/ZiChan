@@ -1,6 +1,6 @@
 interface:
   display_name: 角色出图提示词
-  short_description: 把具体角色设计保真编译为GPT Image 2.5提示词，默认同源文件与可读文档
+  short_description: 直接设计或保真整理角色提示词，一个方向、四类用途及多状态维护在同一文档
   default_prompt: Use $character-image-prompt to complete the requested task.
 policy:
   allow_implicit_invocation: false

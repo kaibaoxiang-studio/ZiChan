@@ -4,7 +4,7 @@
     {
       "id": "character-assets",
       "skill_name": "character-assets",
-      "description": "从剧本、小传或已有稿交具体角色设计和提示词，按需接正式资产生产",
+      "description": "从剧本、小传或已有稿形成一个角色方向，深度设计直接写完整提示词，维护一份文档",
       "input_schema": {
         "type": "object",
         "properties": {
@@ -41,7 +41,8 @@
           },
           "scope": {
             "type": "string",
-            "minLength": 1
+            "minLength": 1,
+            "description": "仅明确旧typed/正式合同使用。普通提示词设计用target_stages或requested_dimensions，不为阶段设计填写旧scope。"
           },
           "review_mode": {
             "type": "string",
@@ -89,7 +90,10 @@
                 "costume_design",
                 "execution"
               ]
-            }
+            },
+            "minItems": 1,
+            "uniqueItems": true,
+            "description": "Ordinary prompt documents support four stages; explicit costume_design is reserved for legacy pipeline 2 and retains the typed contract."
           },
           "delivery_mode": {
             "type": "string",
@@ -174,6 +178,134 @@
               }
             },
             "description": "Explicit local design baselines with actual file hashes; standalone only, never a replacement for production parents."
+          },
+          "delivery_contract": {
+            "type": "string",
+            "enum": [
+              "prompt_document",
+              "legacy_typed"
+            ],
+            "description": "Ordinary prompt-first document by default. Explicit formal purpose or typed design input retains its original contract; the executor cannot downgrade it."
+          },
+          "document_path": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Actual caller-authorized persistent Markdown output target, not a read-only source."
+          },
+          "expected_revision": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$",
+            "description": "Actual current revision returned by prompt_document.context/save; protects concurrent updates."
+          },
+          "subject": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "local_key": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "name",
+              "local_key"
+            ],
+            "additionalProperties": false
+          },
+          "state_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "references": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "role": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "path",
+                "role"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "constraints": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "source_ref": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "text",
+                "source_ref"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "morphology": {
+            "type": "string",
+            "enum": [
+              "human",
+              "humanoid",
+              "nonhuman"
+            ]
+          },
+          "asset_mode": {
+            "type": "string",
+            "enum": [
+              "individual",
+              "speaking_extra",
+              "ensemble"
+            ]
+          },
+          "expression_grid": {
+            "type": "integer",
+            "enum": [
+              9,
+              16
+            ]
+          },
+          "attire_exception": {
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string",
+                "minLength": 1
+              },
+              "basis": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "description",
+              "basis"
+            ],
+            "additionalProperties": false
           }
         },
         "required": [
@@ -189,7 +321,7 @@
           },
           "artifact_path": {
             "type": "string",
-            "description": "Main output path relative to artifact_dir, for example design.md; never an absolute path."
+            "description": "Main result. Ordinary path is one validated Markdown prompt document; relative to artifact_dir unless exactly bound by actual inputs.document_path. Legacy typed outputs retain their original filenames."
           },
           "summary": {
             "type": "string"
@@ -227,14 +359,14 @@
         "network": false
       },
       "knowledge_refs": [
-        "references/routing-and-integration.md",
+        "references/prompt-document.md",
         "references/director-understanding.md",
         "knowledge/index.md",
-        "references/specialist-contract.md",
-        "references/prompt-detail-contract.md",
+        "references/design-detail-standard.md",
+        "references/execution-sheet.md",
         "references/workflow.md",
         "references/phased-design.md",
-        "references/interfaces.md"
+        "references/specialist-contract.md"
       ],
       "explicit_only": true
     },
@@ -431,14 +563,15 @@
         "network": false
       },
       "knowledge_refs": [
-        "references/evidence.md"
+        "references/evidence.md",
+        "references/prompt-document.md"
       ],
       "explicit_only": true
     },
     {
       "id": "character-design",
       "skill_name": "character-design",
-      "description": "理解人物与世界，设计完整形象或指定局部；普通首稿无需生产工程",
+      "description": "理解人物与世界，把一个整合方向的具体设计直接写入完整提示词，支持局部更新",
       "input_schema": {
         "type": "object",
         "properties": {
@@ -476,7 +609,7 @@
           "scope": {
             "type": "string",
             "minLength": 1,
-            "description": "direction/identity/body/costume for phased projects; default identity for phased or standalone. Legacy complete projects use scope complete and default to complete; they return legacy_card without automatic migration."
+            "description": "仅明确旧typed/正式合同使用。普通提示词设计用target_stages或requested_dimensions，不为阶段设计填写旧scope。"
           },
           "review_mode": {
             "type": "string",
@@ -575,6 +708,150 @@
               }
             },
             "description": "Explicit local design baselines with actual file hashes; standalone only, never a replacement for production parents."
+          },
+          "delivery_contract": {
+            "type": "string",
+            "enum": [
+              "prompt_document",
+              "legacy_typed"
+            ],
+            "description": "Ordinary prompt-first document by default. Explicit formal purpose or typed design input retains its original contract; the executor cannot downgrade it."
+          },
+          "document_path": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Actual caller-authorized persistent Markdown output target, not a read-only source."
+          },
+          "expected_revision": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$",
+            "description": "Actual current revision returned by prompt_document.context/save; protects concurrent updates."
+          },
+          "subject": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "local_key": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "name",
+              "local_key"
+            ],
+            "additionalProperties": false
+          },
+          "target_stages": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "avatar",
+                "expression",
+                "full_body",
+                "costume_design",
+                "execution"
+              ]
+            },
+            "minItems": 1,
+            "uniqueItems": true,
+            "description": "Ordinary prompt documents support four stages; explicit costume_design is reserved for legacy pipeline 2 and retains the typed contract."
+          },
+          "state_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "references": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "role": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "path",
+                "role"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "constraints": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "source_ref": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "text",
+                "source_ref"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "morphology": {
+            "type": "string",
+            "enum": [
+              "human",
+              "humanoid",
+              "nonhuman"
+            ]
+          },
+          "asset_mode": {
+            "type": "string",
+            "enum": [
+              "individual",
+              "speaking_extra",
+              "ensemble"
+            ]
+          },
+          "expression_grid": {
+            "type": "integer",
+            "enum": [
+              9,
+              16
+            ]
+          },
+          "attire_exception": {
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string",
+                "minLength": 1
+              },
+              "basis": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "description",
+              "basis"
+            ],
+            "additionalProperties": false
           }
         },
         "required": [
@@ -590,7 +867,7 @@
           },
           "artifact_path": {
             "type": "string",
-            "description": "Must be design-result.json. Typed CharacterDesignDeliveryV1 JSON plus mechanically rendered design.md; a direction is not a completed stage design."
+            "description": "Main result. Ordinary path is one validated Markdown prompt document; relative to artifact_dir unless exactly bound by actual inputs.document_path. Legacy typed outputs retain their original filenames."
           },
           "summary": {
             "type": "string"
@@ -630,6 +907,7 @@
       "knowledge_refs": [
         "references/director-understanding.md",
         "references/design-detail-standard.md",
+        "references/prompt-document.md",
         "references/specialist-contract.md",
         "references/phased-design.md"
       ],
@@ -837,14 +1115,16 @@
         "references/costume-component-design.md",
         "references/scene-styling-needs.md",
         "references/costume-wearable-zones.md",
-        "references/specialist-contract.md"
+        "references/prompt-document.md",
+        "references/specialist-contract.md",
+        "references/execution-sheet.md"
       ],
       "explicit_only": true
     },
     {
       "id": "character-image-prompt",
       "skill_name": "character-image-prompt",
-      "description": "把具体角色设计保真编译为GPT Image 2.5提示词，默认同源文件与可读文档",
+      "description": "直接设计或保真整理角色提示词，一个方向、四类用途及多状态维护在同一文档",
       "input_schema": {
         "type": "object",
         "properties": {
@@ -881,7 +1161,8 @@
           },
           "scope": {
             "type": "string",
-            "minLength": 1
+            "minLength": 1,
+            "description": "仅明确旧typed/正式合同使用。普通提示词设计用target_stages或requested_dimensions，不为阶段设计填写旧scope。"
           },
           "review_mode": {
             "type": "string",
@@ -1070,10 +1351,153 @@
               }
             },
             "description": "Explicit local design baselines with actual file hashes; standalone only, never a replacement for production parents."
+          },
+          "delivery_contract": {
+            "type": "string",
+            "enum": [
+              "prompt_document",
+              "legacy_typed"
+            ],
+            "description": "Ordinary prompt-first document by default. Explicit formal purpose or typed design input retains its original contract; the executor cannot downgrade it."
+          },
+          "document_path": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Actual caller-authorized persistent Markdown output target, not a read-only source."
+          },
+          "expected_revision": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$",
+            "description": "Actual current revision returned by prompt_document.context/save; protects concurrent updates."
+          },
+          "subject": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "local_key": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "name",
+              "local_key"
+            ],
+            "additionalProperties": false
+          },
+          "target_stages": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "avatar",
+                "expression",
+                "full_body",
+                "costume_design",
+                "execution"
+              ]
+            },
+            "minItems": 1,
+            "uniqueItems": true,
+            "description": "Ordinary prompt documents support four stages; explicit costume_design is reserved for legacy pipeline 2 and retains the typed contract."
+          },
+          "state_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "references": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "role": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "path",
+                "role"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "constraints": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "source_ref": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "text",
+                "source_ref"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "morphology": {
+            "type": "string",
+            "enum": [
+              "human",
+              "humanoid",
+              "nonhuman"
+            ]
+          },
+          "asset_mode": {
+            "type": "string",
+            "enum": [
+              "individual",
+              "speaking_extra",
+              "ensemble"
+            ]
+          },
+          "expression_grid": {
+            "type": "integer",
+            "enum": [
+              9,
+              16
+            ]
+          },
+          "attire_exception": {
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string",
+                "minLength": 1
+              },
+              "basis": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "description",
+              "basis"
+            ],
+            "additionalProperties": false
           }
         },
         "required": [
-          "stage",
           "request"
         ],
         "additionalProperties": false
@@ -1086,7 +1510,7 @@
           },
           "artifact_path": {
             "type": "string",
-            "description": "Main output is prompt-package.json; also declare mechanically exported 提示词.txt."
+            "description": "Main result. Ordinary path is one validated Markdown prompt document; relative to artifact_dir unless exactly bound by actual inputs.document_path. Legacy typed outputs retain their original filenames."
           },
           "summary": {
             "type": "string"
@@ -1124,8 +1548,10 @@
         "network": false
       },
       "knowledge_refs": [
-        "references/prompt-detail-contract.md",
+        "references/prompt-document.md",
         "references/prompting.md",
+        "references/execution-sheet.md",
+        "references/prompt-detail-contract.md",
         "references/phased-design.md"
       ],
       "explicit_only": true,
@@ -1138,7 +1564,7 @@
     {
       "id": "character-image-review",
       "skill_name": "character-image-review",
-      "description": "审查回流图片的剧本事实、身份与版式并产报告",
+      "description": "仅在用户明确要求时审查目标图片的事实、身份、结构与版式",
       "input_schema": {
         "type": "object",
         "properties": {
@@ -1345,6 +1771,7 @@
       },
       "knowledge_refs": [
         "references/review.md",
+        "references/execution-sheet.md",
         "references/avatar-identity-granularity.md",
         "references/scene-styling-needs.md"
       ],
@@ -1353,7 +1780,7 @@
     {
       "id": "character-image-edit",
       "skill_name": "character-image-edit",
-      "description": "针对回图缺陷编写局部修图指令",
+      "description": "仅在用户明确要求时，为指定目标图编写或执行局部修图",
       "input_schema": {
         "type": "object",
         "properties": {
@@ -1553,7 +1980,8 @@
         "network": false
       },
       "knowledge_refs": [
-        "references/editing.md"
+        "references/editing.md",
+        "references/execution-sheet.md"
       ],
       "explicit_only": true
     },
@@ -1762,6 +2190,7 @@
       },
       "knowledge_refs": [
         "references/differentiation-framework.md",
+        "references/prompt-document.md",
         "references/specialist-contract.md"
       ],
       "explicit_only": true
@@ -1966,7 +2395,8 @@
         "skills/character-costume-style-design/SKILL.md",
         "skills/character-costume-cut-design/SKILL.md",
         "skills/character-costume-material-design/SKILL.md",
-        "references/costume-and-morphology.md"
+        "references/costume-and-morphology.md",
+        "references/prompt-document.md"
       ],
       "explicit_only": true
     },
@@ -2163,6 +2593,7 @@
       },
       "knowledge_refs": [
         "references/knowledge/character-world-appearance-design/world-appearance.md",
+        "references/prompt-document.md",
         "references/specialist-contract.md"
       ],
       "explicit_only": true
@@ -2361,6 +2792,7 @@
       "knowledge_refs": [
         "references/knowledge/character-feature-focus/feature-focus.md",
         "references/differentiation-framework.md",
+        "references/prompt-document.md",
         "references/specialist-contract.md"
       ],
       "explicit_only": true
@@ -2560,6 +2992,7 @@
         "references/knowledge/character-hair-design/hair.md",
         "references/avatar-identity-granularity.md",
         "references/scene-styling-needs.md",
+        "references/prompt-document.md",
         "references/specialist-contract.md"
       ],
       "explicit_only": true
@@ -2758,6 +3191,7 @@
       "knowledge_refs": [
         "references/knowledge/character-body-design/body.md",
         "references/knowledge/character-body-design/body-proportion-3d.md",
+        "references/prompt-document.md",
         "references/specialist-contract.md"
       ],
       "explicit_only": true
@@ -2956,6 +3390,7 @@
       "knowledge_refs": [
         "references/knowledge/character-face-design/original-face.md",
         "references/avatar-identity-granularity.md",
+        "references/prompt-document.md",
         "references/specialist-contract.md"
       ],
       "explicit_only": true
@@ -3154,6 +3589,7 @@
       "knowledge_refs": [
         "references/knowledge/character-face-signature-design/avatar-head-ear-neck-16.md",
         "references/costume-component-design.md",
+        "references/prompt-document.md",
         "references/specialist-contract.md"
       ],
       "explicit_only": true
@@ -3352,6 +3788,7 @@
       "knowledge_refs": [
         "references/knowledge/character-face-decoration-design/face-decoration.md",
         "references/scene-styling-needs.md",
+        "references/prompt-document.md",
         "references/specialist-contract.md"
       ],
       "explicit_only": true
@@ -3550,6 +3987,7 @@
       "knowledge_refs": [
         "references/knowledge/character-skin-design/skin.md",
         "references/avatar-identity-granularity.md",
+        "references/prompt-document.md",
         "references/specialist-contract.md"
       ],
       "explicit_only": true
@@ -3747,6 +4185,7 @@
       },
       "knowledge_refs": [
         "references/knowledge/character-costume-style-design/costume-style.md",
+        "references/prompt-document.md",
         "references/specialist-contract.md"
       ],
       "explicit_only": true
@@ -3945,6 +4384,7 @@
       "knowledge_refs": [
         "references/knowledge/character-costume-cut-design/costume-cut.md",
         "references/costume-component-design.md",
+        "references/prompt-document.md",
         "references/specialist-contract.md"
       ],
       "explicit_only": true
@@ -4142,6 +4582,7 @@
       },
       "knowledge_refs": [
         "references/knowledge/character-costume-color-design/costume-color.md",
+        "references/prompt-document.md",
         "references/specialist-contract.md"
       ],
       "explicit_only": true
@@ -4339,6 +4780,7 @@
       },
       "knowledge_refs": [
         "references/knowledge/character-costume-material-design/costume-material.md",
+        "references/prompt-document.md",
         "references/specialist-contract.md"
       ],
       "explicit_only": true
@@ -4537,6 +4979,7 @@
       "knowledge_refs": [
         "references/knowledge/character-costume-accessory-design/costume-accessory.md",
         "references/costume-component-design.md",
+        "references/prompt-document.md",
         "references/specialist-contract.md"
       ],
       "explicit_only": true

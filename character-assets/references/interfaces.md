@@ -1,10 +1,13 @@
 # 设计与生产接口 v0.2.16
 
+适用边界：普通任务按[提示词文档](prompt-document.md)直接交一个整合方向，不前置独立设计稿/typed对象/方法证明。生成前仅轻量词格式检查，生成后直接交用户看；默认不自动审图、局部修补、复核或重跑。下文诊断/审图/编辑仅用户明确要求时执行；正式旧typed/批准字段仅在明确登记/生产时使用，人工确认可走实际人工批准分支，不强制模型审图报告，不伪称通过或用户批准。
+
+
 本页后续为**正式工程与历史兼容合同**，不要求普通独立设计先补全这些记录。当前任务范围、text/files边界、真实专项成果、冻结候选与唯一角色设计文档见[专项交付](specialist-contract.md)，提示词来源与结构保真见[提示词合同](prompt-detail-contract.md)。
 
 当前独立跨维度沿CharacterDesignDeliveryV1／StandaloneCharacterDesignV1，scope:requested与requested_dimensions仅表达创作范围，不是生产scope；正式identity/body/costume与旧complete保持。task-local冻结来源不写active；只有真实采用后按原规则登记。
 
-新显式fidelity_review允许同义合句、保留所有已选入画结构；未启用新分支的旧合同继续原逐cue规则。不要把旧默认identity或十三项生产规划套给用户完整人物首稿，也不倒填旧执行／批准。提示词默认后台JSON＋同源TXT，用户只用机械更新的角色设计文档；明确本次只对话才免文件。
+新显式fidelity_review允许同义合句、保留所有已选入画结构；未启用新分支的旧合同继续原逐cue规则。不要把旧默认identity或十三项生产规划套给用户完整人物首稿，也不倒填旧执行／批准。本节旧typed提示词保留JSON/TXT；普通默认走prompt_document，用户只用当前提示词文档，不前置typed设计或方法证明。
 
 ## 群演单图扩展
 
@@ -65,7 +68,7 @@ V2.5 增加 `stage_receipts`（方向与阶段记录键到 SHA）和十三项 `s
 
 complete 模式填写已批准的 `design_card_sha256`。phased 模式省略该字段，使用 `design_basis:{records:{记录键:sha}}`，严格匹配 [阶段依据表](phased-design.md)：avatar/expression 用 brief+identity；full_body 加 body；costume_design 加当前状态 costume；execution 再加当前状态合成卡。正式依据全部已批准，预览例外仅限头像。
 
-头像预览填 `purpose:preview`、`preview_mode:direction_first|image_first`。direction_first 需要已批 brief、冻结 identity；image_first 仅在明确先图后确认需求时允许未批但冻结的 brief/identity。script-context须ready，visual-bible、cast-plan仍先批准。预览不是正式锚点。`promote-candidate --image-id ID --operator NAME` 在原依据已批、SHA一致且回图pass时同图转正；明确合并确认可用 `--approve-design-basis`。未决项、意外新增细节和不一致须先解决。
+头像预览填 `purpose:preview`、`preview_mode:direction_first|image_first`。direction_first 需要已批 brief、冻结 identity；image_first 仅在明确先图后确认需求时允许未批但冻结的 brief/identity。script-context须ready，visual-bible、cast-plan仍先批准。预览不是正式锚点。`promote-candidate --image-id ID --operator NAME` 在原依据已批、SHA一致且用户人工确认时可沿人工批准分支同图转正，不强制模型review pass；明确合并确认可用 `--approve-design-basis`。未决项、意外新增细节和不一致须先解决。
 
 v2 历史五阶段前三图用 base，后两图用当前状态；v3 前三图也用 base，execution 用当前状态。图片锚点：头像空，九宫格含头像，全身含头像和九宫格，服饰含三张基础图，执行再含本状态服饰图。phased头像1–3条，默认一套推荐；complete沿用2–3条。九宫格 labels 长9且各含中文；16格要求 `grid_explicit_user_override:true` 和 `grid_override_basis`。全身加 `head_visible:true,feet_visible:true`；服饰加资产表一致的 `variant_name`。
 
@@ -97,3 +100,15 @@ v2 历史五阶段前三图用 base，后两图用当前状态；v3 前三图也
 ## v0.2.14 提示词双份交付
 
 每个提示词包交 JSON 与从其中 `prompts[].text` 机械导出的 UTF-8 TXT。Harness 文件名为 `prompt-package.json` 和 `提示词.txt`，两者须声明为 artifacts；JSON 为主记录，TXT 为人读复制版本。正常项目的 `submit --kind prompt-package` 同时导出 `提示词/` 下带资产名称与短 SHA 的 TXT，并返回、保存 `text_path` 和 `text_sha256`。验收检查正文逐字一致，不依赖人工另写 TXT。详见 `prompt-detail-contract.md`。
+
+
+### 人工确认后的正式采用
+
+普通生成后先直接交用户，等待人工意见，不需立即运行批准命令。只有真实用户明确确认了该图，才使用人工批准分支；confirmation-ref必须指向实际用户消息或书面确认，不能自造批准或模型审图结论。
+
+```sh
+python scripts/character_project.py approve-image --project-root PROJECT --image-id IMAGE_ID --operator '用户：实际确认人' --human-reviewed --confirmation-ref '真实用户消息或书面确认定位'
+python scripts/character_project.py promote-candidate --project-root PROJECT --image-id IMAGE_ID --operator '用户：实际确认人' --human-reviewed --confirmation-ref '真实用户消息或书面确认定位'
+```
+
+第二条用于头像preview转正；仅用户同时确认该图及其绑定设计时，才另加--approve-design-basis。两者保留真实来源/版本/依赖核对，只记录人工确认，不创建模型review或虚报verdict/pass。显式模型审图仍是另一个仅按用户请求执行的分支。

@@ -1,121 +1,110 @@
-# 角色资产插件 v0.2.16
+# 角色资产插件 v0.2.17
 
-从剧本、小传或已有角色稿，交一版针对人物的具体设计，再形成可复制提示词；需要正式资产时接入原来的生产阶段。**人只用一份持续更新的角色设计文档，图片单独。** 本版按完整插件发布；安装包、文件哈希和实际验证范围见正式 Release 与 VALIDATION.md，不能把文字能力验证当成图像审美通过。
+**一个整合方向，深度设计直接写进提示词。** 每角色一份持续文档，按需维护头像、表情、全身模卡与多状态执行词。用户直接看词提意见，不再先读长设计报告或管理JSON/收据。保留22项能力、58份锁定知识与已有正式项目兼容。
 
-本版保留22项能力和58份锁定知识快照，重整入口、真实交付、独立候选和用户阅读方式。减的是重复收据、全量加载和无谓等待；人物理解、脸发／身体／衣装的具体结构、世界与人物差异、来源和批准保护继续保留。
+## 怎么用
 
-## 怎么使用
+~~~text
+$character-assets 根据这份小传设计苏老太，给同一方向的四类完整提示词。普通细节你决定，不生图。
 
-主入口 `$character-assets`。直接说明本次要什么、给出材料或绝对路径即可，不必先选内部模式：
+$character-assets 沿用当前提示词，只改后脑发量和后颈长度，脸、分缝、发色和衣装不动。
 
-```text
-$character-assets 根据这份人物小传，先设计一版完整人物形象。
-脸发、体态和衣装都给具体推荐，普通细节由你决定；不建正式工程，不生图。
+$character-assets 在同一文档追加婚礼状态执行词，保持已有身份和体型，不重做其他状态。
+~~~
 
-$character-assets 沿用当前已批准角色，只试改后脑发量和后颈长度。
-脸、分缝和发色不动，先交改稿和候选提示词，暂不采用为正式身份。
+不需要内部模式问卷。完整委托交齐四类；当前只要一阶段/局部则只完成该范围，之后自然追加。成熟稿直接接续，只补真实缺项。普通设计不前置长稿、typed设计、body_form对象、逐专项证明或freeze；具体脸发、五组身体比例、实际剪裁、连接和色材仍直接写在词里，不退成“清秀、干练、真实”。
 
-$character-assets 按这份成熟角色稿给完整提示词，表达压顺但结构别丢。
-更新同一份角色设计文档，后台保留同源文件，不生图。
-```
+默认只给一套整合推荐，不外显A/B/C或大量候选。普通留白主动决定；硬冲突、重大新增剧情设定或改变已批身份才集中问。按问题用相关方法，常规inline，复杂跨域结构/形体工艺或反复失败才会诊，不按专项数量开会。
 
-只讨论某个选择时，直接提出问题；本次明确“只要对话文字”才省文件。普通提示词默认后台生成JSON与机械TXT，并将完整正文更新进同一文档；用户无需操作JSON、版本收据或审计表。
+## 文件与修改
 
-正式全员生产可提供标准剧本、资产表及可选场记，沿已有ID和工程推进。成熟外部设计可直接复核接词；缺哪个结构只补哪个，不为补历史收据重做人设。实际给错工程路径会报具体错误，不静默伪装成独立任务。
+唯一人用文件是角色提示词Markdown；四类是同一方向的不同用途，execution按状态分段。工具自动维护后台current.json、同源TXT、真实来源与变更历史，模型不手填hash/父引用/方法台账。更新按阶段与状态合并，未改词原文保留；先读当前文档，不回翻聊天全文重拼设计。用户明确只对话文字时仍交完整正文。
 
-## 这版怎样做设计
+实际保存接口见[普通文档合同](references/prompt-document.md)。Runtime机械提供真实task-inputs.json，模型只写最小update；旧工程可只读继承，错误路径报错，不静默降级。实际验证状态见[VALIDATION](VALIDATION.md)，接口说明不代表尚未运行的验收已通过。
 
-先实际理解全文或复用来源版本一致的有效上下文；小传／片段如实说明范围。区分自述、他评与行为，从矛盾、关系、弧线和观众信息形成设计意图。局部请求只读相关语境与方法，不重开全员规划。
+## 图片交付与版式
 
-世界通过实际接触、工艺材料、资源、维护和个人选择进入外观，不从职业阶层套脸。专项方法落实到额颧颌颏与五官、前侧后发量、端点明确的比例和体块、主衣衣片／叠压／闭合／固定、色材分区与动作。普通角色也具体；无妆、无饰可以完整设计。重点服装有结构巧思，不能靠多珠宝纹样冒充。
+未授权不生图。获授权时只在生成前做轻量提示词格式检查，使用同一已展示正文，**生成后直接交给用户看**。默认不自动审图、局部修补、复核或重跑；用户人工提意见，明确要求后才审图/编辑。不自称图像通过或替用户正式批准。
 
-常规由总控inline真实执行，复杂冲突才会诊；主控整合一套推荐，核本次硬要求、人物适配、近邻差异、结构与视觉主次。普通细节整稿审阅，重大剧情身份或已批方向变化才集中提出。结构校验不证明美感，没看图不报实图通过。
+人形默认头像3:4、3×3表情、9:16中性全身模卡。执行词先写完整9:16/2×2布局：上约1/3正脸与45°脸，下约2/3左下颈肩以下至鞋、头彻底出画，右下头到鞋完整背面；左下双臂双手和鞋完整，右下不能缩成角落小人。再写当前状态正式衣装/鞋履/妆饰，不能继承模卡背心短裤赤脚。细节见[准确版式](references/execution-sheet.md)。生成文字格式检查不能证明图片实际遵守。
+
+有台词群演与无台词群像每状态单图，不强套前三身份图/服饰圣经；群像按明确人数/槽位，非人按给定形态，不补人类器官。用户明确画幅覆盖按真实请求处理。
+
+
+## 同一条工作链的三种视图
 
 ```mermaid
 flowchart TD
-  U[本次请求与已有材料] --> R{当前成果}
-  R -->|讨论| Q[具体判断与理由]
-  R -->|设计或修改| A[读取或复用人物理解]
-  A --> B[设计意图与世界机制]
-  B --> C[当前相关专项实际设计]
-  C --> D[整合与一次任务复核]
-  D --> H[同一角色设计文档]
-  R -->|成熟稿要词| E[核当前设计与可见结构]
-  D --> E
-  E --> F[保真编译与完整提示词]
-  F --> H
-  H -->|需要正式资产| P[既有生产登记与图片批准链]
+  U[材料与本次要求] --> D[一次理解 单一方向直接设计入词]
+  D --> S[一次保存]
+  S --> H[同一角色提示词文档]
+  S --> B[后台机械侧车]
+  H --> G{已授权生图}
+  G -->|是| I[轻量词格式检查后生成]
+  I --> V[直接交用户看]
+  V --> F[用户反馈]
+  F --> L[只改受影响词]
+  L --> S
+  H -->|明确正式采用| A[人工批准接口]
 ```
-
-## 用户拿到什么
-
-唯一角色设计文档包含当前完整设计、重要取舍、修改结果、当前完整可复制提示词。局部修改合并真实base设计，未改内容仍在文档中；不把文档覆盖成仅剩几句改动。内部JSON／TXT、冻结输入、来源、执行与版本记录保留，但不作为用户需要阅读的一堆交付。
-
-提示词允许同义、合句、去理由和重复，调整强调；当前画幅可见的已选结构全部保留。人物左右、比例、片数、连接、色材和佩戴状态不能静默改。内部源细节映射辅助一次语义复核，不让用户先填表，也不把代码检查说成理解同义。
 
 ```mermaid
 sequenceDiagram
   participant U as 用户
-  participant M as 人物总控
-  participant S as 当前相关方法
-  participant I as 内部工具
-  participant D as 同一角色设计文档
-  U->>M: 材料、本次范围与所需成果
-  M->>M: 理解人物并确定设计意图
-  M->>S: 读取并实际运用必要方法
-  S-->>M: 可画结构与取舍
-  M->>M: 整合、核硬要求与设计主次
-  M->>I: 保存或冻结真实设计与输入
-  I->>D: 机械更新完整设计
-  opt 用户本次还要提示词
-    M->>M: 可见投影、编译、保真核对
-    M->>I: 同源JSON与TXT留内部
-    I->>D: 更新当前完整可复制正文
+  participant M as 角色主控
+  participant T as 保存工具
+  participant D as 同一提示词文档
+  participant I as 图像工具
+  U->>M: 材料与本次范围
+  M->>M: 理解并直接写一个方向的完整词
+  M->>T: 本次update与runtime真实inputs
+  T->>T: 自动维护来源 版本 TXT
+  T->>D: 保存当前词 保留未改条目
+  D-->>U: 一个文档
+  opt 已授权生图
+    M->>I: 轻量格式检查后的同一正文
+    I-->>U: 直接展示生成图
   end
-  D-->>U: 一个文档路径
+  U->>M: 人工意见
+  M->>T: 仅受影响条目的新词
+  T->>D: 更新同一文档
 ```
 
 ```mermaid
 flowchart LR
-  S[真实材料与有效上下文] --> C[当前完整设计]
-  K[按问题选知识方法] --> C
-  C --> V[可见细节投影与保真核对]
-  V --> P[提示词JSON]
-  P --> T[同源TXT 内部]
-  C --> D[唯一角色设计文档]
-  P -->|原样正文| D
-  C --> R[来源版本与实际执行 内部]
-  C -->|正式采用后映射| L[生产记录与合法批准]
-  L --> G[实际图片与审图]
-  G --> O[图片与正式资产包]
+  R[实际材料与已选约束] --> P[当前单一方向完整词]
+  K[按问题采用的方法] --> P
+  O[同一文档当前词] -->|局部继承| P
+  P --> S[一次保存]
+  S --> H[人用文档 四类与多状态]
+  S --> C[机械侧车 当前JSON TXT 来源版本 历史]
+  H -->|已授权的同一正文| I[生成图直接给用户]
+  I --> F[人工反馈]
+  F -->|只改相关词| P
+  H -->|明确正式采用| A[实际人工批准与旧工程接口]
 ```
 
-## 正式生产和旧批准
+## 正式生产与旧工程
 
-新pipeline3常规人物仍为头像3:4、表情九宫格、全身9:16中性模卡、每状态一张9:16人形四格执行图；服饰圣经和逐状态文字设计先于执行图。执行图上正脸／45°，下无头放大正面服装／头鞋完整背面。正式服饰不继承模卡背心短裤赤脚。
+明确正式生产、旧scope或typed来源仍走原合同，保存真实记录和用户确认；普通候选词无图也可完成，不等待正式上游锚图。旧complete、各pipeline/schema与批准可读，不自动迁移、重建或补历史证明；试改不写active、不使旧图批准提前失效。若明确旧登记操作缺特定材料，说明具体缺项，不自行启动审核/重跑循环来补齐。
 
-有台词群演每状态单张执行图，人形四格、非人按获批布局；无台词群像每状态一张完整全身同画布图，明确人数照数，横向比例按辨识选。群演不强套前三身份图／圣经；非人不补造人类器官。
+人物推荐、程序通过和明确委托的审图结论均不是用户批准。最终正式资产表仍按真实角色/状态与单元格内图片规则交付。
 
-已批角色试改只写task-local草稿，父约束只读；确认采用前不覆盖active或使生产图失效。采用后按原登记批准和实际影响复核相关图片。旧complete、pipeline和schema按原合同读，不自动迁移、补历史收据或整库重画。后台继续ephemeral隔离，不向用户最近聊天注入内部任务。
 
-插件先写提示词，不自行生图；明确授权且会话工具可用时，主控可用同一展示正文生成候选。所有图实际打开审查，用户确认后才正式采用；预览不自动成下游锚点。最终正式资产表仍按单元格内图片规则制作。
+### 人工确认后的正式采用
 
-## CLI与资料
-
-普通使用不需要手动运行以下命令。内部维护可用真实入口：
+普通生成后先直接交用户，等待人工意见，不需立即运行批准命令。只有真实用户明确确认了该图，才使用人工批准分支；confirmation-ref必须指向实际用户消息或书面确认，不能自造批准或模型审图结论。
 
 ```sh
-python scripts/character_project.py freeze-design --file /internal/design-result.json --inputs /internal/inputs.json --output /internal/frozen
-python scripts/verify_design_delivery.py document --design /internal/design-result.json --prompt /internal/prompt-package.json --output /delivery/角色设计.md
-python scripts/character_project.py plan --project-root /work/role-project --character-id CHR-001
+python scripts/character_project.py approve-image --project-root PROJECT --image-id IMAGE_ID --operator '用户：实际确认人' --human-reviewed --confirmation-ref '真实用户消息或书面确认定位'
+python scripts/character_project.py promote-candidate --project-root PROJECT --image-id IMAGE_ID --operator '用户：实际确认人' --human-reviewed --confirmation-ref '真实用户消息或书面确认定位'
 ```
 
-局部稿更新同一文档时，document使用可重复的 `--base-design` 读取真实旧完整设计或stage记录；不是重新随机补出未改内容。冻结候选不写active ledger，source与真实输入共同校验。正式映射沿现有submit/approve，不新增批准系统。
+第二条用于头像preview转正；仅用户同时确认该图及其绑定设计时，才另加--approve-design-basis。两者保留真实来源/版本/依赖核对，只记录人工确认，不创建模型review或虚报verdict/pass。显式模型审图仍是另一个仅按用户请求执行的分支。
 
-- [本次路由](references/routing-and-integration.md)、[人物方法](references/director-understanding.md)、[具体设计](references/design-detail-standard.md)
-- [专项与冻结交付](references/specialist-contract.md)、[提示词保真](references/prompt-detail-contract.md)
-- [正式工作流](references/workflow.md)、[阶段批准](references/phased-design.md)、[生产接口](references/interfaces.md)
-- [短知识索引](knowledge/index.md)、[服饰方法](references/costume-designer.md)、[群演单图](references/group-ensemble.md)
-- [实际审图](references/review.md)、[局部修图](references/editing.md)、[最终资产表](references/final-asset-table.md)
+- [普通提示词文档](references/prompt-document.md)、[请求路由](references/routing-and-integration.md)、[人物方法](references/director-understanding.md)
+- [具体设计](references/design-detail-standard.md)、[知识索引](knowledge/index.md)、[服饰方法](references/costume-designer.md)
+- [明确请求才审图](references/review.md)、[明确请求才修图](references/editing.md)、[群演分支](references/group-ensemble.md)
+- [正式旧工作流](references/workflow.md)、[阶段批准](references/phased-design.md)、[旧专项合同](references/specialist-contract.md)、[接口](references/interfaces.md)
 
-安装保留整个插件目录，使用Python3.12+；依赖与诊断按RUNTIME及bootstrap配置。Windows项目文件锁与调度恢复探活已改用平台标准接口，并通过模拟Windows API与临时文件回归；尚未在Windows真机验收，不宣称已完成原生Windows端到端验证。知识快照按字节哈希校验。原始剧本、课程ZIP和用户图片不在插件内；知识只打包独立规则与来源收据，许可见[第三方说明](THIRD_PARTY_NOTICES.md)。
+安装保留完整插件，Python3.12+，依赖与启动见RUNTIME.md。58知识快照与来源许可保留，原始剧本、课程ZIP及用户图片不随包发布。安装包哈希和实际检查以发行manifest/验证记录为准，不预写发布成功。

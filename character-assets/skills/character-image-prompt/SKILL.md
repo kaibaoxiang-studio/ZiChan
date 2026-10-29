@@ -1,20 +1,24 @@
 ---
 name: character-image-prompt
-description: "把具体角色设计保真编译为GPT Image 2.5提示词，默认同源文件与可读文档"
+description: "直接设计或保真整理角色提示词，一个方向、四类用途及多状态维护在同一文档"
 ---
 
 # 角色图像提示词
 
-将当前具体设计编译成当前画幅可用的完整提示词，不临时发明脸、衣片或妆饰。先核成熟度：有可画结构就接续，缺哪处只回补哪处；candidate 仅改变批准状态，不免设计。没有工程可接真实冻结独立 delivery；错误工程不能自动降级。接口与真实命令见[提示词合同](../../references/prompt-detail-contract.md)。
+直接在提示词里落实一个整合方向；成熟稿复核接续，缺哪处只设计哪处，不因缺typed设计、body_form、专项收据或冻结而重做。深度设计与写词同轮完成，按[普通文档合同](../../references/prompt-document.md)保存，不让用户选内部模式或填字段。
 
-先读[出图规则](../../references/prompting.md)与本次阶段相关规则。投影当前可见细节，按视觉主次整理为无部位标题的自然正文。允许同义、合句、去理由与重复；已选且入画的骨点、左右、比例、片数、叠压连接、色材分区、佩戴与状态不能静默丢改。主次只改排序和强调，不授权删小件；不入画内容留在设计。完成源细节到正文的语义核对；确定性检查不能冒充审美或看图。
+读[出图规则](../../references/prompting.md)与当前阶段规则，形成可独立复制的自然正文。所选且入画的骨点、左右、比例、衣片数量、叠压连接、色材、佩戴及状态不能静默删改；主次调整排序和强调。完整身体五组比例与实际剪裁直接入词，不以关键词覆盖证明质量。理由、方法名、弃选与旧值不入正文。
 
-默认后台交 `prompt-package.json`＋机械导出的 `提示词.txt`，TXT逐字等于 `prompts[].text`；同时把完整可复制正文机械合入同一份角色设计文档。用户只需该文档，版本和审计后台保留。只有本次明确只对话文字，才用 `delivery_mode:text` 免文件，仍交完整正文；不能模型自行把提示词请求改成讨论。
+每角色一份文档含头像、表情、全身模卡与按状态分段的execution。只完成当前委托，分阶段追加，局部只更新受影响词，其余原文保留。后台JSON/TXT、来源与版本由工具派生，模型不手造台账。仅用户明确只对话时免文件，仍交完整词。
 
-正式生产沿已批准设计、状态与图片锚点；task-local试改以冻结稿和只读正式父约束出候选，采用前不污染active。保留3:4头像、9:16全身、九宫格、模卡与四格／群像／非人对应布局，详见[阶段合同](../../references/phased-design.md)。本专项不调用生图；需要预览时由主控使用同一已展示正文，回图后实际审查。
+普通候选词无图可完成，不等正式图片批准。参考图存在才声明身份/体型/衣装/风格职责，否则词自足，不编已批锚点。执行图先读[准确版式](../../references/execution-sheet.md)，先写完整布局与视觉主次再衣装细节：人形9:16、2×2，上约1/3面孔、下约2/3服饰；左上正脸、右上约45°、左下颈肩以下至鞋且头彻底出画、右下完整头至鞋背面。单独全身必须有头。群像与非人走适用布局。
+
+正式或旧typed提示词包继续[保真合同](../../references/prompt-detail-contract.md)和[阶段批准](../../references/phased-design.md)，不被普通路径静默替换。已批试改只读旧约束，不污染active。本专项不生图；主控获授权用同一正文生成，生成前仅轻量格式检查，生成后直接交用户。默认不自动审图、修补、复核或重跑；明确请求才审图/编辑，不自称通过。
 
 ## Packaged references
 
-- [references/prompt-detail-contract.md](../../references/prompt-detail-contract.md)
+- [references/prompt-document.md](../../references/prompt-document.md)
 - [references/prompting.md](../../references/prompting.md)
+- [references/execution-sheet.md](../../references/execution-sheet.md)
+- [references/prompt-detail-contract.md](../../references/prompt-detail-contract.md)
 - [references/phased-design.md](../../references/phased-design.md)

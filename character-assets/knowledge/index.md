@@ -20,8 +20,8 @@
 | 衣装色块与材料行为 | 配色／材质专项 | `costume-color`／`costume-material`；保持当前已选物件，不因词表重配全身 |
 | 衣身、四肢独立穿戴与道具接口 | `$character-costume-accessory-design` | `costume-accessory`；22手腕、23腰、24臂、25背、28腿按部位取 |
 | 单图群演、无台词群像或非人 | `$character-ensemble-designer`、[群演合同](../references/group-ensemble.md) | 按明确人数与已选形态，不全套人形四图 |
-| 设计到提示词、参考职责与同源交付 | [提示词保真](../references/prompt-detail-contract.md)、[出图规则](../references/prompting.md) | `character-image-prompt/hedgehog-general-image-skill`，媒介转换明确获选才取`hedgehog-2d3d` |
-| 实际回图审查／局部修图 | [审图](../references/review.md)／[修图](../references/editing.md) | 当前能力的feature-focus／anti-stereotype／hedgehog快照按具体缺陷取 |
+| 单方向提示词设计、参考职责与同源交付 | [持续提示词文档](../references/prompt-document.md)、[出图规则](../references/prompting.md) | `character-image-prompt/hedgehog-general-image-skill`；旧正式合同才取提示词保真；媒介转换明确获选才取`hedgehog-2d3d` |
+| 用户明确要求的审图／局部修图 | [审图](../references/review.md)／[修图](../references/editing.md) | 默认生成后直接展示，不自动审图或重跑；明确反馈后按具体缺陷取方法 |
 | 正式项目、依赖、批准与最终资产表 | [工作流](../references/workflow.md)、[接口](../references/interfaces.md) | [分阶段](../references/phased-design.md)、[最终资产表](../references/final-asset-table.md)仅进入生产时加载 |
 
-每个专项SKILL列出完整快照链接。先用具体方法产生人物化结果，再留必要“问题→方法→结果→采用位置”记录；不以读取路径数量证明设计完成。来源与哈希见知识锁与sources.lock，原始集中源库不随运行重新采集。[苏老太案例](../references/prompt-density-example-su.md)示范完整性与状态切换，不是全员密度或造型下限。
+每个专项SKILL列出完整快照链接。普通路径将采用的具体设计直接写进当前完整提示词；不另写逐专项方法收据、独立设计长稿或冻结证明。真实会诊或明确旧正式合同才保留相应返回物；不以读取路径数量证明设计完成。来源与哈希由程序维护，原始集中源库不随运行重新采集。[苏老太案例](../references/prompt-density-example-su.md)示范完整性与状态切换，不是全员密度或造型下限。

@@ -439,12 +439,11 @@ def package(cp, args, root, state):
             cp._record_key("prompt-package", character, variant, "execution")]
     records = {k: cp._checked_record(root, state, k) for k in keys}
     image = cp._checked_image(root, state, "execution", character, variant)
-    review = state["reviews"][image["id"]]
     out = Path(args.output).expanduser().resolve()
     cp.ensure(not out.exists(), f"Output already exists: {out}")
     out.mkdir(parents=True)
     copied = []
-    for item in [*records.values(), image, review]:
+    for item in [*records.values(), *cp.image_delivery_files(state, image)]:
         source = root / item["path"]
         target = out / item["path"]
         target.parent.mkdir(parents=True, exist_ok=True)

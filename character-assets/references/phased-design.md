@@ -1,6 +1,9 @@
 # 正式项目：分阶段、预览与同图转正
 
-本页只管理正式生产阶段。独立首稿、跨维度人物及已批局部试改先走[本次路由](routing-and-integration.md)和[ledger外冻结交付](specialist-contract.md)。试改确认前不submit覆盖active，也不使生产图提前失效；采用后按下述影响规则复核。普通首稿不被以下工程前置阻塞。
+图片默认生成后直接交用户人工看，不自动审图/修补/复核/重跑；本页旧审查报告路径仅明确要求时使用。正式批准由用户人工确认，可走真实人工批准分支，保留图像/词/依据哈希和依赖，不先强制模型审图报告，不伪造review pass。人工确认命令见[接口中的人工采用](interfaces.md)，使用--human-reviewed与实际--confirmation-ref，不伪造模型review。
+
+
+本页只管理明确正式生产及旧typed阶段，不是普通候选词前置。首稿、跨维度人物与局部试改先走[提示词文档](prompt-document.md)，可只读旧工程，不先冻结typed设计或登记本页对象。携project_root本身不等于正式生产。试改确认前不submit覆盖active，也不使生产图提前失效；采用后按下述影响规则复核。普通首稿不被以下工程前置阻塞。
 
 ## pipeline_version 3 优先规则
 
@@ -72,17 +75,17 @@ phased 的 `CharacterPromptPackageV1` 使用 `design_basis:{records:{记录键:s
 
 预览与正式身份设计使用相同的专项深化和可追溯颗粒度；只允许上述批准时点差异。不因“候选”“文字版”“批量先铺一轮”而跳过专项或把方向摘要拼为短词。冻结草案与已批准草案均须能回答具体设计来自哪项实际成果；模板只负责序列化与导出。
 
-preview 只用于看方向和首稿，不是正式身份锚点，不能推进九宫格、打包或用回图意外细节悄悄改卡。图片仍需导入并实际审查。希望采用首图时：
+preview 只用于看方向和首稿，不是正式身份锚点，不能推进九宫格、打包或用回图意外细节悄悄改卡。图片生成后直接展示；明确要求正式登记时导入，人工确认可直接采用，不默认启动模型审查。希望采用首图时：
 
 1. 对照该图冻结的 brief 和 identity 审阅方向、人物细节与普通标记，清空 unresolved；如修改了快照内容，原 SHA 不再匹配，不能直接转正原图。
-2. 图像审查必须 `pass`，图文件、提示词及设计依据 SHA 保持不变。
+2. 采用人工确认分支时不要求模型review pass；采用显式模型审查分支时其结果须真实。两分支均保持图文件、提示词及依据SHA不变。
 3. 用户确认设计和该图后，执行 `promote-candidate --image-id ID --operator OPERATOR`；原依据须先批准。若用户一次明确确认同一份方向/身份和该图，可加 `--approve-design-basis`，显式批准同 SHA 依据并转正同一图片。
 
 ```sh
-python scripts/character_project.py promote-candidate --project-root /work/role-project --image-id avatar-HASH --operator OPERATOR --approve-design-basis
+python scripts/character_project.py promote-candidate --project-root /work/role-project --image-id avatar-HASH --operator OPERATOR --human-reviewed --confirmation-ref '实际用户确认定位' --approve-design-basis
 ```
 
-这是有明确确认与哈希约束的同图转正，不要求重新生图，也不自动接受未审的其他候选。review 不通过、缺审批、记录或图像变更、未决项未清空时不得转正。需要修改设计时保留旧预览，提交新版本并生成/审查相符图。
+这是有明确确认与哈希约束的同图转正，不要求重新生图，也不自动接受未审的其他候选。缺真实人工确认、依据/图像变更或未决硬冲突时不得转正；显式使用模型审查分支时保留其实际结论，不能伪造pass。需要修改设计时保留旧预览，提交新版本；生成图直接交用户，审图/修改/重跑仅按明确请求执行。
 
 ## 5. 后续深化、合成与兼容
 

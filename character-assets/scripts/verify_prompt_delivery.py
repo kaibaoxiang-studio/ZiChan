@@ -306,6 +306,9 @@ def validate(package_path, inputs):
         card_record = cp._checked_record(root, state, cp._record_key('design-card', character, variant))
         cp.ensure(content['design_card_sha256'] == card_record['sha256'], 'Prompt refers to another design card')
         card = cp.read_json(root / card_record['path'])
+    # This entry point verifies a newly delivered/generation prompt. Ordinary
+    # historical approved-record reads retain their original contract.
+    cp.validate_new_execution_layout(content, card, asset_mode, inputs)
     anchors = {}
     if asset_mode == 'individual':
         for prior in cp.image_predecessors(state, stage):

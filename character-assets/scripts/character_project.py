@@ -748,15 +748,18 @@ def _checked_image(root, state, stage, character_id, variant_id):
     image = _approved_image(state, stage, character_id, variant_id)
     ensure(digest(root / image["path"]) == image["sha256"],
            f"Approved image contents changed: {image['id']}")
-    review = state["reviews"].get(image["id"])
-    ensure(review and digest(read_json(root / review["path"])) == review["sha256"],
-           f"Review missing or changed: {image['id']}")
-    ensure(image["approval"].get("review_sha256") == review["sha256"],
-           f"Image approval refers to another review: {image['id']}")
+    if image['approval'].get('method') == 'human_confirmation':
+        _checked_human_image_approval(root, state, image)
+    else:
+        review = state["reviews"].get(image["id"])
+        ensure(review and digest(read_json(root / review["path"])) == review["sha256"],
+               f"Review missing or changed: {image['id']}")
+        ensure(image["approval"].get("review_sha256") == review["sha256"],
+               f"Image approval refers to another review: {image['id']}")
+        ensure(read_json(root / review["path"]).get("verdict") == "pass",
+               f"Approved image review does not pass: {image['id']}")
     ensure(image["approval"].get("image_sha256") == image["sha256"],
            f"Image approval refers to another image version: {image['id']}")
-    ensure(read_json(root / review["path"]).get("verdict") == "pass",
-           f"Approved image review does not pass: {image['id']}")
     prompt = _checked_record(root, state, _record_key(
         "prompt-package", character_id, variant_id, stage))
     ensure(image["prompt_sha256"] == prompt["sha256"],
@@ -1451,6 +1454,26 @@ def cmd_freeze_design(args):
             "approved": False, "next_action": "compile_candidate_prompt"}
 
 
+def validate_new_execution_layout(content, card, asset_mode="individual", inputs=None):
+    """Check new human execution prompt text; never re-audit approved pictures.
+
+    Historical record reads do not call this helper. It catches the omitted
+    geometry that produced a half-height face row and a cropped clothing panel.
+    """
+    if (content.get("stage") != "execution" or asset_mode == "ensemble" or
+            card.get("morphology") not in {"human", "humanoid"}):
+        return
+    from prompt_layout import validate_package
+    actual = dict(inputs or {})
+    # The legacy submit command already validates this explicit override and its
+    # basis. Runtime callers supply their real task canvas instead.
+    if inputs is None and content.get("aspect_ratio_explicit_user_override") is True:
+        require_text(content, "aspect_ratio_basis")
+        actual["aspect_ratio"] = content.get("aspect_ratio")
+    errors = validate_package(content, actual, card["morphology"], asset_mode)
+    ensure(not errors, "; ".join(errors))
+
+
 def cmd_submit(args):
     with locked_project(args.project_root) as (root, state):
         ensure(not state["pending_impact"], "Resolve upstream impact before new design decisions")
@@ -1534,6 +1557,7 @@ def cmd_submit(args):
                     _record_key("design-card", character_id, variant_id)]["path"])
             if asset_mode not in {"ensemble", "speaking_extra"}:
                 validate_model_card_attire(content, card)
+            validate_new_execution_layout(content, card, asset_mode)
             if (asset_mode == "individual" and phased.enabled(state) and
                     state.get("pipeline_version", 1) >= 3 and card.get("morphology") in {"human", "humanoid"} and
                     args.stage in {"avatar", "execution"}):
@@ -1727,7 +1751,126 @@ def cmd_submit_review(args):
                 "review_sha256": review_sha}
 
 
+def _human_image_basis(root, state, image, approve_design_basis=False, operator=None):
+    """Check real bytes and production dependencies, without a visual verdict."""
+    root = Path(root).resolve()
+    sources = {}
+    for kind, source in state['inputs'].items():
+        path = (root / source['path']).resolve()
+        ensure(path.is_relative_to(root) and path.is_file() and digest(path) == source['sha256'],
+               f'Imported {kind} source changed')
+        sources[kind] = source['sha256']
+    image_path = (root / image['path']).resolve()
+    ensure(image_path.is_relative_to(root) and image_path.is_file() and digest(image_path) == image['sha256'],
+           'Imported image contents changed')
+    key = _record_key('prompt-package', image['character_id'], image['variant_id'], image['stage'])
+    prompt = _checked_record(root, state, key)
+    ensure(prompt['sha256'] == image['prompt_sha256'], 'Image prompt version changed')
+    package = read_json(root / prompt['path'])
+    asset_mode = ensemble.mode(_runtime(), root, state, image['character_id'])
+    if phased.enabled(state):
+        if asset_mode in {'ensemble', 'speaking_extra'}:
+            ensure(not approve_design_basis, 'Extra designs must be explicitly approved through their design record')
+            ensemble.resolve(_runtime(), root, state, package, image['character_id'], image['variant_id'])
+        else:
+            if approve_design_basis:
+                ensure(image.get('purpose') == 'preview' and image['stage'] == 'avatar',
+                       'Combined design adoption applies only to an avatar preview')
+                phased.resolve_basis(_runtime(), root, state, package, image['character_id'],
+                                     image['variant_id'], image['stage'])
+                for parent in phased.basis_keys(image['character_id'], image['variant_id'], 'avatar'):
+                    record = phased.draft(_runtime(), root, state, parent)
+                    ensure(record['sha256'] == package['design_basis']['records'][parent],
+                           'Cannot adopt a different preview design version')
+                    if not record.get('approval'):
+                        kind = 'design-brief' if parent.startswith('design-brief:') else 'stage-design'
+                        phased.approve(_runtime(), SimpleNamespace(kind=kind, character_id=image['character_id'],
+                            variant_id='base', scope='identity' if kind == 'stage-design' else None,
+                            operator=operator), root, state)
+            phased.resolve_basis(_runtime(), root, state, package, image['character_id'],
+                                 image['variant_id'], image['stage'], force_approved=True)
+        design_basis = package['design_basis']['records']
+    else:
+        ensure(not approve_design_basis, 'Combined design adoption requires a phased avatar preview')
+        card_key = _record_key('design-card', image['character_id'], image['variant_id'])
+        card = _checked_record(root, state, card_key)
+        ensure(package.get('design_card_sha256') == card['sha256'], 'Image design-card version changed')
+        design_basis = {card_key: card['sha256']}
+    anchors = {}
+    for stage in (() if asset_mode in {'ensemble', 'speaking_extra'} else image_predecessors(state, image['stage'])):
+        variant = 'base' if state.get('pipeline_version', 1) >= 2 and stage in IDENTITY_STAGES else image['variant_id']
+        anchors[stage] = _checked_image(root, state, stage, image['character_id'], variant)['sha256']
+    ensure(package.get('anchor_images') == anchors, 'Image upstream anchor versions changed')
+    return {'prompt_sha256': prompt['sha256'], 'source_sha256': sources,
+            'design_basis': design_basis, 'anchor_images': anchors}
+
+
+def _checked_human_image_approval(root, state, image):
+    confirmation = image.get('approval') or {}
+    ensure(confirmation.get('method') == 'human_confirmation' and confirmation.get('human_reviewed') is True,
+           'Image needs an explicit human confirmation')
+    require_text(confirmation, 'operator')
+    require_text(confirmation, 'confirmation_ref')
+    ensure(confirmation.get('image_sha256') == image['sha256'], 'Human confirmation image version changed')
+    basis = _human_image_basis(root, state, image)
+    ensure(all(confirmation.get(key) == value for key, value in basis.items()),
+           'Human confirmation source/prompt/design/anchor versions changed')
+
+
+def image_delivery_files(state, image):
+    """A human confirmation is inline; it must not create a fake review report."""
+    if (image.get('approval') or {}).get('method') == 'human_confirmation':
+        return (image,)
+    return (image, state['reviews'][image['id']])
+
+
+def cmd_human_image_approval(args, promote=False):
+    """Use only after the human explicitly confirms this exact image/version."""
+    ensure(getattr(args, 'human_reviewed', False) is True, 'Explicit --human-reviewed is required')
+    require_text({'operator': args.operator}, 'operator')
+    require_text({'confirmation_ref': getattr(args, 'confirmation_ref', None)}, 'confirmation_ref')
+    with locked_project(args.project_root) as (root, state):
+        ensure(not state['pending_impact'], 'Unresolved upstream impact')
+        image = _image(state, args.image_id)
+        if promote:
+            ensure(phased.enabled(state) and image.get('purpose') == 'preview' and image['stage'] == 'avatar',
+                   'Only a current phased avatar preview can be promoted')
+        else:
+            ensure(image.get('purpose', 'production') != 'preview', 'Use promote-candidate for a preview')
+        basis = _human_image_basis(root, state, image,
+            approve_design_basis=bool(getattr(args, 'approve_design_basis', False)), operator=args.operator)
+        previous = [x for x in state['images'] if x is not image and x['stage'] == image['stage']
+                    and x['character_id'] == image['character_id'] and x['variant_id'] == image['variant_id']
+                    and x.get('approval')]
+        if previous:
+            modern = state.get('pipeline_version', 1) >= 2
+            if modern and image['stage'] in IDENTITY_STAGES:
+                following = {'avatar': 'expression', 'expression': 'full_body',
+                             'full_body': 'execution' if state.get('pipeline_version', 1) >= 3 else 'costume_design'}[image['stage']]
+                _invalidate(state, image['character_id'], None, following)
+            elif image['stage'] == 'avatar':
+                _invalidate(state, image['character_id'], image['variant_id'], 'expression')
+                _invalidate(state, image['character_id'], image['variant_id'], 'full_body')
+            elif image['stage'] != 'execution':
+                _invalidate(state, image['character_id'], image['variant_id'], 'execution')
+            for old in previous:
+                old['approval'] = None
+        confirmation = {'method': 'human_confirmation', 'human_reviewed': True,
+                        'confirmation_ref': args.confirmation_ref, 'operator': args.operator,
+                        'at': now(), 'image_sha256': image['sha256'], **basis}
+        image['approval'] = confirmation
+        if promote:
+            image['purpose'] = 'production'
+            image['promotion'] = copy.deepcopy(confirmation)
+        state['decisions'].append({'kind': 'promote-candidate' if promote else 'approve-image',
+                                   'image_id': image['id'], **confirmation})
+        return {'image_id': image['id'], 'approved': True, 'approval_method': 'human_confirmation',
+                'promoted': promote, 'automatic_visual_verdict': False, 'review_report_created': False}
+
+
 def cmd_approve_image(args):
+    if getattr(args, 'human_reviewed', False):
+        return cmd_human_image_approval(args)
     with locked_project(args.project_root) as (root, state):
         ensure(not state["pending_impact"], "Unresolved upstream impact")
         image = _image(state, args.image_id)
@@ -1877,8 +2020,7 @@ def cmd_package(args):
         if read_json(source).get("schema_version") == "CharacterPromptPackageV1":
             copied.append(copy_prompt_text_delivery(root, out, item))
     for image in images:
-        review = state["reviews"][image["id"]]
-        for item in (image, review):
+        for item in image_delivery_files(state, image):
             source = root / item["path"]
             target = out / item["path"]
             target.parent.mkdir(parents=True, exist_ok=True)
@@ -2024,6 +2166,8 @@ def build_parser():
     promote.add_argument("--image-id", required=True)
     promote.add_argument("--operator", required=True)
     promote.add_argument("--approve-design-basis", action="store_true", help="Explicitly approve the exact bound brief and identity snapshot")
+    promote.add_argument('--human-reviewed', action='store_true', help='Use only after the human explicitly confirms the exact candidate; no model review is fabricated')
+    promote.add_argument('--confirmation-ref', help='Actual user message or written confirmation reference; required with --human-reviewed')
     reference = sub.add_parser("import-reference")
     reference.add_argument("--project-root", required=True)
     reference.add_argument("--path", required=True)
@@ -2044,6 +2188,8 @@ def build_parser():
     approve_image.add_argument("--project-root", required=True)
     approve_image.add_argument("--image-id", required=True)
     approve_image.add_argument("--operator", required=True)
+    approve_image.add_argument('--human-reviewed', action='store_true', help='Use only after explicit human image confirmation, without a model review report')
+    approve_image.add_argument('--confirmation-ref', help='Actual user message or written confirmation reference; required with --human-reviewed')
     refresh = sub.add_parser("refresh")
     refresh.add_argument("--project-root", required=True)
     refresh.add_argument("--screenplay")
@@ -2068,7 +2214,8 @@ def main():
                "plan": cmd_plan, "freeze-design": cmd_freeze_design, "submit": cmd_submit,
                "context-units": lambda args: phased.context_units(_runtime(), args),
                "compile-design-card": lambda args: phased.compile_card(_runtime(), args),
-               "promote-candidate": lambda args: phased.promote(_runtime(), args),
+               "promote-candidate": lambda args: cmd_human_image_approval(args, promote=True)
+                   if getattr(args, 'human_reviewed', False) else phased.promote(_runtime(), args),
                "approve-record": cmd_approve_record, "import-reference": cmd_import_reference,
                "import-image": cmd_import_image, "submit-review": cmd_submit_review,
                "approve-image": cmd_approve_image, "refresh": cmd_refresh,

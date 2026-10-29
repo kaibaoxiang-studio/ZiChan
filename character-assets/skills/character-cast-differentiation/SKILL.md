@@ -9,9 +9,12 @@ description: "群像差异化总控：比较组、五轴矩阵与回图防撞型
 
 保留世界圈层共性，给具体改动与保留建议，避免全员模板脸或只换色；不能为差异强造疤痕、怪发或极端体型。控制每人主锚点和安静区，普通相貌也完整可画。
 
-区分文本判断和实图证据；需要视觉结论就实际打开图片并排，未见侧背写未验证。复核结果合入同一角色设计文档，正式工程不自动改已批卡；执行证据见[专项交付](../../references/specialist-contract.md)。
+区分文本判断和实图证据；需要视觉结论就实际打开图片并排，未见侧背写未验证。复核结果合入同一角色提示词文档，正式工程不自动改已批卡；普通交付见[普通文档](../../references/prompt-document.md)。
+
+普通成果直接写本次完整提示词并更新同一文档，默认一个整合方向；局部只改受影响结构，不重设计未改域。不前置typed设计、body_form、方法/知识SHA、逐field成果证明或freeze；实际具体结构仍须完成。解释和弃选不塞词。明确正式或旧typed调用才按[旧专项合同](../../references/specialist-contract.md)封装。
 
 ## Packaged references
 
 - [references/differentiation-framework.md](../../references/differentiation-framework.md)
+- [references/prompt-document.md](../../references/prompt-document.md)
 - [references/specialist-contract.md](../../references/specialist-contract.md)

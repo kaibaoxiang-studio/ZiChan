@@ -11,7 +11,7 @@ description: "从人物、世界与动作设计衣装；独立单状态或正式
 
 本状态先判妆、发、头耳颈、主衣、其他穿戴的可见需求，必要时读[状态方法](../../references/scene-styling-needs.md)与[部位归属](../../references/costume-wearable-zones.md)。仪式检查准确禁令、旧物取下和时点，无妆无饰也可完整设计；不设装饰候选数或加物件配额。同一物件唯一主责，状态妆不换脸。
 
-独立或局部请求直接交本次完整推荐，不强建圣经／状态矩阵／生产JSON；成熟设计能接候选提示词。正式常规人物服饰阶段仍建立 CostumeStyleBibleV1，逐状态 CharacterStageDesignV1.2 与实际专项成果；群演按群演单图分支。所有用户可读内容维护在同一角色设计文档，后台按[专项合同](../../references/specialist-contract.md)保留真实依据。新项目不额外制作横版服饰图；正式执行图沿9:16四格与既有批准链。
+普通衣装设计直接写入本状态完整执行提示词，一个整合方向；按[文档合同](../../references/prompt-document.md)在同一文档追加/局部更新，不前置长设计稿、圣经、状态矩阵、typed JSON、方法成果证明或freeze。具体款式、剪裁、色材仍实际设计；解释、弃选不入词。只有明确正式或旧typed服饰阶段才建立CostumeStyleBibleV1及逐状态CharacterStageDesignV1.2，沿[旧专项合同](../../references/specialist-contract.md)；群演走单图。执行词先写[准确四格](../../references/execution-sheet.md)，再写衣装，不另做横版服饰图。
 
 ## Packaged references
 
@@ -20,4 +20,6 @@ description: "从人物、世界与动作设计衣装；独立单状态或正式
 - [references/costume-component-design.md](../../references/costume-component-design.md)
 - [references/scene-styling-needs.md](../../references/scene-styling-needs.md)
 - [references/costume-wearable-zones.md](../../references/costume-wearable-zones.md)
+- [references/prompt-document.md](../../references/prompt-document.md)
 - [references/specialist-contract.md](../../references/specialist-contract.md)
+- [references/execution-sheet.md](../../references/execution-sheet.md)
