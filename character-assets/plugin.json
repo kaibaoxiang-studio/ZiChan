@@ -1,15 +1,15 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "character-assets",
-  "version": "0.2.17",
-  "description": "基于人物理解形成一个设计方向，将具体设计直接写入同一文档的四类提示词，按用户反馈局部更新",
+  "version": "0.2.20",
+  "description": "人物总控自主设计，服饰参考转译与适度创新，多族裔角色明确表达；完整提示词维护同一文档，支持已有资产嵌图汇总",
   "author": {
     "name": "开宝箱工作室"
   },
   "interface": {
     "displayName": "角色资产插件",
-    "shortDescription": "单方向设计入词，一角色一文档，反馈后局部更新",
-    "defaultPrompt": "使用 $character-assets 将本次需要的具体人物设计直接写入同一份完整提示词文档。默认一个方向；生成后由我提意见，不自动审图或重跑。"
+    "shortDescription": "自主角色设计、服饰创意与多族裔方向，同文档交付",
+    "defaultPrompt": "使用 $character-assets 完成本次角色设计。原始剧本先自主设计，成熟稿保真接续；一个方向、一份文档，按当前委托交完整提示词。"
   },
   "extensions": {
     "com.openai": {

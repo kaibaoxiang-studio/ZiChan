@@ -6,9 +6,12 @@ explicit approvals and dependency hashes; it never infers character traits.
 from __future__ import annotations
 
 import copy
+from contextvars import ContextVar
 import json
 from pathlib import Path
 import re
+
+_APPROVED_KNOWLEDGE_READ = ContextVar("approved_knowledge_read", default=False)
 
 KINDS = {"script-context", "design-brief", "costume-bible", "stage-design"}
 SCOPES = {"identity", "body", "costume"}
@@ -303,7 +306,7 @@ def checked_dependencies(cp, root, state, record_key, data):
             # Existing approved contracts remain readable. New submissions carry
             # the marker and keep their stronger provenance checks on every read.
             validate_execution(cp, root, data, state,
-                               strict=data.get("execution_contract_version") == 2)
+                               strict=data.get("execution_contract_version") == 2, archived_approved=True)
         if record_key.startswith("costume-bible:"):
             validate_bible(cp, root, state, data, data["character_id"])
     elif data.get("schema_version") == "CharacterDesignCardV2.5":
@@ -429,6 +432,16 @@ def _knowledge(cp, root, refs, specialist=None, strict=True, archive=False):
         sha = item.get("sha256", "")
         cp.ensure(isinstance(sha, str) and len(sha) == 64 and all(x in "0123456789abcdef" for x in sha),
                   "Knowledge reference SHA must be hexadecimal SHA-256")
+        snapshot = root / "knowledge-snapshots" / sha
+        if _APPROVED_KNOWLEDGE_READ.get() and not archive:
+            if snapshot.is_file():
+                cp.ensure(cp.digest(snapshot) == sha, "Project knowledge snapshot changed")
+                continue
+            # Projects created before archival may still use the exact current
+            # locked file. This is not a fallback to a different rule version.
+            cp.ensure(any(row.get("path") == item.get("path") and row.get("rules_sha256") == sha and
+                          specialist in row.get("capability_ids", []) for row in locked),
+                      "Approved historical knowledge archive is missing")
         if strict:
             cp.ensure(any(row.get("path") == item.get("path") and row.get("rules_sha256") == sha and
                           specialist in row.get("capability_ids", []) for row in locked),
@@ -498,7 +511,30 @@ def _specialist_field(cp, data, specialist, path):
               "Specialist result must map an owned design field, not evidence or prompt metadata")
 
 
-def validate_execution(cp, root, data, state=None, strict=True):
+def validate_execution(cp, root, data, state=None, strict=True, archived_approved=False):
+    # Only read paths with a verified current approval may use archived rules.
+    # Fresh submission paths never pass archived_approved, even if old cache
+    # files exist. Other strict design/parent checks remain unchanged.
+    if archived_approved:
+        cp.ensure(state is not None, "Historical knowledge needs actual approved project state")
+        record_key = key("stage-design", data["character_id"], data["variant_id"], data["scope"])
+        record = state.get("records", {}).get(record_key) or {}
+        digest = cp.digest(data)
+        approval = record.get("approval") or {}
+        path = (root / record.get("path", "")).resolve()
+        cp.ensure(not record.get("stale") and approval.get("sha256") == digest == record.get("sha256"),
+                  "Historical knowledge needs the exact current approved stage")
+        cp.ensure(path.is_relative_to(root.resolve()) and path.is_file() and cp.digest(cp.read_json(path)) == digest,
+                  "Approved historical stage file is missing or changed")
+        parents(cp, root, state, data, approved=True)
+    token = _APPROVED_KNOWLEDGE_READ.set(bool(archived_approved and data.get("execution_contract_version") == 2))
+    try:
+        return _validate_execution(cp, root, data, state, strict)
+    finally:
+        _APPROVED_KNOWLEDGE_READ.reset(token)
+
+
+def _validate_execution(cp, root, data, state=None, strict=True):
     execution = data.get("specialist_execution")
     cp.ensure(isinstance(execution, dict) and execution, "Stage design needs actual specialist_execution")
     cp.ensure(SCOPE_SPECIALISTS[data["scope"]] <= set(execution),
@@ -1013,7 +1049,8 @@ def resolve_basis(cp, root, state, package, character, variant, stage, force_app
         if record_key.startswith("stage-design:"):
             parents(cp, root, state, data, approved=not preview)
             strict = data.get("execution_contract_version") == 2 or not record.get("approval")
-            validate_execution(cp, root, data, state, strict=strict)
+            validate_execution(cp, root, data, state, strict=strict,
+                               archived_approved=bool(record.get("approval")))
             if (strict and data["scope"] in {"identity", "costume"} and
                     data.get("schema_version") == "CharacterStageDesignV1.2" and
                     _stage_morphology(cp, root, data, state) in {"human", "humanoid"}):

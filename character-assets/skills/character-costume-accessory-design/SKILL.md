@@ -11,6 +11,8 @@ description: "服饰附加物设计：肩胸背、臂手腕腰腿的装饰与挂
 
 重点扣件按[部件方法](../../references/costume-component-design.md)写部件与连接，不能悬浮；知识快照只按当前部位加载。按[普通文档](../../references/prompt-document.md)交成果，不调用生图。
 
+承接[服饰设计师的整体主张与局部创新边界](../../references/costume-designer.md)。可用扣件、佩戴方式、局部形态或装饰节奏服务审美，不强迫每件附会身份故事；也可不新增物件，不为额度加配饰。
+
 普通成果直接写本次完整提示词并更新同一文档，默认一个整合方向；局部只改受影响结构，不重设计未改域。不前置typed设计、body_form、方法/知识SHA、逐field成果证明或freeze；实际具体结构仍须完成。解释和弃选不塞词。明确正式或旧typed调用才按[旧专项合同](../../references/specialist-contract.md)封装。
 
 ## Packaged references
@@ -18,4 +20,5 @@ description: "服饰附加物设计：肩胸背、臂手腕腰腿的装饰与挂
 - [references/knowledge/character-costume-accessory-design/costume-accessory.md](../../references/knowledge/character-costume-accessory-design/costume-accessory.md)
 - [references/costume-component-design.md](../../references/costume-component-design.md)
 - [references/prompt-document.md](../../references/prompt-document.md)
+- [references/costume-designer.md](../../references/costume-designer.md)
 - [references/specialist-contract.md](../../references/specialist-contract.md)

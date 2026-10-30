@@ -10,7 +10,7 @@ import sys
 ROOT=Path(__file__).resolve().parent
 if sys.version_info<(3,12):
     raise SystemExit('Python 3.12+ required. Select a compatible interpreter; this tool does not modify Codex configuration.')
-if any(importlib.util.find_spec(name) is None for name in ('jsonschema','yaml')):
+if any(importlib.util.find_spec(name) is None for name in ('jsonschema','yaml','xlsxwriter')):
     key=hashlib.sha256((ROOT/'requirements.lock').read_bytes()).hexdigest()[:16]
     suffix=Path('Scripts/python.exe') if os.name=='nt' else Path('bin/python')
     candidates=[ROOT/'.venv'/suffix,Path.home()/'.cache/harness-runtime'/key/f'py{sys.version_info.major}{sys.version_info.minor}'/suffix]

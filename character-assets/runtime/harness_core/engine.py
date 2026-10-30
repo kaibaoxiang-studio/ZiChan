@@ -15,6 +15,7 @@ from .common import inside, fingerprint, sha, read_json, write_json, now, redact
 from .contracts import graph_order, bind_inputs, validate_data
 from .store import Store
 from .delivery import (completion_mode, verify_text, verify_main_file, prompt_document_allowed,
+                       asset_workbook_allowed, verify_asset_workbook,
                        verify_prompt_document, verify_prompt_text, PROMPT_DOCUMENT_CAPABILITIES)
 
 
@@ -83,6 +84,7 @@ def verify_result(result, capability, artifact_dir, task_inputs=None, plugin_roo
     if result['status']=='succeeded':
         validate_data(result['result'],capability['output_schema'])
         character_task = capability.get('id', '').startswith('character-')
+        asset_workbook = asset_workbook_allowed(capability, task_inputs)
         mode = completion_mode(capability, task_inputs, result['result']) if character_task else 'files'
         ordinary_document = prompt_document_allowed(capability, task_inputs) if character_task else False
         main = result['result'].get('artifact_path', '')
@@ -116,6 +118,10 @@ def verify_result(result, capability, artifact_dir, task_inputs=None, plugin_roo
             return artifacts
         if character_task or 'artifact_path' in capability.get('output_schema', {}).get('properties', {}):
             verify_main_file(result['result'], result['artifacts'], artifact_dir)
+        if asset_workbook:
+            root = Path(plugin_root or Path(__file__).resolve().parents[2]).resolve()
+            verify_asset_workbook(inside(artifact_dir, main), task_inputs, root)
+            return artifacts
         if capability.get('id') in PROMPT_DOCUMENT_CAPABILITIES:
             main = result['result']['artifact_path']
             if Path(main).suffix.lower() in {'.md', '.markdown'} and ordinary_document:

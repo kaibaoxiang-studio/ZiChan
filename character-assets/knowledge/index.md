@@ -1,4 +1,4 @@
-# 角色资产知识检索 v0.2.16
+# 角色资产知识检索 v0.2.20
 
 先理解本次人物与交付，再选相关方法；本索引是检索目录，不是必读清单。现有58份锁定知识快照保留原文与来源。人物事实、用户明确选择和已批准边界优先；来源中的个案、固定件数、性别阶层配搭及比例公式不自动成为通用要求。
 
@@ -25,3 +25,9 @@
 | 正式项目、依赖、批准与最终资产表 | [工作流](../references/workflow.md)、[接口](../references/interfaces.md) | [分阶段](../references/phased-design.md)、[最终资产表](../references/final-asset-table.md)仅进入生产时加载 |
 
 每个专项SKILL列出完整快照链接。普通路径将采用的具体设计直接写进当前完整提示词；不另写逐专项方法收据、独立设计长稿或冻结证明。真实会诊或明确旧正式合同才保留相应返回物；不以读取路径数量证明设计完成。来源与哈希由程序维护，原始集中源库不随运行重新采集。[苏老太案例](../references/prompt-density-example-su.md)示范完整性与状态切换，不是全员密度或造型下限。
+
+## v0.2.20 定点可操作参考
+
+款式仅有类别或功能模板时，读[款式语汇](../references/knowledge/character-costume-style-design/costume-style.md)的形状/比例/衣层与穿法对照；形式、纹样与纯审美转译读[深层服饰](../references/knowledge/character-costume-designer/costume-deep.md)；附加穿戴的形底/节奏读[饰品关系](../references/knowledge/character-costume-accessory-design/costume-accessory.md)。按当前问题取所需段落，不全库扫描，不以读过文件数量证明设计。
+
+本次保持58快照，定点更新上述三份与world-appearance。款式/饰品由原ZIP选章重新捕获；深层与环境课程本轮未重新取得原文，以原锁定快照和用户新授权增量维护。原archive记录、选章hash与本次rules修订见archive-manifest，集中来源留工作区，发布包只带精炼规则。族裔方向可用于虚构人物原创，不以现实姓名/图像推断身份或血统事实。

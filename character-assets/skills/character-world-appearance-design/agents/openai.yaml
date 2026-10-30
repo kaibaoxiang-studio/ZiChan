@@ -1,6 +1,6 @@
 interface:
   display_name: 环境与技术外貌设计
-  short_description: 环境与技术外貌设计：世界压力、资源与可达技术
+  short_description: 虚构角色族裔与外貌方向，以及世界环境、资源与技术影响
   default_prompt: Use $character-world-appearance-design to complete the requested
     task.
 policy:

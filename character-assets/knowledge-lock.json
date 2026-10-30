@@ -93,10 +93,10 @@
     },
     {
       "source_id": "costume-style",
-      "source_sha256": "8bf2a9fb6e40f61443d569649c37d453365e5f9db1c558d192ed131e9b78ae62",
-      "origin": "local:服饰款式设计知识库.zip",
+      "source_sha256": "5d14fc30d13e984c70f80057f5d1c16c826c245877c8961e10e7ae4ebfe78803",
+      "origin": "local:role-0220-costume-style-selected-or-policy-source.md",
       "path": "references/knowledge/character-costume-style-design/costume-style.md",
-      "rules_sha256": "e2453a4efcdc0312751f4ee07428dc7ec128f3fe91df0dfe68083578f1b17014",
+      "rules_sha256": "5a933eec21e820d952c758aee75b0d50f948c41f09b0141b7bc97dcad45e242b",
       "capability_ids": [
         "character-costume-style-design"
       ]
@@ -133,10 +133,10 @@
     },
     {
       "source_id": "costume-accessory",
-      "source_sha256": "6565d53ac91096979e8846ab8d19ef78f59641a1978aa617b837d3f002664f96",
-      "origin": "local:服饰饰品设计知识库.zip",
+      "source_sha256": "874503decfb20d9dd6e62ec2348bb4c4fd65ceff55d5a75cc3fc24cc002c2be5",
+      "origin": "local:role-0220-costume-accessory-selected-or-policy-source.md",
       "path": "references/knowledge/character-costume-accessory-design/costume-accessory.md",
-      "rules_sha256": "02bfae07d291764448673b13ecc6630ceb9f4a6af713de58bc8fc800820a4592",
+      "rules_sha256": "2e80b1e0c749dc4fca70263463233d2d8c5beadd7fc1afbfbf26cf6b1892eef1",
       "capability_ids": [
         "character-costume-accessory-design"
       ]
@@ -273,10 +273,10 @@
     },
     {
       "source_id": "world-appearance",
-      "source_sha256": "13bd2996eb7f8c6e0f7f100e32bb63c7bdb3e70b17e5adb9ddf494bdb5d720b0",
-      "origin": "local:人种环境与科技外貌设计-知识库.zip",
+      "source_sha256": "ff70e837ce49a26c20ca17b8a08713ae2f95389a62872ed9d157ba2f19fa5e60",
+      "origin": "local:role-0220-world-appearance-selected-or-policy-source.md",
       "path": "references/knowledge/character-world-appearance-design/world-appearance.md",
-      "rules_sha256": "6f50a8de6095aa62016fb2a3d8c627faef3ba5b92a6dbdd5ec281831c87292cc",
+      "rules_sha256": "2e07991bb9e67367d1258c593130ead0088d59b81ecf0597f3be9e79ee4c2792",
       "capability_ids": [
         "character-world-appearance-design"
       ]
@@ -293,10 +293,10 @@
     },
     {
       "source_id": "costume-deep",
-      "source_sha256": "e103945647dd96c3c2a38bae4144e9ba3b897391da381909c9f95e3f7fc2a07d",
-      "origin": "local:服饰深层设计知识库.zip",
+      "source_sha256": "90fd12db73645c3333fdfd47e302b478c8c069b7a437e9c4f8ed29fe88593ec4",
+      "origin": "local:role-0220-costume-deep-selected-or-policy-source.md",
       "path": "references/knowledge/character-costume-designer/costume-deep.md",
-      "rules_sha256": "7591016c764114f3b512b76e1602e20d4fd12f6fc807e91bc6d01956860de282",
+      "rules_sha256": "0fc0df8dec31f38bd62959903099f1809df2df6b98062e30ec13fa3a5ca3d486",
       "capability_ids": [
         "character-costume-designer"
       ]

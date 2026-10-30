@@ -29,6 +29,14 @@ def read_only_knowledge(api, root, refs, specialist=None, strict=True, archive=F
         sha = item.get('sha256', '')
         api.ensure(isinstance(sha, str) and len(sha) == 64 and all(x in '0123456789abcdef' for x in sha),
                    'Knowledge reference SHA must be hexadecimal SHA-256')
+        snapshot = root / 'knowledge-snapshots' / sha
+        if cp.phased._APPROVED_KNOWLEDGE_READ.get() and not archive:
+            if snapshot.is_file():
+                api.ensure(api.digest(snapshot) == sha, 'Project knowledge snapshot changed')
+                continue
+            api.ensure(any(row.get('path') == item.get('path') and row.get('rules_sha256') == sha and
+                           specialist in row.get('capability_ids', []) for row in locked),
+                       'Approved historical knowledge archive is missing')
         if strict:
             api.ensure(any(row.get('path') == item.get('path') and row.get('rules_sha256') == sha and
                            specialist in row.get('capability_ids', []) for row in locked),

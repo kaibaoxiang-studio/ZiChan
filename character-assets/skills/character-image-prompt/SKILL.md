@@ -1,11 +1,11 @@
 ---
 name: character-image-prompt
-description: "直接设计或保真整理角色提示词，一个方向、四类用途及多状态维护在同一文档"
+description: "成熟设计保真编译；仅有剧本或身份标签时先完成本次角色设计，再交完整提示词"
 ---
 
 # 角色图像提示词
 
-直接在提示词里落实一个整合方向；成熟稿复核接续，缺哪处只设计哪处，不因缺typed设计、body_form、专项收据或冻结而重做。深度设计与写词同轮完成，按[普通文档合同](../../references/prompt-document.md)保存，不让用户选内部模式或填字段。
+先判断已有的是成熟造型，还是仅有剧本、身份标签或粗略方向。“仅提示词”限定交付形式，不代表设计已经完成：后一种输入先按[人物设计方法](../../references/director-understanding.md)自主形成连贯造型，再按画面用途表达；不从版式模板逐项填词。成熟稿复核接续，缺哪处只设计哪处，不因缺typed设计、body_form、专项收据或冻结而重做。深度设计与写词同轮完成，按[普通文档合同](../../references/prompt-document.md)保存，不让用户选内部模式或填字段。
 
 读[出图规则](../../references/prompting.md)与当前阶段规则，形成可独立复制的自然正文。所选且入画的骨点、左右、比例、衣片数量、叠压连接、色材、佩戴及状态不能静默删改；主次调整排序和强调。完整身体五组比例与实际剪裁直接入词，不以关键词覆盖证明质量。理由、方法名、弃选与旧值不入正文。
 
@@ -17,6 +17,7 @@ description: "直接设计或保真整理角色提示词，一个方向、四类
 
 ## Packaged references
 
+- [references/director-understanding.md](../../references/director-understanding.md)
 - [references/prompt-document.md](../../references/prompt-document.md)
 - [references/prompting.md](../../references/prompting.md)
 - [references/execution-sheet.md](../../references/execution-sheet.md)

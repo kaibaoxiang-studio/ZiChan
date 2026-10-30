@@ -36,3 +36,5 @@ Agent 使用 Codex App Server 的本地 stdio 协议，继承当前模型配置�
 协议依据：https://learn.chatgpt.com/docs/app-server
 
 插件规范：https://developers.openai.com/plugins/build/plugins
+
+原生单元格图片使用锁定的 XlsxWriter 3.2.9。运行 scripts/bootstrap.py --install 后，通过 harness.py asset-workbook --input 输入清单.json --output 资产表.xlsx 使用同一锁定运行环境；验证用 --validate-workbook 资产表.xlsx。不依赖本机固定路径。

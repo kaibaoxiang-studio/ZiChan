@@ -303,6 +303,26 @@
       "origin": "local:知识库/wearable-lower-morphology-31",
       "revision": "sha256:199f9834d74573b380fcbd03ccbed4428db1df0d1026d3876b4f5d53c20ca9dc",
       "adaptation": "用户资料精炼为 character-body-design 的独立知识快照；原文保留在集中源库"
+    },
+    {
+      "origin": "local:role-0220-costume-style-selected-or-policy-source.md",
+      "revision": "sha256:5d14fc30d13e984c70f80057f5d1c16c826c245877c8961e10e7ae4ebfe78803",
+      "adaptation": "v0.2.20 定点精炼：本轮选章/既存快照与用户授权分别留源，不冒充原全集；规则用于 character-costume-style-design"
+    },
+    {
+      "origin": "local:role-0220-costume-accessory-selected-or-policy-source.md",
+      "revision": "sha256:874503decfb20d9dd6e62ec2348bb4c4fd65ceff55d5a75cc3fc24cc002c2be5",
+      "adaptation": "v0.2.20 定点精炼：本轮选章/既存快照与用户授权分别留源，不冒充原全集；规则用于 character-costume-accessory-design"
+    },
+    {
+      "origin": "local:role-0220-costume-deep-selected-or-policy-source.md",
+      "revision": "sha256:90fd12db73645c3333fdfd47e302b478c8c069b7a437e9c4f8ed29fe88593ec4",
+      "adaptation": "v0.2.20 定点精炼：本轮选章/既存快照与用户授权分别留源，不冒充原全集；规则用于 character-costume-designer"
+    },
+    {
+      "origin": "local:role-0220-world-appearance-selected-or-policy-source.md",
+      "revision": "sha256:ff70e837ce49a26c20ca17b8a08713ae2f95389a62872ed9d157ba2f19fa5e60",
+      "adaptation": "v0.2.20 定点精炼：本轮选章/既存快照与用户授权分别留源，不冒充原全集；规则用于 character-world-appearance-design"
     }
   ]
 }

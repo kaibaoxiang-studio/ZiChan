@@ -50,7 +50,7 @@ class LauncherEnvironmentTest(unittest.TestCase):
     def dependencies(self, executable):
         purelib = subprocess.check_output([str(executable), '-B', '-c',
             'import sysconfig; print(sysconfig.get_path("purelib"))'], text=True, env=self.env).strip()
-        for name in ('yaml', 'jsonschema'):
+        for name in ('yaml', 'jsonschema', 'xlsxwriter'):
             (Path(purelib) / (name + '.py')).write_text('OFFLINE_LAUNCHER_FIXTURE = True\n', encoding='utf-8')
 
     def launch(self, executable=None):
@@ -62,9 +62,9 @@ class LauncherEnvironmentTest(unittest.TestCase):
             self.assertEqual(self.caller.resolve(), self.fallback.resolve())
         self.dependencies(self.fallback)
         missing = subprocess.check_output([str(self.caller), '-B', '-c',
-            'import importlib.util,json; print(json.dumps([importlib.util.find_spec(n) is None for n in ("yaml","jsonschema")]))'],
+            'import importlib.util,json; print(json.dumps([importlib.util.find_spec(n) is None for n in ("yaml","jsonschema","xlsxwriter")]))'],
             text=True, env=self.env)
-        self.assertEqual(json.loads(missing), [True, True])
+        self.assertEqual(json.loads(missing), [True, True, True])
         result = self.launch()
         self.assertEqual(result.returncode, 0, result.stderr)
         evidence = json.loads(result.stdout)

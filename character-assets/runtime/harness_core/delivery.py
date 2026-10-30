@@ -9,6 +9,44 @@ import sys
 PROMPT_DOCUMENT_CAPABILITIES = {'character-assets', 'character-design', 'character-image-prompt'}
 
 
+def asset_workbook_allowed(capability, inputs):
+    """Select assembly only from the actual user's bound task contract."""
+    inputs = inputs or {}
+    if inputs.get('delivery_contract') != 'asset_workbook':
+        return False
+    if capability.get('id') != 'character-assets':
+        raise ValueError('asset_workbook is available only through character-assets')
+    if not isinstance(inputs.get('request'), str) or not inputs['request'].strip():
+        raise ValueError('Asset workbook needs the actual user request')
+    if (legacy_delivery_required(inputs) or inputs.get('purpose') == 'production'):
+        raise ValueError('Formal/typed design cannot downgrade to asset_workbook')
+    if inputs.get('delivery_mode', 'files') != 'files':
+        raise ValueError('Asset workbook requires files delivery')
+    source = inputs.get('asset_table_input')
+    if not isinstance(source, str) or not source.strip() or not Path(source).expanduser().is_file():
+        raise ValueError('Asset workbook needs actual asset_table_input')
+    return True
+
+
+def verify_asset_workbook(path, inputs, plugin_root):
+    if Path(path).suffix.lower() != '.xlsx':
+        raise ValueError('Asset workbook main artifact must be a real .xlsx')
+    helper = Path(plugin_root) / 'scripts/export_asset_workbook.py'
+    checked = subprocess.run([sys.executable, str(helper), 'validate', '--input',
+                              str(Path(inputs['asset_table_input']).expanduser().resolve()),
+                              '--workbook', str(path)], capture_output=True,
+                             text=True, encoding='utf-8', timeout=60)
+    if checked.returncode:
+        raise ValueError('Asset workbook contract failed: ' + (checked.stderr or checked.stdout).strip())
+    try:
+        result = json.loads(checked.stdout)
+    except (ValueError, TypeError) as exc:
+        raise ValueError('Asset workbook validator returned no actual result') from exc
+    if not isinstance(result, dict) or result.get('valid') is not True:
+        raise ValueError('Asset workbook did not pass real embedded-cell verification')
+    return result
+
+
 def legacy_delivery_required(inputs):
     """Route from the actual task, never from an agent's preferred output file."""
     inputs = inputs or {}
@@ -20,6 +58,8 @@ def legacy_delivery_required(inputs):
 
 
 def prompt_document_allowed(capability, inputs):
+    if (inputs or {}).get('delivery_contract') == 'asset_workbook':
+        return False
     if capability.get('id') not in PROMPT_DOCUMENT_CAPABILITIES:
         return False
     if not isinstance(inputs, dict) or not inputs.get('request'):

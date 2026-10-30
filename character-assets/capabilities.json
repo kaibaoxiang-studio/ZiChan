@@ -4,7 +4,7 @@
     {
       "id": "character-assets",
       "skill_name": "character-assets",
-      "description": "从剧本、小传或已有稿形成一个角色方向，深度设计直接写完整提示词，维护一份文档",
+      "description": "自主完成人物化设计并交付单方向角色提示词，成熟稿按限定范围保真整理；支持已有图资产表",
       "input_schema": {
         "type": "object",
         "properties": {
@@ -29,7 +29,8 @@
             "items": {
               "type": "string",
               "minLength": 1
-            }
+            },
+            "description": "本次真实来源路径；创作复用有效剧本语境与已给约束，成熟稿编译/局部修改只读取所需基准，不让资产表标签代替人物设计。"
           },
           "script_context_path": {
             "type": "string",
@@ -49,7 +50,8 @@
             "enum": [
               "direction_first",
               "image_first"
-            ]
+            ],
+            "description": "沿用旧项目或用户明确选择的交互方式，不因新创作自动发起选案/审图流程；普通创作在一次工作中先设计再表达。"
           },
           "execution_mode": {
             "type": "string",
@@ -93,7 +95,7 @@
             },
             "minItems": 1,
             "uniqueItems": true,
-            "description": "Ordinary prompt documents support four stages; explicit costume_design is reserved for legacy pipeline 2 and retains the typed contract."
+            "description": "依据实际委托绑定所需阶段/状态完整性；完整四类需明确avatar/expression/full_body/execution，局部仅当前所需。此字段不证明设计深度；costume_design仅旧pipeline2合同使用。"
           },
           "delivery_mode": {
             "type": "string",
@@ -118,7 +120,8 @@
                 "costume",
                 "adornments"
               ]
-            }
+            },
+            "description": "本次实际需设计或修改的维度。按问题深化相关域，成熟稿不重设计未授权部分；不得用枚举齐全代替具体设计。"
           },
           "parent_refs": {
             "type": "object",
@@ -141,7 +144,7 @@
               "prompt",
               "discussion"
             ],
-            "description": "Actual requested task, resolved by the caller; delivery choice cannot change its purpose."
+            "description": "实际委托目标。prompt或仅提示词说明交付格式，不证明已有成熟设计；只有剧本/身份标签时仍需先完成人物化设计。"
           },
           "design_origin": {
             "type": "string",
@@ -150,7 +153,7 @@
               "provided",
               "captured_from_conversation"
             ],
-            "description": "Actual source of existing design; never backfill historical specialist execution."
+            "description": "实际设计来源及成熟性。new包括只有剧本/小传/身份标签而尚需设计；provided或captured_from_conversation须有可见设计依据，不能仅凭文件名或用户说继续判为成熟。不得回填历史专项执行。"
           },
           "aspect_ratio": {
             "type": "string",
@@ -183,9 +186,10 @@
             "type": "string",
             "enum": [
               "prompt_document",
-              "legacy_typed"
+              "legacy_typed",
+              "asset_workbook"
             ],
-            "description": "Ordinary prompt-first document by default. Explicit formal purpose or typed design input retains its original contract; the executor cannot downgrade it."
+            "description": "普通创作及成熟稿整理均可使用prompt_document；保存合同只核交付与来源，不证明创作成熟。明确正式typed保持旧合同；asset_workbook仅主入口已有资产整理使用。"
           },
           "document_path": {
             "type": "string",
@@ -306,6 +310,11 @@
               "basis"
             ],
             "additionalProperties": false
+          },
+          "asset_table_input": {
+            "type": "string",
+            "minLength": 1,
+            "description": "已有资产行与实际图片路径的AssetWorkbookInputV1 JSON，纯汇总嵌图不重启人物设计。"
           }
         },
         "required": [
@@ -359,9 +368,11 @@
         "network": false
       },
       "knowledge_refs": [
-        "references/prompt-document.md",
+        "references/final-asset-table.md",
         "references/director-understanding.md",
+        "references/prompt-document.md",
         "knowledge/index.md",
+        "skills/character-costume-designer/SKILL.md",
         "references/design-detail-standard.md",
         "references/execution-sheet.md",
         "references/workflow.md",
@@ -571,7 +582,7 @@
     {
       "id": "character-design",
       "skill_name": "character-design",
-      "description": "理解人物与世界，把一个整合方向的具体设计直接写入完整提示词，支持局部更新",
+      "description": "从人物与世界建立具体设计决议，深化脸发、身体与衣装后写入同一提示词文档",
       "input_schema": {
         "type": "object",
         "properties": {
@@ -596,7 +607,8 @@
             "items": {
               "type": "string",
               "minLength": 1
-            }
+            },
+            "description": "本次真实来源路径；创作复用有效剧本语境与已给约束，成熟稿编译/局部修改只读取所需基准，不让资产表标签代替人物设计。"
           },
           "script_context_path": {
             "type": "string",
@@ -616,7 +628,8 @@
             "enum": [
               "direction_first",
               "image_first"
-            ]
+            ],
+            "description": "沿用旧项目或用户明确选择的交互方式，不因新创作自动发起选案/审图流程；普通创作在一次工作中先设计再表达。"
           },
           "execution_mode": {
             "type": "string",
@@ -648,7 +661,8 @@
                 "costume",
                 "adornments"
               ]
-            }
+            },
+            "description": "本次实际需设计或修改的维度。按问题深化相关域，成熟稿不重设计未授权部分；不得用枚举齐全代替具体设计。"
           },
           "parent_refs": {
             "type": "object",
@@ -671,7 +685,7 @@
               "prompt",
               "discussion"
             ],
-            "description": "Actual requested task, resolved by the caller; delivery choice cannot change its purpose."
+            "description": "实际委托目标。prompt或仅提示词说明交付格式，不证明已有成熟设计；只有剧本/身份标签时仍需先完成人物化设计。"
           },
           "design_origin": {
             "type": "string",
@@ -680,7 +694,7 @@
               "provided",
               "captured_from_conversation"
             ],
-            "description": "Actual source of existing design; never backfill historical specialist execution."
+            "description": "实际设计来源及成熟性。new包括只有剧本/小传/身份标签而尚需设计；provided或captured_from_conversation须有可见设计依据，不能仅凭文件名或用户说继续判为成熟。不得回填历史专项执行。"
           },
           "aspect_ratio": {
             "type": "string",
@@ -715,7 +729,7 @@
               "prompt_document",
               "legacy_typed"
             ],
-            "description": "Ordinary prompt-first document by default. Explicit formal purpose or typed design input retains its original contract; the executor cannot downgrade it."
+            "description": "普通创作及成熟稿整理均可使用prompt_document，先设计再表达不新增typed设计/方法收据；保存合同不证明创作成熟。明确正式typed保留旧合同。"
           },
           "document_path": {
             "type": "string",
@@ -759,7 +773,7 @@
             },
             "minItems": 1,
             "uniqueItems": true,
-            "description": "Ordinary prompt documents support four stages; explicit costume_design is reserved for legacy pipeline 2 and retains the typed contract."
+            "description": "依据实际委托绑定所需阶段/状态完整性；完整四类需明确avatar/expression/full_body/execution，局部仅当前所需。此字段不证明设计深度；costume_design仅旧pipeline2合同使用。"
           },
           "state_ids": {
             "type": "array",
@@ -1124,7 +1138,7 @@
     {
       "id": "character-image-prompt",
       "skill_name": "character-image-prompt",
-      "description": "直接设计或保真整理角色提示词，一个方向、四类用途及多状态维护在同一文档",
+      "description": "成熟设计保真编译；仅有剧本或身份标签时先完成本次角色设计，再交完整提示词",
       "input_schema": {
         "type": "object",
         "properties": {
@@ -1149,7 +1163,8 @@
             "items": {
               "type": "string",
               "minLength": 1
-            }
+            },
+            "description": "本次真实来源路径；创作复用有效剧本语境与已给约束，成熟稿编译/局部修改只读取所需基准，不让资产表标签代替人物设计。"
           },
           "script_context_path": {
             "type": "string",
@@ -1169,7 +1184,8 @@
             "enum": [
               "direction_first",
               "image_first"
-            ]
+            ],
+            "description": "沿用旧项目或用户明确选择的交互方式，不因新创作自动发起选案/审图流程；普通创作在一次工作中先设计再表达。"
           },
           "execution_mode": {
             "type": "string",
@@ -1211,7 +1227,8 @@
                 "costume",
                 "adornments"
               ]
-            }
+            },
+            "description": "本次实际需设计或修改的维度。按问题深化相关域，成熟稿不重设计未授权部分；不得用枚举齐全代替具体设计。"
           },
           "parent_refs": {
             "type": "object",
@@ -1314,7 +1331,7 @@
               "prompt",
               "discussion"
             ],
-            "description": "Actual requested task, resolved by the caller; delivery choice cannot change its purpose."
+            "description": "实际委托目标。prompt或仅提示词说明交付格式，不证明已有成熟设计；只有剧本/身份标签时仍需先完成人物化设计。"
           },
           "design_origin": {
             "type": "string",
@@ -1323,7 +1340,7 @@
               "provided",
               "captured_from_conversation"
             ],
-            "description": "Actual source of existing design; never backfill historical specialist execution."
+            "description": "实际设计来源及成熟性。new包括只有剧本/小传/身份标签而尚需设计；provided或captured_from_conversation须有可见设计依据，不能仅凭文件名或用户说继续判为成熟。不得回填历史专项执行。"
           },
           "aspect_ratio": {
             "type": "string",
@@ -1358,7 +1375,7 @@
               "prompt_document",
               "legacy_typed"
             ],
-            "description": "Ordinary prompt-first document by default. Explicit formal purpose or typed design input retains its original contract; the executor cannot downgrade it."
+            "description": "普通创作及成熟稿整理均可使用prompt_document，先设计再表达不新增typed设计/方法收据；保存合同不证明创作成熟。明确正式typed保留旧合同。"
           },
           "document_path": {
             "type": "string",
@@ -1402,7 +1419,7 @@
             },
             "minItems": 1,
             "uniqueItems": true,
-            "description": "Ordinary prompt documents support four stages; explicit costume_design is reserved for legacy pipeline 2 and retains the typed contract."
+            "description": "依据实际委托绑定所需阶段/状态完整性；完整四类需明确avatar/expression/full_body/execution，局部仅当前所需。此字段不证明设计深度；costume_design仅旧pipeline2合同使用。"
           },
           "state_ids": {
             "type": "array",
@@ -1548,6 +1565,7 @@
         "network": false
       },
       "knowledge_refs": [
+        "references/director-understanding.md",
         "references/prompt-document.md",
         "references/prompting.md",
         "references/execution-sheet.md",
@@ -2403,7 +2421,7 @@
     {
       "id": "character-world-appearance-design",
       "skill_name": "character-world-appearance-design",
-      "description": "环境与技术外貌设计：世界压力、资源与可达技术",
+      "description": "虚构角色族裔与外貌方向，以及世界环境、资源与技术影响",
       "input_schema": {
         "type": "object",
         "properties": {
@@ -2593,6 +2611,7 @@
       },
       "knowledge_refs": [
         "references/knowledge/character-world-appearance-design/world-appearance.md",
+        "references/director-understanding.md",
         "references/prompt-document.md",
         "references/specialist-contract.md"
       ],
@@ -4186,6 +4205,7 @@
       "knowledge_refs": [
         "references/knowledge/character-costume-style-design/costume-style.md",
         "references/prompt-document.md",
+        "references/costume-designer.md",
         "references/specialist-contract.md"
       ],
       "explicit_only": true
@@ -4385,6 +4405,7 @@
         "references/knowledge/character-costume-cut-design/costume-cut.md",
         "references/costume-component-design.md",
         "references/prompt-document.md",
+        "references/costume-designer.md",
         "references/specialist-contract.md"
       ],
       "explicit_only": true
@@ -4583,6 +4604,7 @@
       "knowledge_refs": [
         "references/knowledge/character-costume-color-design/costume-color.md",
         "references/prompt-document.md",
+        "references/costume-designer.md",
         "references/specialist-contract.md"
       ],
       "explicit_only": true
@@ -4781,6 +4803,7 @@
       "knowledge_refs": [
         "references/knowledge/character-costume-material-design/costume-material.md",
         "references/prompt-document.md",
+        "references/costume-designer.md",
         "references/specialist-contract.md"
       ],
       "explicit_only": true
@@ -4980,6 +5003,7 @@
         "references/knowledge/character-costume-accessory-design/costume-accessory.md",
         "references/costume-component-design.md",
         "references/prompt-document.md",
+        "references/costume-designer.md",
         "references/specialist-contract.md"
       ],
       "explicit_only": true

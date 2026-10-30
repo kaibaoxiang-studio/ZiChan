@@ -11,3 +11,6 @@
 角色出图提示词与修图知识快照参考了用户提供的 `刺猬星球/01-通用图片生成` 中 `SKILL.md` 和 `references/prompting.md`，按角色资产工作流重新编写。源目录附 Apache License 2.0，许可证文本见 `licenses/hedgehog-general-image-Apache-2.0.txt`。本插件未复制源 Skill、API/CLI 脚本或示例提示词。
 
 具体文件 SHA-256、采用范围与改写说明见 `knowledge/source-register.json` 和 `sources.lock.json`。来源 Skill 与本机内置 `imagegen` Skill 主体几乎相同，因此这里只携带角色业务规则，不另装一套通用生图能力。
+
+## XlsxWriter 3.2.9
+BSD-2-Clause; Copyright John McNamara. Used for native in-cell Excel images. https://github.com/jmcnamara/XlsxWriter

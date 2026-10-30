@@ -16,6 +16,11 @@ def parser():
     commands=p.add_subparsers(dest='command',required=True)
     commands.add_parser('doctor')
     validate=commands.add_parser('validate'); validate.add_argument('--plugin',type=Path)
+    table=commands.add_parser('asset-workbook', help='Embed existing asset images without restarting design')
+    table.add_argument('--input',type=Path,required=True)
+    target=table.add_mutually_exclusive_group(required=True)
+    target.add_argument('--output',type=Path)
+    target.add_argument('--validate-workbook',type=Path)
     for name in ('build','revise'):
         cmd=commands.add_parser(name); cmd.add_argument('--spec',type=Path,required=True)
         cmd.add_argument('--output',type=Path,required=True); cmd.add_argument('--confirmed',action='store_true')
@@ -60,6 +65,11 @@ def execute(args,root):
                 'codex':codex,'codex_version':subprocess.check_output([codex,'--version'],text=True).strip() if codex else None,
                 'plugin':validate_plugin(root)}
     if command=='validate': return validate_plugin(plugin)
+    if command=='asset-workbook':
+        sys.path.insert(0,str(root/'scripts'))
+        from export_asset_workbook import export_workbook, validate_workbook
+        return (validate_workbook(args.input,args.validate_workbook) if args.validate_workbook
+                else export_workbook(args.input,args.output))
     if command=='build': return build(read_json(args.spec),args.output,root,args.confirmed)
     if command=='revise': return revise(args.source,read_json(args.spec),args.output,root,args.confirmed)
     if command=='patch': return patch(plugin,read_json(args.plan),args.confirmed)
